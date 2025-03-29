@@ -1,0 +1,35 @@
+{
+  "dFusion": {
+    "validatorBackendUrl": "http://localhost:5001"
+  },
+  "telegram": {
+    "apiId": 22074876,
+    "apiHash": "f802a4056ca9a3239f1b85edf37f27c6",
+    "botId": 8158782279,
+    "botUsername": "@vpsl_miner_bot"
+  },
+  "pinata": {
+    "apiKey": "ed317261693a25bf4829",
+    "jwt": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiJkOGNjODFiNS04YzljLTQ2NWQtOThkMC1jZTBlZmE3MTliMmQiLCJlbWFpbCI6InZhdWdobkBwb2xpY3lkb2NrLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJwaW5fcG9saWN5Ijp7InJlZ2lvbnMiOlt7ImRlc2lyZWRSZXBsaWNhdGlvbkNvdW50IjoxLCJpZCI6IkZSQTEifSx7ImRlc2lyZWRSZXBsaWNhdGlvbkNvdW50IjoxLCJpZCI6Ik5ZQzEifV0sInZlcnNpb24iOjF9LCJtZmFfZW5hYmxlZCI6ZmFsc2UsInN0YXR1cyI6IkFDVElWRSJ9LCJhdXRoZW50aWNhdGlvblR5cGUiOiJzY29wZWRLZXkiLCJzY29wZWRLZXlLZXkiOiJlZDMxNzI2MTY5M2EyNWJmNDgyOSIsInNjb3BlZEtleVNlY3JldCI6IjU5MTI5MjIyOWZkYWIwMTFlMjczN2QxYTY0ZWVmMDMzNDRmOWU1OWUwOTY5MTRkZWI5N2MxZDVkNmNkMDhkN2MiLCJleHAiOjE3NjU2OTUyMDh9.3l7z-SJHDJMRkzkVgPxJooaQGunkQT69UCMWCOzHgo0",
+    "gatewayDomain": "red-accurate-hookworm-520.mypinata.cloud",
+    "fileBaseUrl": "https://gateway.pinata.cloud/ipfs"
+  },
+  "vana": {
+    "dlpSmartContractAddress": "0x308bFf8Ad48f11ff5692adE73B8Fd4af6aE9381d",
+    "dataRegistrySmartContractAddress": "0x8C8788f98385F6ba1adD4234e551ABba0f82Cb7C",
+    "teePoolSmartContractAddress": "0x3c92fD91639b41f13338CE62f19131e7d19eaa0D",
+    "tokenSmartContractAddress": "0x4f6502027Ef5887453E167df84F430B1b1f6726b",
+    "tokenSymbolSmartContractAddress": "VTK",
+    "tokenDecimalsSmartContractAddress": 18,
+    "dlpPublicKey": "0x4a5acfaed75c732d67f62ed8620e06482825b11001f266581f2abf790adc6cd9e2c1bbfdcaa8770b1c2e33bbf3b823a81fdf96591e21215fe1c6bf2968c5c6f4",
+    "stakingSmartContractAddress": "0x9B9bD709844a3Fa34EfFAd67a7cB91d881ca4fA0",
+    "vanaScanUrl": "https://moksha.vanascan.io",
+    "rpcUrl": "https://rpc.moksha.vana.org"
+  },
+  "cloudFlare": {
+    "siteKey": "1x00000000000000000000AA"
+  },
+  "gelato": {
+    "apiKey": "i851bh80pHB4FI55cmAHb3OZW3qGe_zvn3UZGr7PY58_"
+  }
+}

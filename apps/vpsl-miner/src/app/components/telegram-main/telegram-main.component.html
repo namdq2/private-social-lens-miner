@@ -1,0 +1,67 @@
+
+<div class="flex flex-row justify-start items-center mb-4">
+  <div class="w-1/3 flex flex-row justify-start items-center gap-x-4">
+    <mat-checkbox [checked]="isAllChatsSelected()" [indeterminate]="!isAllChatsSelected()" (change)="selectAllDialogs($event)">
+      Chats
+    </mat-checkbox>
+
+    <!-- <div>|</div>
+
+    <button class="dfus-basic-btn">
+      Sort by latest
+    </button> -->
+  </div>
+
+  <div class="w-1/3 flex flex-row justify-start items-center gap-x-4">
+    <span>Next submission time: {{nextSubmissionTimeString()}}</span>
+  </div>
+
+  <div class="w-1/3 flex flex-row justify-end items-center gap-x-4">
+    <div>
+      <button mat-icon-button (click)="refresh()">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+
+    <div>|</div>
+
+    @if (!isBackgroundTaskEnabled()) {
+      <!-- [disabled]="selectedDialogsList().length === 0" -->
+      <button class="dfus-orange-btn disabled:cursor-not-allowed" (click)="doSubmit()">
+        Start Auto-submission
+      </button>
+    }
+    @else {
+      <button (click)="stopBackgroundTask()" [disabled]="!isBackgroundTaskEnabled()" class="dfus-basic-btn disabled:cursor-not-allowed">
+        Stop Auto-submission
+      </button>
+    }
+  </div>
+</div>
+
+<div class="flex flex-row gap-x-4">
+  <div class="w-1/3 flex flex-col gap-y-4 pr-4 overflow-y-auto dialogs-container">
+    @for (dialog of telegramDialogList(); track $index) {
+      <app-telegram-dialog
+        [dialog]="dialog" [selectedDialogId]="selectedDialog?.id"
+        [selectedDialogsList]="selectedDialogsList"
+        (dialogSelected)="onDialogSelected($event)" (addDialog)="onAddDialog($event)" (removeDialog)="onRemoveDialog($event)">
+      </app-telegram-dialog>
+    }
+  </div>
+
+  <div class="w-2/3 flex flex-col justify-start items-stretch gap-y-8 bg-[#07122C] border border-[#22252B] border-solid rounded-xl p-4 overflow-y-auto dialog-msgs-container">
+    @if (selectedDialog) {
+      <div class="flex flex-row justify-start items-center gap-x-4">
+        <div class="relative inline-flex items-center justify-center w-10 h-10 overflow-hidden bg-gray-600 rounded-full">
+          <span class="font-medium text-gray-300">{{selectedDialog.title?.charAt(0)}}</span>
+        </div>
+        <span>{{selectedDialog.title}}</span>
+      </div>
+    }
+    @for (msg of selectedDialogMessages; track $index) {
+      <app-telegram-message [message]="msg">
+      </app-telegram-message>
+    }
+  </div>
+</div>

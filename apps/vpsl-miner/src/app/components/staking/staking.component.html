@@ -1,0 +1,203 @@
+<!-- <div class="h-full w-full flex flex-col justify-start items-stretch gap-4 py-4 lg:py-16 lg:px-[10%] bg-[#0b0d14] border border-[#272C35]">
+  <Show when={!isBusyProcessing()} fallback={<></>}>
+      <div class="absolute right-0 top-0 mt-2 mr-2">
+          <IconButton onClick={props.onDialogClose}>
+              <img src="icons/close.svg" alt="Close icon" class="h-8 w-8" />
+          </IconButton>
+      </div>
+  </Show>
+  <div class="flex flex-col justify-start items-start sm:items-center px-4">
+      <div class="text-3xl lg:text-4xl">
+          <span class="mr-2">Stake</span>
+          <span class="text-[#FB9C2D]">$VFSN</span>
+      </div>
+  </div>
+
+  <Show when={!stakeCompleted() && !stakeFailed() && !isBusyProcessing()} fallback={<></>}>
+      <div class="flex flex-1 flex-col justify-start items-stretch gap-y-6 p-4">
+          <Show
+              when={isWalletConnected()}
+              fallback={
+                  <></>
+              }
+          >
+              <div class="flex flex-col">
+                  <span class="text-sm">Available Balance</span>
+                  <span class="text-lg font-semibold">
+                      {availableBalance()}
+                  </span>
+              </div>
+          </Show>
+
+          <div class="flex flex-col justify-start items-stretch gap-y-8 section-container p-4 md:p-8">
+              <span class="font-bold">Staking Amount</span>
+
+              <div class="flex flex-col md:flex-row justify-start items-stretch gap-8">
+                  <TextField
+                      type="number"
+                      variant="outlined"
+                      label="Enter staking amount"
+                      class="md:flex-1"
+                      value={stakeAmount()}
+                      onChange={(e) => {
+                          // console.log('e.target.value', e.target.value, typeof e.target.value);
+                          setStakeAmount(e.target.value)
+                      }}
+                  ></TextField>
+                  <button
+                      class="dfus-blue-btn font-extralight"
+                      style={'border-width: 1px'}
+                      onClick={stakeMaxAmount}
+                  >
+                      Stake All
+                  </button>
+              </div>
+
+              <Show when={Number(stakeAmount()) > Number(dlpToken())} fallback={<></>}>
+                  <div class="flex flex-row justify-start items-center gap-x-2">
+                      <img src="icons/hint_error.svg" alt="Hint error icon" />
+                      <span class="text-[#FF8389]">Staking amount can not be higher than available balance</span>
+                  </div>
+              </Show>
+          </div>
+
+          <div class="flex flex-col justify-start items-stretch gap-y-8 section-container p-4">
+              <span class="font-bold">Staking Period</span>
+
+              <TextField variant="outlined" label="Days staked" class="w-full" disabled value={stakeDuration()}></TextField>
+
+              <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <button
+                      class="dfus-blue-btn font-extralight"
+                      style={'border-width: 1px'}
+                      classList={{ selected: stakeDuration() === 7 }}
+                      onClick={() => setStakeDuration(7)}
+                  >
+                      7 Days
+                  </button>
+                  <button
+                      class="dfus-blue-btn font-extralight"
+                      style={'border-width: 1px'}
+                      classList={{ selected: stakeDuration() === 21 }}
+                      onClick={() => setStakeDuration(21)}
+                  >
+                      21 Days
+                  </button>
+                  <button
+                      class="dfus-blue-btn font-extralight"
+                      style={'border-width: 1px'}
+                      classList={{ selected: stakeDuration() === 42 }}
+                      onClick={() => setStakeDuration(42)}
+                  >
+                      42 Days
+                  </button>
+                  <button
+                      class="dfus-blue-btn font-extralight"
+                      style={'border-width: 1px'}
+                      classList={{ selected: stakeDuration() === 63 }}
+                      onClick={() => setStakeDuration(63)}
+                  >
+                      63 Days
+                  </button>
+                  <button
+                      class="dfus-blue-btn font-extralight"
+                      style={'border-width: 1px'}
+                      classList={{ selected: stakeDuration() === 84 }}
+                      onClick={() => setStakeDuration(84)}
+                  >
+                      84 Days
+                  </button>
+              </div>
+
+          </div>
+
+
+          <div class="flex flex-row justify-start items-center gap-x-4 px-3" onClick={() => setHasAgreed((prev) => !prev)}>
+              <ThemeProvider theme={dFusionTheme}>
+                  <Checkbox sx={{ '& .MuiSvgIcon-root': { fontSize: 24 } }} edge="start" disableRipple color="success" checked={hasAgreed()}>
+                  </Checkbox>
+              </ThemeProvider>
+              <span>
+                  I confirm that the information entered is accurate and agree to the <a>terms and conditions</a> of staking.
+              </span>
+          </div>
+
+          <button
+              class="dfus-orange-btn font-extralight"
+              style={'border-width: 1px'}
+              disabled={
+                  Number(stakeAmount()) <= 0 ||
+                  Number(stakeAmount()) > Number(dlpToken()) ||
+                  stakeDuration() < 7 ||
+                  !hasAgreed()
+              }
+              onClick={doStake}
+          >
+              Stake &gt;
+          </button>
+      </div>
+  </Show>
+
+  <Show when={stakeCompleted() && !isBusyProcessing()} fallback={<></>}>
+      <div class="flex flex-1 flex-col justify-start items-stretch gap-y-8 p-4">
+          <div class="flex flex-col justify-start items-center text-center">
+              <img src="icons/verified.svg" alt="Verified icon" class="mb-4" />
+              <span>Thank you for staking with us!</span>
+              <span>Glad to have you on board.</span>
+          </div>
+
+          <div class="flex flex-col justify-start items-stretch gap-y-4 section-container p-6">
+              <div class="flex flex-row justify-between items-center">
+                  <span>Staked {dlpTokenSymbol()}:</span>
+                  <span class="text-[#42BE65]">{Number(stakeAmount()).toFixed(5)}</span>
+              </div>
+              <div class="flex flex-row justify-between items-center">
+                  <span>Duration:</span>
+                  <span class="text-[#42BE65]">{stakeDuration()} days</span>
+              </div>
+          </div>
+
+          <div class="flex flex-row justify-start items-center gap-x-4 px-3">
+              <img src="icons/hint_info.svg" alt="Hint info icon" />
+              <span>Your stake will reflect shortly.</span>
+          </div>
+
+          <div class="w-full flex flex-col md:flex-row-reverse justify-center items-center md:items-start gap-x-4 gap-y-8">
+              <button class="dfus-orange-btn font-extralight w-full max-w-sm" style={'border-width: 1px'} onClick={viewStakes}>
+                  View Stakes
+              </button>
+              <button class="dfus-blue-btn font-extralight w-full max-w-sm" style={'border-width: 1px'} onClick={finish}>
+                  Close
+              </button>
+          </div>
+
+      </div>
+  </Show>
+
+  <Show when={stakeFailed() && !isBusyProcessing()} fallback={<></>}>
+      <div class="flex flex-1 flex-col justify-start items-stretch gap-y-8 p-4 mt-8 min-h-[50vh] sm:min-h-0">
+          <div class="flex flex-col justify-start items-center text-center">
+              <img src="icons/report_error.svg" alt="Verified icon" class="mb-4" />
+              <span>{stakeFailedMessage()}</span>
+          </div>
+
+          <div class="w-full flex flex-row justify-center items-start">
+              <button class="dfus-blue-btn font-extralight w-full max-w-sm" style={'border-width: 1px'} onClick={goBackToStake}>
+                  Back
+              </button>
+          </div>
+
+      </div>
+  </Show>
+
+  <Show when={isBusyProcessing()} fallback={<></>}>
+      <div class="flex flex-1 flex-col justify-start items-center pb-20 min-h-[50vh] sm:min-h-0">
+          <span class="px-4 my-10 md:text-center">
+              Your staking request is being processed. Please carefully review and sign the transaction in your wallet to complete the process.
+          </span>
+          <div class="px-20 mt-16 sm:mt-0">
+              <img class="spinner h-20 w-20" src="img/spinner.svg" alt="Upload Spinner" />
+          </div>
+      </div>
+  </Show>
+</div> -->

@@ -1,0 +1,104 @@
+{
+  "name": "vpsl-miner",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "prefix": "app",
+  "sourceRoot": "apps/vpsl-miner/src",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@angular-devkit/build-angular:browser-esbuild",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/vpsl-miner",
+        "index": "apps/vpsl-miner/src/index.html",
+        "main": "apps/vpsl-miner/src/main.ts",
+        "polyfills": ["zone.js", "apps/vpsl-miner/src/polyfills.ts"],
+        "tsConfig": "apps/vpsl-miner/tsconfig.app.json",
+        "inlineStyleLanguage": "scss",
+        "assets": [
+          {
+            "glob": "**/*",
+            "input": "apps/vpsl-miner/public"
+          },
+          {
+            "glob": "**/*",
+            "input": "apps/vpsl-miner/src/app/assets/fonts"
+          }
+        ],
+        "styles": [
+          "apps/vpsl-miner/src/styles.scss"
+        ],
+        "scripts": [],
+        "allowedCommonJsDependencies": [
+          "buffer",
+          "iso-url",
+          "telegram",
+          "@gelatonetwork/relay-sdk",
+          "elliptic",
+          "form-data"
+        ]
+      },
+      "configurations": {
+        "production": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "3mb",
+              "maximumError": "5mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "4kb",
+              "maximumError": "8kb"
+            }
+          ],
+          "outputHashing": "all"
+        },
+        "development": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "serve": {
+      "executor": "@angular-devkit/build-angular:dev-server",
+      "configurations": {
+        "production": {
+          "buildTarget": "vpsl-miner:build:production"
+        },
+        "development": {
+          "buildTarget": "vpsl-miner:build:development"
+        }
+      },
+      "defaultConfiguration": "development"
+    },
+    "extract-i18n": {
+      "executor": "@angular-devkit/build-angular:extract-i18n",
+      "options": {
+        "buildTarget": "vpsl-miner:build"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "apps/vpsl-miner/jest.config.ts"
+      }
+    },
+    "serve-static": {
+      "executor": "@nx/web:file-server",
+      "options": {
+        "buildTarget": "vpsl-miner:build",
+        "port": 4200,
+        "staticFilePath": "dist/apps/vpsl-miner/browser",
+        "spa": true
+      }
+    }
+  }
+}

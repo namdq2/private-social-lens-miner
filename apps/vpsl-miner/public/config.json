@@ -1,0 +1,35 @@
+{
+  "dFusion": {
+    "validatorBackendUrl": "https://api.vana.genesis.dfusion.ai"
+  },
+  "telegram": {
+    "apiId": 25821202,
+    "apiHash": "8d4a0b424eb328eac7776c397cb73d7d",
+    "botId": 7862527963,
+    "botUsername": "@social_truth_bot"
+  },
+  "pinata": {
+    "apiKey": "fc51cb7103bd7d3b5bc5",
+    "jwt": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiJhMDRlZWY2Yy1jMTM4LTQyNjMtYjg0ZC04Njk4OTMxNzE2OTUiLCJlbWFpbCI6InBhdHJpY2tAZGZ1c2lvbi5haSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJwaW5fcG9saWN5Ijp7InJlZ2lvbnMiOlt7ImRlc2lyZWRSZXBsaWNhdGlvbkNvdW50IjoxLCJpZCI6IkZSQTEifSx7ImRlc2lyZWRSZXBsaWNhdGlvbkNvdW50IjoxLCJpZCI6Ik5ZQzEifV0sInZlcnNpb24iOjF9LCJtZmFfZW5hYmxlZCI6ZmFsc2UsInN0YXR1cyI6IkFDVElWRSJ9LCJhdXRoZW50aWNhdGlvblR5cGUiOiJzY29wZWRLZXkiLCJzY29wZWRLZXlLZXkiOiJmYzUxY2I3MTAzYmQ3ZDNiNWJjNSIsInNjb3BlZEtleVNlY3JldCI6IjljMjA5N2ZkZTRhMDllYjNjOWJjMmE4NTAxMTQwYzEyMTc1NzA0ZGQ5MTEzNDljZWQyOGFiNzNhMThkYjJkNTYiLCJleHAiOjE3NjU2OTUyOTV9.KJcNJCapySBeC6lN-vuN3px-IFcG6yxNxWdjZIBVALs",
+    "gatewayDomain": "copper-tricky-skunk-461.mypinata.cloud",
+    "fileBaseUrl": "https://dfusion-social-lens.mypinata.cloud/ipfs"
+  },
+  "vana": {
+    "dlpSmartContractAddress": "0x999383DBAFF7064aA68Ee785412710846523e728",
+    "dataRegistrySmartContractAddress": "0x8C8788f98385F6ba1adD4234e551ABba0f82Cb7C",
+    "teePoolSmartContractAddress": "0xE8EC6BD73b23Ad40E6B9a6f4bD343FAc411bD99A",
+    "tokenSmartContractAddress": "0x0CC1Bc0131DD9782e65ca0319Cd3a60eBA3a932d",
+    "tokenSymbolSmartContractAddress": "VFSN",
+    "tokenDecimalsSmartContractAddress": 18,
+    "dlpPublicKey": "0x8e7fe10528804e68f61e1d315b964648dd36d899fbc0396190ea2b3e64b7101d8be4a1ab9a4ae75a89e85b301bda8bdb2a66c61e427dd96ec73f040933306436",
+    "stakingSmartContractAddress": "0xf4262BA729C2465d254a7CFF8524375700319979",
+    "vanaScanUrl": "https://vanascan.io",
+    "rpcUrl": "https://rpc.vana.org"
+  },
+  "cloudFlare": {
+    "siteKey": "0x4AAAAAAA2Kz8YigmJDTyyc"
+  },
+  "gelato": {
+    "apiKey": "8mK_rHJJsaOSwQPfOvM6Qc5FdNkSs5PR_9HjlK8zKbw_"
+  }
+}

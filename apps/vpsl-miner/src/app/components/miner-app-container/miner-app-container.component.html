@@ -1,0 +1,46 @@
+<mat-sidenav-container class="h-screen w-screen">
+  <!-- doesnt work... -->
+  <!-- class="w-64" -->
+  <mat-sidenav #sidenav mode="side" opened>
+    <!-- w-64 -->
+    <div class="flex flex-col h-full px-3 py-4 overflow-y-auto bg-[#151a23]">
+      <a href="https://www.dfusion.ai/socialtruthdlp/" target="_blank" class="flex items-center ps-2.5 mb-5">
+        <img src="img/logo.svg" class="h-6 me-3 sm:h-7" alt="dFusion logo" />
+      </a>
+      <ul class="space-y-2 font-medium">
+        <li>
+          <a routerLink="/app/miner" routerLinkActive="text-[#5B92FD]"
+            class="flex items-center p-2 rounded-lg hover:bg-gray-700 group">
+            <mat-icon>dashboard_2</mat-icon>
+            <span class="flex-1 ms-3 whitespace-nowrap">dFusion Social Truth</span>
+          </a>
+        </li>
+
+        <li>
+          <a routerLink="/app/staking-rewards" routerLinkActive="text-[#5B92FD]"
+            class="flex items-center p-2 rounded-lg hover:bg-gray-700 group">
+            <mat-icon>info</mat-icon>
+            <span class="flex-1 ms-3 whitespace-nowrap">Staking rewards</span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="flex flex-1"></div>
+
+      <ul class="space-y-2 font-medium">
+        <li (click)="openSettings()" class="cursor-pointer">
+          <a
+            class="flex items-center p-2 rounded-lg hover:bg-gray-700 group">
+            <mat-icon>settings</mat-icon>
+            <span class="flex-1 ms-3 whitespace-nowrap">Settings</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </mat-sidenav>
+  <mat-sidenav-content class="h-screen p-10 sm:ml-64 overflow-x-hidden overflow-y-auto">
+    <div class="h-full">
+      <router-outlet></router-outlet>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

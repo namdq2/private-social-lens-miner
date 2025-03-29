@@ -1,0 +1,40 @@
+
+<div class="h-full w-full flex flex-col justify-start items-stretch gap-y-4 p-10">
+  <div class="flex flex-row justify-between items-center">
+    <h3>Settings</h3>
+    <button mat-icon-button mat-dialog-close="">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="flex flex-col justify-start items-stretch gap-y-4">
+  <h5>App</h5>
+  <div class="flex flex-col gap-y-4 cursor-pointer bg-[#0A0D14] rounded-xl p-4">
+    <div class="flex flex-row justify-between items-center">
+      <span>Launch miner app when system starts</span>
+      <mat-slide-toggle class="slide-toggle-label" [checked]="isAutoLaunchEnabled()" (change)="onAutoLaunchEnabledChange($event)">
+      </mat-slide-toggle>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <div class="flex flex-row justify-between items-center">
+      <span>Minimize to system tray when window is closed</span>
+      <mat-slide-toggle class="slide-toggle-label" [checked]="minimizeToTray()" (change)="onMinimizeToTrayChange($event)">
+      </mat-slide-toggle>
+    </div>
+
+  </div>
+
+  <h5>Telegram</h5>
+  <div class="w-full flex flex-row justify-start items-center gap-x-2 cursor-pointer bg-[#0A0D14] rounded-xl p-4" matRipple (click)="signOut()">
+    @if(isTelegramAuthorized) {
+      <mat-icon>logout</mat-icon>
+      Sign out
+    }
+    @else {
+      You've signed out.
+    }
+  </div>
+</div>
+</div>

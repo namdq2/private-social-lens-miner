@@ -1,0 +1,71 @@
+<div class="h-full w-full  flex flex-1 flex-col justify-start items-stretch gap-y-8">
+
+  <div class="flex flex-row justify-start items-center">
+
+    <div class="flex flex-1 flex-col justify-start items-start gap-y-2">
+      <span class="text-[#848689]">Upload Frequency</span>
+      <!-- #trigger="matMenuTrigger" [matMenuTriggerFor]="menu" -->
+      <button class="dfus-basic-btn flex flex-row justify-center items-center gap-x-2">
+        Every {{selectedFrequency()}} hours
+        <!-- @if (trigger.menuOpen) {
+          <mat-icon>arrow_drop_up</mat-icon>
+        }
+        @else {
+          <mat-icon>arrow_drop_down</mat-icon>
+        } -->
+      </button>
+      <!-- <mat-menu #menu="matMenu" xPosition="before">
+        @for (freqItem of uploadFrequencyList(); track $index) {
+          <button mat-menu-item (click)="selectFrequency(freqItem)">
+            Every {{freqItem}} hours
+          </button>
+        }
+      </mat-menu> -->
+
+    </div>
+
+    <div class="flex flex-1 flex-col gap-y-2">
+      <span class="text-[#848689]">Maximize your rewards - default to select all chats for each submission</span>
+
+      <mat-slide-toggle class="slide-toggle-label" [checked]="isUploadAllChats()" (change)="onUploadAllChatsChange($event)">
+        Always upload all chats
+      </mat-slide-toggle>
+    </div>
+
+  </div>
+
+  <!-- @if (isTelegramAuthorized) {
+    <div class="flex flex-row justify-start items-center">
+      <div class="flex flex-1">
+        <p>Last submission: {{ lastSubmissionTimeString }}</p>
+        <p>Next submission: {{ nextSubmissionTimeString }}</p>
+      </div>
+
+      <div class="flex flex-1 flex-row">
+      @if (!isBackgroundTaskEnabled()) {
+        <button (click)="startBackgroundTask()" [disabled]="isBackgroundTaskEnabled()" class="dfus-green-btn disabled:cursor-not-allowed">
+          Start Auto-submission
+        </button>
+      }
+      @else {
+        <button (click)="stopBackgroundTask()" [disabled]="!isBackgroundTaskEnabled()" class="dfus-basic-btn disabled:cursor-not-allowed">
+          Stop Auto-submission
+        </button>
+      }
+      </div>
+    </div>
+  } -->
+
+  <div class="border-[#54575B] border-solid border"></div>
+
+  @if (!isTelegramAuthorized) {
+    <div class="flex flex-1 flex-col">
+      <app-telegram-signin class="h-full w-full" (sendPhoneNumber)="getAuthCode($event)" (sendAuthCode)="submitAuthCode($event)"
+        [showAuthCodeInput]="showAuthCodeInput" (editNumber)="onEditNumber()" [showPhoneNumberError]="showPhoneNumberError" [showCodeError]="showCodeError">
+      </app-telegram-signin>
+    </div>
+  }
+  @else {
+    <app-telegram-main></app-telegram-main>
+  }
+</div>

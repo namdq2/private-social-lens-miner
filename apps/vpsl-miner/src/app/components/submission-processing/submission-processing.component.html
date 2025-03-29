@@ -1,0 +1,110 @@
+<!-- <div mat-dialog-title >
+    @if(showError()) {
+      <button mat-icon-button>
+        <mat-icon>close</mat-icon>
+      </button>
+    }
+</div> -->
+
+<!-- <mat-dialog-content> -->
+<div class="h-full w-full flex flex-col justify-start items-stretch px-4 pb-4 overflow-hidden">
+  @if(showError() || showFailure()) {
+  <div class="flex flex-row justify-end items-center pt-4">
+
+    <button mat-icon-button (click)="endSubmissionFlow()">
+      <mat-icon>close</mat-icon>
+    </button>
+
+  </div>
+  }
+
+  <div class="flex flex-1 overflow-y-auto">
+    <!-- @if (showCloudFlare()) {
+    <div class="state-content-container">
+      <h1 class="mt-20">
+        Verifying
+        <span class="ellipsis-anim">
+          <span>.</span>
+          <span>.</span>
+          <span>.</span>
+        </span>
+      </h1>
+      <div class="mt-4" id="turnstile-container" data-theme="dark"></div>
+    </div>
+    } -->
+    @if (showInfo()) {
+    <div class="state-content-container">
+      <div class="h-6"></div>
+      <img class="spinner h-20 w-20" src="img/spinner.svg" alt="Busy Spinner" />
+      <h1>
+        {{showInfoMessage()}}
+        <span class="ellipsis-anim">
+          <span>.</span>
+          <span>.</span>
+          <span>.</span>
+        </span>
+      </h1>
+    </div>
+    }
+    @else if (showError()) {
+    <div class="state-content-container">
+      <img class="h-20 w-20" src="icons/report_error.svg" alt="Error icon" />
+      <h1>{{showErrorMessage()}}</h1>
+    </div>
+
+    }
+    @else if (showSuccess()) {
+    <div class="state-content-container">
+      <img class="h-20 w-20" src="icons/verified.svg" alt="Verified icon" />
+      <h2>You've successfully contributed to the dFusion Social Truth DLP!</h2>
+      <h5>{{showSuccessMessage()}}</h5>
+      @if(gelatoTaskType() === gelatoTaskTypeRequestReward) {
+      <p>Your tokens are on the way and will appear in your balance shortly.</p>
+      }
+      @if(gelatoTaskType() === gelatoTaskTypeNone) {
+      <p>Your rewards are still being processed. They will be awarded to you shortly.</p>
+      }
+    </div>
+    }
+    @else if (showFailure()) {
+    <div class="state-content-container">
+      <h2>Unfortunately, your submitted data did not satisfy the criteria for receiving rewards.</h2>
+      <h5>{{showFailureMessage()}}</h5>
+    </div>
+    }
+    @else {
+    <div class="h-full w-full flex flex-col justify-center items-center">
+      <span>
+        Please wait
+        <span class="ellipsis-anim">
+          <span>.</span>
+          <span>.</span>
+          <span>.</span>
+        </span>
+      </span>
+    </div>
+    }
+  </div>
+
+  <!-- <button mat-button (click)="showCloudFlare.set(true)">showInfo</button> -->
+  <!-- <div class="flex flex-row">
+    <button mat-button (click)="testShowInfo()">showInfo</button>
+    <button mat-button (click)="testShowError()">showError</button>
+    <button mat-button (click)="testShowSuccess()">showSuccess</button>
+    <button mat-button (click)="testShowFailure()">showFailure</button>
+  </div> -->
+
+  <!-- </mat-dialog-content> -->
+  <div class="flex flex-row justify-center items-center pb-4">
+    @if (showSuccess()) {
+    <button class="w-full dfus-green-btn" (click)="endSubmissionFlow()">Done</button>
+    }
+    <!-- @if (showFailure()) {
+      <button class="w-full dfus-orange-btn" (click)="endSubmissionFlow()">Close</button>
+    } -->
+  </div>
+</div>
+
+<!-- <mat-dialog-actions [align]="'center'"> -->
+
+<!-- </mat-dialog-actions> -->

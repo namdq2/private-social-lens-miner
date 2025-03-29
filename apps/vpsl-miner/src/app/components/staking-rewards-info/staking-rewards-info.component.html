@@ -1,0 +1,273 @@
+<div
+  class="h-full w-full flex flex-col justify-start items-stretch gap-4 p-4 lg:py-16 lg:px-[5%] bg-[#0b0d14] text-xl lg:text-2xl">
+  <!-- <div class="absolute right-0 top-0 mt-2 mr-2">
+    <IconButton onClick={props.onDialogClose}>
+      <img src="icons/close.svg" alt="Close icon" class="h-8 w-8" />
+    </IconButton>
+  </div> -->
+
+  <div class="flex flex-col md:hidden justify-center items-center gap-x-2 text-center text-3xl lg:text-4xl">
+    <h6>Stake $VANA, $VFSN</h6>
+    <h6 class="text-[#FB9C2D]">Earn up to 50% more</h6>
+    <h6>$VFSN every 21 days</h6>
+  </div>
+  <div class="hidden flex-col md:flex justify-center items-center gap-x-2 text-center text-3xl lg:text-4xl">
+    <h6>
+      Stake $VANA, $VFSN and <span class="text-[#FB9C2D]">Earn up</span>
+    </h6>
+    <h6>
+      <span class="text-[#FB9C2D]">to 50% more</span> $VFSN every 21 days
+    </h6>
+  </div>
+
+  <div class="flex flex-col gap-4 sm:flex-row">
+    <div class="flex flex-1 flex-col justify-between items-start gap-y-10 section-container p-4">
+      <div class="flex flex-col justify-start items-start gap-y-2">
+        <div class="block-number">
+          <span>1</span>
+        </div>
+        <div class="flex flex-wrap">
+          <h6>
+            Stake <span class="text-[#FB9C2D]">30 $VANA</span> or more on our DLP
+          </h6>
+        </div>
+      </div>
+
+      <div>
+        <span class="text-lg">
+          Listed on <span class="font-bold">Binance, Bybit, Upbit</span> and most exchanges
+        </span>
+      </div>
+
+      <div>
+        <button class="dfus-orange-btn" (click)="stakeVana()">
+          Stake <span class="font-semibold">$VANA</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="flex flex-1 flex-col justify-between items-start gap-y-10 section-container p-4">
+      <div class="flex flex-col justify-start items-start gap-y-2">
+        <div class="block-number">
+          <span>2</span>
+        </div>
+        <div class="flex flex-wrap">
+          <h6>
+            Stake <span class="text-[#1A56CB]">$VFSN</span> for 7 to 63 days
+          </h6>
+        </div>
+      </div>
+
+      <div>
+        <span class="text-lg">Earn and stake your $VFSN to compound returns to over 900% APY</span>
+      </div>
+
+      <div>
+        <button class="dfus-blue-btn" (click)="stakeVFSN()">
+          Stake <span class="font-semibold">$VFSN</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex flex-col justify-start items-start gap-y-4 section-container p-4">
+    <div class="flex flex-row justify-start items-start sm:items-center gap-x-4">
+      <div class="block-number">
+        <span>3</span>
+      </div>
+      <div class="flex flex-wrap">
+        <h6>
+          We take the ratio of <span class="text-[#1A56CB]">$VFSN</span>:<span class="text-[#FB9C2D]">$VANA</span>
+          staked and the staking
+          duration <span class="font-semibold">to calculate a total multiplier</span>
+        </h6>
+      </div>
+    </div>
+
+    <div
+      class="w-full flex flex-col md:flex-row justify-center items-stretch md:items-center gap-4 text-xs sm:text-base">
+      <div class="flex flex-row justify-center items-center gap-4">
+        <div class="text-center font-semibold border border-[#FFFFFF75] rounded-xl purple-block flex flex-col gap-2">
+          <span>Staking Multiplier</span>
+          <span class="text-xs md:text-sm text-[#C6C6C6] pt-2">For example</span>
+          <span class="font-semibold">1.1</span>
+        </div>
+        <span class="font-bold md:text-xl">x</span>
+        <div class="text-center font-semibold border border-[#FFFFFF75] rounded-xl green-block flex flex-col gap-2">
+          <span>Duration Multiplier</span>
+          <span class="text-xs md:text-sm text-[#C6C6C6] pt-2">For example</span>
+          <span class="font-semibold">1.2</span>
+        </div>
+        <span class="font-bold md:text-xl">=</span>
+      </div>
+      <div class="text-center font-semibold border border-[#FFFFFF75] rounded-xl orange-block flex flex-col gap-2">
+        <span>Total Multiplier</span>
+        <span class="text-xs md:text-sm text-[#C6C6C6] pt-2">For example</span>
+        <span class="font-semibold">1.32</span>
+      </div>
+    </div>
+
+    <div class="w-full flex flex-col justify-start items-start gap-y-4 md:px-20">
+      <div class="ratio-grid w-full flex flex-col p-4 border rounded-xl text-center text-sm sm:text-base bg-[#2f3238]"
+        [ngStyle]="{'box-shadow': 'inset 0px 1px 20px 0px #474849'}">
+        <div class="flex flex-row items-center gap-2">
+          <div class="flex-1 py-2 md:py-1 text-center font-semibold border border-[#FFFFFF75] rounded-xl">Staking
+            Multiplier</div>
+          <div class="p-2">x</div>
+          <div class="flex-1 py-2 md:py-1 text-center font-semibold border border-[#FFFFFF75] rounded-xl">Duration
+            Multiplier</div>
+        </div>
+
+        <div class="flex flex-row p-2">
+          <div class="s-multiplier flex flex-1 flex-row justify-center gap-x-2">
+            1:1 <img src="icons/arrow_right.svg" alt="Right arrow icon" /> <span class="font-bold">1.0</span>
+          </div>
+          <div class="p-2"></div>
+          <div class="d-multiplier flex flex-1 flex-row justify-center gap-x-2">
+            21 Days <img src="icons/arrow_right.svg" alt="Right arrow icon" /> <span class="font-bold">1.1</span>
+          </div>
+        </div>
+        <div class="divider p-0"></div>
+        <div class="flex flex-row p-2">
+          <div class="s-multiplier flex flex-1 flex-row justify-center gap-x-2">
+            5:1 <img src="icons/arrow_right.svg" alt="Right arrow icon" /> <span class="font-bold">1.1</span>
+          </div>
+          <div class="p-2"></div>
+          <div class="d-multiplier flex flex-1 flex-row justify-center gap-x-2">
+            42 days <img src="icons/arrow_right.svg" alt="Right arrow icon" /> <span class="font-bold">1.2</span>
+          </div>
+        </div>
+        <div class="divider p-0"></div>
+        <div class="flex flex-row p-2">
+          <div class="s-multiplier flex flex-1 flex-row justify-center gap-x-2">
+            10:1 <img src="icons/arrow_right.svg" alt="Right arrow icon" /> <span class="font-bold">1.2</span>
+          </div>
+          <div class="p-2"></div>
+          <div class="d-multiplier flex flex-1 flex-row justify-center gap-x-2">
+            63 days <img src="icons/arrow_right.svg" alt="Right arrow icon" /> <span class="font-bold">1.3</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex flex-col gap-4 sm:flex-row">
+    <div class="flex flex-1 flex-col justify-start items-start gap-y-4 section-container p-4">
+      <div class="block-number">
+        <span>4</span>
+      </div>
+      <div class="flex flex-wrap">
+        <h6>Every 21 days, your staked $VFSN gets</h6>
+      </div>
+
+      <div class="flex flex-col justify-start items-stretch gap-y-2">
+        <div class="text-2xl md:text-3xl">
+          (<span class="text-[#FB9C2D]">Staked</span> x Multiplier) - <span class="text-[#1A56CB]">Staked</span>
+        </div>
+
+        <div class="text-2xl md:text-3xl">
+          = <span>BONUS</span> <span class="text-[#FB9C2D]">$VFSN</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex flex-1 flex-col justify-start items-stretch gap-y-4 section-container p-4">
+      <div class="flex flex-row justify-start items-center gap-x-4">
+        <div class="block-number">
+          <span>5</span>
+        </div>
+        <div class="flex flex-wrap">
+          <h6>Grow together with us!</h6>
+        </div>
+      </div>
+
+      <img src="img/growth_infographic.svg" alt="Growth graphic" />
+    </div>
+  </div>
+
+  <div class="flex flex-col justify-start items-stretch gap-y-4 section-container p-4">
+    <div class="flex flex-row justify-start items-center gap-x-4">
+      <div class="block-number">
+        <span>6</span>
+      </div>
+      <div class="flex flex-wrap">
+        <h6>Example Calculator</h6>
+      </div>
+    </div>
+
+    <div class="overflow-x-auto text-sm md:text-base">
+      <div class="calc-grid grid grid-rows-7 grid-cols-4 min-w-[475px]">
+        <div class="sticky left-0 z-10 bg-[#181920] sm:bg-[transparent]">Tier</div>
+        <div>Tier 1</div>
+        <div>Tier 2</div>
+        <div>Tier 3</div>
+
+        <div class="tier-detail">$VANA Staked</div>
+        <div>100</div>
+        <div>100</div>
+        <div>100</div>
+
+        <div class="tier-detail">$VFSN Staked</div>
+        <div>500</div>
+        <div>1000</div>
+        <div>1000</div>
+
+        <div class="tier-detail">Staking Multiplier</div>
+        <div>
+          <div class="text-[#A4A4A4] text-xs">(Tier 1)</div>
+          <div>1.1</div>
+        </div>
+        <div>
+          <div class="text-[#A4A4A4] text-xs">(Tier 2)</div>
+          <div>1.2</div>
+        </div>
+        <div>
+          <div class="text-[#A4A4A4] text-xs">(Tier 3)</div>
+          <div>1.2</div>
+        </div>
+
+        <div class="tier-detail">Duration Multiplier</div>
+        <div>
+          <div class="text-[#A4A4A4] text-xs">(21 Days)</div>
+          <div>1.1</div>
+        </div>
+        <div>
+          <div class="text-[#A4A4A4] text-xs">(42 Days)</div>
+          <div>1.2</div>
+        </div>
+        <div>
+          <div class="text-[#A4A4A4] text-xs">(63 Days)</div>
+          <div>1.3</div>
+        </div>
+
+        <div class="tier-detail">Total Multiplier</div>
+        <div>
+          <div class="text-[#A4A4A4] text-xs">(1.1 x 1.1)</div>
+          <div>1.21</div>
+        </div>
+        <div>
+          <div class="text-[#A4A4A4] text-xs">(1.2 x 1.2)</div>
+          <div>1.44</div>
+        </div>
+        <div>
+          <div class="text-[#A4A4A4] text-xs">(1.2 x 1.3)</div>
+          <div>1.56</div>
+        </div>
+
+        <div class="tier-detail">Bonus $VFSN</div>
+        <div>
+          <div class="text-[#A4A4A4] text-xs">500 x 1.21 - 500 =</div>
+          <div class="text-[#FB9C2D] font-semibold">105 $VFSN</div>
+        </div>
+        <div>
+          <div class="text-[#A4A4A4] text-xs">1000 x 1.44 - 1000 =</div>
+          <div class="text-[#FB9C2D] font-semibold">440 $VFSN</div>
+        </div>
+        <div>
+          <div class="text-[#A4A4A4] text-xs">1000 x 1.56 - 1000 =</div>
+          <div class="text-[#FB9C2D] font-semibold">560 $VFSN</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

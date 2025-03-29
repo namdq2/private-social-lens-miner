@@ -1,0 +1,13 @@
+// pt-[40px]
+// app-wallet-h-[72px]
+// upload-freq-row-h-[74px]
+// gap-y-[32px]
+// divider-h-[2px]
+// gap-y-[32px]
+// chats-submit-row-h-[60px] + mb-[16px]
+// pb-[40px]
+
+.dialogs-container,
+.dialog-msgs-container {
+  height: calc(100vh - 40px - 72px - 74px - 32px - 2px - 32px - 60px - 16px - 40px);
+}

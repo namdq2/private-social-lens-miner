@@ -1,0 +1,403 @@
+@use '@angular/material' as mat;
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "Clash Display Variable";
+  src: url("./app/assets/fonts/ClashDisplay-Variable.ttf") format("truetype-variations");
+  font-weight: 300 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Poppins";
+  src: url("./app/assets/fonts/Poppins-Regular.ttf") format("truetype-variations");
+  font-weight: 400;
+  font-style: normal;
+}
+
+/* For Webkit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #2b3445; /* Even softer, very subtle blue-gray */
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #8691a7;
+  border-radius: 10px;
+  transition: background 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #1345a3; /* Slightly darker on hover */
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #8691a7 #2b3445;
+}
+
+body {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #0b0d14;
+  font-size: 1rem;
+  color: white;
+}
+
+// *** start MATERIAL COMPONENTS
+:root {
+  @include mat.dialog-overrides((
+    container-color: #151a23,
+    subhead-color: white,
+    supporting-text-color: white,
+    // subhead-font: "Poppins",
+    // supporting-text-font: "Poppins",
+    container-shape: 16px,
+  ));
+
+  @include mat.menu-overrides((
+    container-color: #101b34,
+    item-hover-state-layer-color: #4b5563,
+    item-leading-spacing: 32px,
+    item-trailing-spacing: 32px,
+  ));
+
+  @include mat.checkbox-overrides((
+    label-text-size: 20px,
+
+    selected-icon-color: #497BFFB2,
+    selected-hover-icon-color: #497BFFB2,
+    selected-pressed-icon-color: #497BFFB2,
+    selected-focus-icon-color: #497BFFB2,
+
+    unselected-icon-color: #848689,
+
+    selected-checkmark-color: white,
+  ));
+
+  @include mat.slide-toggle-overrides((
+    handle-shape: 20px,
+    track-shape: 20px,
+    track-outline-color: grey,
+    selected-focus-state-layer-color: red,
+    selected-handle-color: white,
+    selected-hover-state-layer-color: #4488f6,
+    selected-pressed-state-layer-color: #4488f6,
+    selected-focus-handle-color: white,
+    selected-hover-handle-color: white,
+    selected-pressed-handle-color: white,
+    selected-focus-track-color: #4488f6,
+    selected-hover-track-color: #4488f6,
+    selected-pressed-track-color: #4488f6,
+    selected-track-color: #4488f6,
+    handle-surface-color: white,
+    selected-icon-color: #4488f6,
+    unselected-focus-handle-color: white,
+    unselected-focus-state-layer-color: #4488f6,
+    unselected-focus-track-color: #3b3d42,
+    unselected-handle-color: white,
+    unselected-hover-handle-color: white,
+    unselected-hover-state-layer-color: #4488f6,
+    unselected-hover-track-color: #3b3d42,
+    unselected-icon-color: #4488f6,
+    unselected-pressed-handle-color:white,
+    unselected-pressed-state-layer-color: #4488f6,
+    unselected-pressed-track-color: #3b3d42,
+    unselected-track-color: #3b3d42,
+  ));
+
+  @include mat.snack-bar-overrides((
+    container-shape: 16px,
+    supporting-text-color: black,
+    container-color: white,
+    button-color: white,
+  ));
+}
+
+// ??
+.slide-toggle-label .mdc-label {
+  margin-left: 8px;
+}
+
+.mat-menu-below {
+  margin-top: 4px;
+}
+// *** end MATERIAL COMPONENTS
+
+h1 {
+  font-family: "Clash Display Variable", sans-serif;
+  @apply text-5xl;
+}
+
+h2 {
+  font-family: "Clash Display Variable", sans-serif;
+  @apply text-4xl;
+}
+
+h3 {
+  font-family: "Clash Display Variable", sans-serif;
+  @apply text-3xl;
+}
+
+h4,
+h5 {
+  font-family: "Clash Display Variable", sans-serif;
+  @apply text-2xl;
+}
+
+h6 {
+  font-family: "Clash Display Variable", sans-serif;
+}
+
+button {
+  @apply p-[0.5rem];
+}
+
+.dfus-basic-btn {
+  @apply border border-[#272C35] rounded-xl px-4 py-2;
+}
+
+.dfus-blue-btn {
+  text-align: center;
+  background-image: radial-gradient(circle, #0c2453, #1c4aaa);
+  border-radius: 0.75rem;
+  border: 1px solid #1a56cb;
+  padding: .5rem 1rem;
+  font-weight: 400;
+  transition: opacity .2s;
+  font-size: 1rem;
+}
+
+.dfus-blue-btn:hover {
+  box-shadow: 4px 4px 8px rgba(255, 255, 255, .1), 5px 4px 15px rgba(26, 86, 203, .3);
+}
+
+.dfus-blue-btn:active {
+  box-shadow: inset 0 0 18px rgba(255, 255, 255, .1), 0 9px 9px rgba(0, 0, 0, .1), 0 4px 4px rgba(0, 0, 0, .05);
+}
+
+.dfus-blue-btn.selected {
+  border-color: white;
+}
+
+.dfus-green-btn {
+  text-align: center;
+  background-image: linear-gradient(#0B1C1A, #16413D);
+  border-radius: 0.75rem;
+  border: 1px solid #1ACBAB;
+  padding: .5rem 1rem;
+  font-weight: 400;
+  transition: opacity .2s;
+  box-shadow: inset 0 13.33px 40px #1ACBAB1F;
+  font-size: 1rem;
+}
+
+.dfus-green-btn:hover {
+  box-shadow: 0 0 8px rgba(255, 255, 255, .1), 0 0 15px #1acbab;;
+}
+
+.dfus-green-btn:active {
+  box-shadow: inset 0 0 18px rgba(255, 255, 255, 0.01),
+    inset 0 0 10px rgba(0, 0, 0, 0.5),
+    0 9px 18px rgba(0, 0, 0, 0.8),
+    0 4px 8px rgba(0, 0, 0, 0.6);
+}
+
+.dfus-orange-btn {
+  text-align: center;
+  background-image: linear-gradient(#342207, #795114);
+  border-radius: 0.75rem;
+  border: 1px solid #FB9C2D;
+  padding: .5rem 1rem;
+  font-weight: 400;
+  transition: opacity .2s;
+  box-shadow: inset 0 13.33px 40px #cb841a59;
+  font-size: 1rem;
+}
+
+.dfus-orange-btn:disabled {
+  @apply cursor-not-allowed; // bg-neutral-darker
+  border-width: 0px;
+  border-color: transparent;
+  background-image: none;
+  box-shadow: none;
+}
+
+.dfus-purple-btn {
+  text-align: center;
+  background-image: linear-gradient(#1A0B1C, #3D1641);
+  border-radius: 0.75rem;
+  border: 1px solid #BD1ACB;
+  padding: .5rem 1rem;
+  font-weight: 400;
+  transition: opacity .2s;
+  box-shadow: inset 0 13.33px 40px #BD1ACB1F;
+  font-size: 1rem;
+}
+
+.dfus-btn-icon-group {
+  @apply flex flex-row justify-center items-center gap-x-4;
+}
+
+.blue-block {
+  text-align: center;
+  background-image: radial-gradient(circle, #0c2453, #1c4aaa);
+  border-radius: 0.75rem;
+  border: 1px solid #1a56cb;
+  font-weight: 400;
+  transition: opacity .2s;
+  /* box-shadow: inset 0 13.33px 40px #cb841a59; */
+  font-size: 1rem;
+  @apply p-4;
+}
+.green-block {
+  text-align: center;
+  background-image: linear-gradient(#0B1C1A, #16413D);
+  border-radius: 0.75rem;
+  border: 1px solid #1ACBAB;
+  font-weight: 400;
+  transition: opacity .2s;
+  box-shadow: inset 0 20px 20px #1ACBAB1F;
+  font-size: 1rem;
+  @apply p-4;
+}
+.orange-block {
+  text-align: center;
+  background-image: linear-gradient(#342207, #795114);
+  border-radius: 0.75rem;
+  border: 1px solid #FB9C2D;
+  font-weight: 400;
+  transition: opacity .2s;
+  box-shadow: inset 0 20px 20px #cb841a59;
+  font-size: 1rem;
+  @apply p-4;
+}
+.purple-block {
+  text-align: center;
+  background-image: linear-gradient(#1A0B1C, #3D1641);
+  border-radius: 0.75rem;
+  border: 1px solid #BD1ACB;
+  font-weight: 400;
+  transition: opacity .2s;
+  box-shadow: inset 0 20px 20px #BD1ACB1F;
+  font-size: 1rem;
+  @apply p-4;
+}
+
+/* *** start animated ellipsis */
+.ellipsis-anim span {
+  opacity: 0;
+  -webkit-animation: ellipsis-dot 1s infinite;
+  animation: ellipsis-dot 1s infinite;
+}
+
+.ellipsis-anim span:nth-child(1) {
+  -webkit-animation-delay: 0.0s;
+  animation-delay: 0.0s;
+}
+.ellipsis-anim span:nth-child(2) {
+  -webkit-animation-delay: 0.1s;
+  animation-delay: 0.1s;
+}
+.ellipsis-anim span:nth-child(3) {
+  -webkit-animation-delay: 0.2s;
+  animation-delay: 0.2s;
+}
+
+@-webkit-keyframes ellipsis-dot {
+    0% { opacity: 0; }
+   50% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes ellipsis-dot {
+    0% { opacity: 0; }
+   50% { opacity: 1; }
+  100% { opacity: 0; }
+}
+/* *** end animated ellipsis */
+
+.spinner {
+  animation: spin 2s ease-in-out infinite;
+}
+
+@keyframes spin {
+  from {
+      transform: rotate(0deg);
+  }
+  to {
+      transform: rotate(360deg);
+  }
+}
+
+.section-container {
+  border: 1px solid #E1F6FF3B;
+  box-shadow: inset 0 0 12px rgba(255, 255, 255, 0.12), inset 0 0 4px rgba(255, 255, 255, 0.35);
+  border-radius: 8px !important;
+  background: #171920;
+}
+
+.section-container-blue {
+  background: #101520B2;
+  border: 1px solid;
+  border-radius: 16px;
+  border-image-source: linear-gradient(125.77deg, #1A56CB -8.71%, rgba(26, 86, 203, 0) 94.63%);
+}
+.section-container-blue-outline {
+  background: #101520B2;
+  border: 1px solid #1a56cb80;
+  border-radius: 16px;
+}
+
+.notification-container {
+  @apply border border-[#272C35] rounded-2xl bg-[#101520];
+  p {
+    @apply ml-9;
+  }
+}
+
+.blue-gradient-container {
+  background-image: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0));
+  // border: 1px solid #1A56CB00;
+  // box-shadow: inset 0 0 20px 10px rgba(26, 86, 203, .12), inset 0 0 20px 10px rgba(73, 123, 255, .35);
+  // box-shadow: 0px 0px 25px 10px #3470E54D inset;
+  box-shadow: 0px 0px 300px 20px #3470E54D inset;
+  @apply rounded-xl p-8;
+}
+
+.blue-gradient-container-outer {
+  background-image: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0));
+  // border: 1px solid #1A56CB00;
+  // box-shadow: inset 0 0 20px 10px rgba(26, 86, 203, .12), inset 0 0 20px 10px rgba(73, 123, 255, .35);
+  // box-shadow: 0px 0px 25px 10px #3470E54D inset;
+  box-shadow: 0px 0px 150px 20px #3470E54D;
+  @apply rounded-xl;
+}
+
+.background-layer {
+  opacity: 0.4;
+  background: radial-gradient(
+    circle,
+    rgba(26, 86, 203, 0.7) 1%,
+    rgba(101, 153, 255, 0.5) 25%,
+    rgba(0, 0, 0, 0.7) 100%
+  );
+}
+
+.dfus-input-label {
+  @apply block mb-2 font-medium;
+}
+.dfus-input {
+  @apply block w-full text-lg h-16 p-2.5 rounded-lg bg-gray-700 border-gray-700 placeholder-gray-400  focus:ring-blue-500 focus:border-blue-500;
+}

@@ -1,0 +1,13 @@
+header {
+  position: relative;
+}
+
+header::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px; /* Adjust height if needed */
+  background: linear-gradient(to right, transparent, white, transparent);
+}

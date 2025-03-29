@@ -1,0 +1,249 @@
+<div class="max-w-2xl flex flex-col justify-start items-stretch gap-y-8 mx-auto mt-32 pb-24">
+  <img [src]="'img/logo_vertical.svg'" class="w-auto h-32" alt="dFusion logo" />
+
+  @if (!showWalletSetup && !showWalletGeneration && !showVerification && !recoveryConfirmed) {
+    <div class="w-full flex flex-col justify-start items-stretch gap-y-8 text-center">
+      <!-- <img [src]="'img/logo_vertical.svg'" class="w-auto h-32" alt="dFusion logo" /> -->
+
+      <div class="flex flex-col justify-start items-center">
+        <p class="text-[#848689]">
+          This application will run in the background. It will automatically submit your data and earn you $VFSN tokens.
+        </p>
+      </div>
+
+      <div class="flex flex-col justify-start items-center">
+        <h1>
+          Welcome to the
+        </h1>
+        <h1 class="text-[#FB9C2D]">
+          dFusion DLP Miner
+        </h1>
+      </div>
+
+      @if (requiresWalletSetup) {
+        <div class="flex flex-col justify-start items-center">
+          <p>
+            Complete a quick setup to get started.
+          </p>
+        </div>
+      }
+    </div>
+
+    <div class="w-full flex flex-col justify-start items-center gap-y-4 mt-12">
+      <button class="dfus-blue-btn dfus-btn-icon-group w-full h-16" (click)="onNextClick()">
+        {{requiresWalletSetup ? 'Get Started' : 'Continue'}}
+        <img src="icons/chevron_right.svg" alt="Right chevron icon" />
+      </button>
+    </div>
+  }
+
+  @if (showWalletSetup) {
+    <div class="blue-gradient-container flex flex-col justify-start items-stretch gap-y-8 text-left">
+      <div class="w-full flex flex-row justify-between items-center">
+        <h1>Firstly</h1>
+        <span>Step 1 of 4</span>
+      </div>
+
+      <div class="flex flex-row justify-start items-stretch gap-x-4 px-4 py-8 text-left section-container-blue">
+        <div class="flex flex-col justify-start items-center">
+          <img src="icons/setup_one.svg" alt="Setup icon one" class="h-16" />
+          <div class="h-10 w-[1px] bg-[white]"></div>
+          <img src="icons/setup_two.svg" alt="Setup icon two" class="h-16" />
+          <div class="h-10 w-[1px] bg-[white]"></div>
+          <img src="icons/setup_three.svg" alt="Setup icon three" class="h-16" />
+        </div>
+        <div class="flex flex-1 flex-col">
+          <div class="flex flex-row justify-start items-center gap-x-4 h-16">
+            A hot wallet will be created for you, receiving your mining rewards, which you can transfer anytime.
+          </div>
+          <div class="h-10 w-[1px]"></div>
+          <div class="flex flex-row justify-start items-center gap-x-4 h-16">
+            A signature will be generated to create a unique encryption key, securing your contributions and verifying ownership of your data.
+          </div>
+          <div class="h-10 w-[1px]"></div>
+          <div class="flex flex-row justify-start items-center gap-x-4 h-16">
+            Your private key and recovery phrase are never stored or shared.
+          </div>
+        </div>
+
+      </div>
+
+      <div>
+        <mat-checkbox [(ngModel)]="hasUserAgreed">
+          <span class="text-base">
+            I understand and accept the data encryption and wallet setup process
+          </span>
+        </mat-checkbox>
+      </div>
+
+      <div class="w-full flex flex-col justify-start items-center gap-y-4">
+        <button class="dfus-blue-btn dfus-btn-icon-group w-full h-16" [ngClass]="{'cursor-not-allowed': !hasUserAgreed}" (click)="onGenerateClick()" [disabled]="!hasUserAgreed">
+          Start
+          <img src="icons/chevron_right.svg" alt="Right chevron icon" />
+        </button>
+      </div>
+    </div>
+
+    <div class="flex flex-col justify-start items-stretch text-sm gap-y-2 mt-6 p-4 text-left notification-container">
+      <div class="flex flex-row justify-start items-center gap-x-2 text-base font-semibold">
+        <img src="icons/info.svg" alt="Important notification icon" />
+        <span>Important Note</span>
+      </div>
+      <p>
+        Be sure to keep your private key and recovery phrase safe.
+      </p>
+      <p>
+        We will never ask for this.
+      </p>
+    </div>
+  }
+
+  @if (showWalletGeneration) {
+    <div class="blue-gradient-container flex flex-col justify-start items-stretch gap-y-8 p-4 text-left">
+      <div class="w-full flex flex-row justify-between items-center">
+        <h1>Wallet</h1>
+        <span>Step 2 of 4</span>
+      </div>
+
+      <div class="w-full flex flex-col justify-start items-stretch gap-y-8 px-4 py-8 text-left section-container-blue">
+        <p>
+          Here are your wallet details:
+        </p>
+
+        <div class="flex flex-col">
+          <span>Wallet Address:</span>
+          <div class="flex flex-row justify-between items-center text-sm mt-2 py-2 px-4 section-container-blue-outline">
+            <span class="font-semibold">{{walletAddress}}</span>
+            <button mat-icon-button [cdkCopyToClipboard]="walletAddress">
+              <mat-icon>content_copy</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <!-- <div class="flex flex-col">
+          <span>Private Key:</span>
+          <div class="flex flex-row justify-between items-center text-sm mt-2 py-2 px-4 section-container">
+            <span class="font-semibold">{{privateKey}}</span>
+            <button mat-icon-button [cdkCopyToClipboard]="privateKey">
+              <mat-icon>content_copy</mat-icon>
+            </button>
+          </div>
+        </div> -->
+
+        <div class="flex flex-col">
+          <span>Recovery Phrase:</span>
+          <div class="flex flex-row justify-between items-center text-sm mt-2 py-2 px-4 section-container-blue-outline">
+            <span class="font-semibold">{{mnemonic}}</span>
+            <button mat-icon-button [cdkCopyToClipboard]="mnemonic">
+              <mat-icon>content_copy</mat-icon>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="w-full flex flex-col justify-start items-center gap-y-4">
+        <button class="dfus-blue-btn dfus-btn-icon-group w-full h-16" (click)="onVerifyClick()">
+          Next
+          <img src="icons/chevron_right.svg" alt="Right chevron icon" />
+        </button>
+      </div>
+    </div>
+
+    <div class="flex flex-col justify-start items-stretch text-sm gap-y-2 mt-6 p-4 text-left notification-container">
+      <div class="flex flex-row justify-start items-center gap-x-2 text-base font-semibold">
+        <img src="icons/info.svg" alt="Important notification icon" />
+        <span>Important Note</span>
+      </div>
+      <p>
+        Be sure to keep your recovery phrase safe.
+      </p>
+    </div>
+  }
+
+  @if (showVerification) {
+    <div class="blue-gradient-container flex flex-col justify-start items-stretch gap-y-8 text-left">
+      <div class="w-full flex flex-row justify-between items-center">
+        <h1>Verify</h1>
+        <span>Step 3 of 4</span>
+      </div>
+
+      <div class="flex flex-col justify-start items-center gap-y-8 px-4 py-8 section-container-blue">
+        <div class="w-full">
+          <p>Enter the 2nd, 6th and 9th words from your recovery phrase</p>
+        </div>
+        <div class="flex flex-row gap-x-4">
+          <div class="flex flex-1 flex-col">
+            <label for="phone-number-input" class="dfus-input-label">2nd</label>
+            <input type="text" id="phone-number-input" [(ngModel)]="recovery2nd" class="dfus-input">
+          </div>
+          <div class="flex flex-1 flex-col">
+            <label for="phone-number-input" class="dfus-input-label">6th</label>
+            <input type="text" id="phone-number-input" [(ngModel)]="recovery6th" class="dfus-input">
+          </div>
+          <div class="flex flex-1 flex-col">
+            <label for="phone-number-input" class="dfus-input-label">9th</label>
+            <input type="text" id="phone-number-input" [(ngModel)]="recovery9th" class="dfus-input">
+          </div>
+        </div>
+        <div class="w-full flex flex-row justify-end items-center">
+          <span class="text-[#848689] cursor-pointer underline" (click)="onBackToReviewWalletClick()">
+            Back
+          </span>
+          <!-- <button class="dfus-blue-btn dfus-btn-icon-group w-3/4 h-12" (click)="onBackToReviewWalletClick()">
+            Back
+          </button> -->
+        </div>
+      </div>
+
+      @if (showInvalidRecovery) {
+        <div class="flex flex-row justify-start items-start gap-x-2">
+          <img src="icons/hint_error.svg" alt="Hint error icon" />
+          <span class="text-[#FF8389]">
+            Make sure to save your private key and recovery phrase correctly.
+          </span>
+        </div>
+      }
+
+      <div class="w-full flex flex-col justify-start items-center gap-y-4">
+        <button class="dfus-blue-btn dfus-btn-icon-group w-full h-16" (click)="onConfirmClick()">
+          Confirm
+          <img src="icons/chevron_right.svg" alt="Right chevron icon" />
+        </button>
+      </div>
+    </div>
+  }
+
+  @if (recoveryConfirmed) {
+    <div class="blue-gradient-container flex flex-col justify-start items-stretch gap-y-12 text-left">
+      <div class="w-full flex flex-row justify-between items-center">
+        <h1>Completed</h1>
+        <span>Step 4 of 4</span>
+      </div>
+
+      <div class="flex flex-col justify-start items-center gap-y-8 px-4 py-12 section-container-blue text-xl">
+        <p>Setup is finished - start using the dFusion DLP Miner!</p>
+
+        <div class="w-full flex flex-col justify-start items-center gap-y-4">
+          <button class="dfus-blue-btn dfus-btn-icon-group w-full h-16" (click)="onDoneClick()">
+            Done
+            <img src="icons/chevron_right.svg" alt="Right chevron icon" />
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex flex-col justify-start items-stretch text-sm gap-y-2 mt-6 p-4 text-left notification-container">
+      <div class="flex flex-row justify-start items-center gap-x-2 text-base font-semibold">
+        <img src="icons/info.svg" alt="Important notification icon" />
+        <span>Important Note</span>
+      </div>
+      <p>
+        Never share your private key or recovery phrase with anyone.
+      </p>
+      <p>
+        We will never ask for them.
+      </p>
+    </div>
+  }
+</div>
