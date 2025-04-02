@@ -190,9 +190,7 @@ export default class App {
   }
 
   private static startBackgroundTask() {
-    // TODO
-    // const interval = (App.uploadIntervalHours * 60 * 60 * 1000) + (1000 * 60 * 2); // 4 hours in milliseconds + 2 minutes
-    const interval = 1000 * 60 * 30; // 30 minutes
+    const interval = (1000 * 60 * 30) + (30 * 1000); // 30m 30s
 
     // Clear any existing interval
     if (App.backgroundTaskInterval) {

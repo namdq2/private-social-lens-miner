@@ -203,7 +203,10 @@ export class TelegramApiService {
       }
 
       if (chatId) {
-        const message = await this.telegramClient.getMessages(chatId);
+        const message = await this.telegramClient.getMessages(
+          chatId,
+          { limit: 50 }
+        );
         // console.log('message', message);
         return message;
       } else {
