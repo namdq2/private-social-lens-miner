@@ -16,12 +16,12 @@ jobs:
           - os: windows-latest
             platform: win
             artifact-name: windows-build
-            executable-path: dist/executables/dFusion-DLP-miner Setup 0.1.0.exe # TODO version
+            executable-path: dist/executables/dFusion-DLP-miner Setup 0.2.0.exe # TODO version
 
           - os: ubuntu-latest
             platform: linux
             artifact-name: linux-build
-            executable-path: dist/executables/dFusion-DLP-miner-0.1.0.AppImage # TODO version
+            executable-path: dist/executables/dFusion-DLP-miner-0.2.0.AppImage # TODO version
 
           # - os: macos-latest
           #   platform: mac
@@ -105,7 +105,8 @@ jobs:
           name: Release v${{ github.run_number }}
           body: |
             Changes in this Release:
-            - Initial miner build
+            - updated staking rewards info
+            - resolve indefinite time for data encryption stage
           draft: false
           prerelease: false
           files: artifacts/**/*
