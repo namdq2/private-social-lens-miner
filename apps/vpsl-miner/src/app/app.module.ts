@@ -17,7 +17,6 @@ import { HomeComponent } from './components/home/home.component';
 import { MinerAppContainerComponent } from './components/miner-app-container/miner-app-container.component';
 import { MinerMainComponent } from './components/miner-main/miner-main.component';
 import { StakingRewardsInfoComponent } from './components/staking-rewards-info/staking-rewards-info.component';
-// import { StakingComponent } from './components/staking/staking.component';
 import { ClipboardModule } from '@angular/cdk/clipboard';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatSidenavModule } from '@angular/material/sidenav';

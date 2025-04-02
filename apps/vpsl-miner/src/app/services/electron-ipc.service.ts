@@ -118,7 +118,7 @@ export class ElectronIpcService {
     const nextDate = new Date();
     // milliseconds: (4 hours * 60 min * 60 sec * 1000 ms) + (1 min * 60 sec * 1000 ms)
     // NOTE must match app.ts in electron app
-    nextDate.setTime(lastSubmissionTime.getTime() + (UPLOAD_INTERVAL_HOURS * 60 * 60 * 1000) + (2 * 60 * 1000));
+    nextDate.setTime(lastSubmissionTime.getTime() + (UPLOAD_INTERVAL_HOURS * 60 * 60 * 1000) + (2 * 60 * 1000)); // 2h 2m
 
     this.nextSubmissionTime.set(nextDate);
     window.electron.setNextSubmissionTime(nextDate);
