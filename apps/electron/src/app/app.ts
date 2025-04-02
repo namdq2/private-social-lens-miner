@@ -150,7 +150,6 @@ export default class App {
           slashes: true,
         }),
       );
-      App.mainWindow.webContents.openDevTools();
     }
   }
 
