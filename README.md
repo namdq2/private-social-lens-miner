@@ -1,4 +1,4 @@
-# DFusionVana
+# dFusion Vana Miner
 
 ## vpsl-miner
 
