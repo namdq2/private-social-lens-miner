@@ -37,13 +37,20 @@ export class MinerSettingsComponent {
 
   public async signOut() {
     if (this.isTelegramAuthorized) {
-      await this.telegramApiService.logOut();
-
-      this.snackBar.open(
-        `You've successfully signed out.`,
-        ``,
-        { duration: 1000 * 3 }
-      );
+      await this.telegramApiService.logOut().then(() => {
+        this.electronIpcService.stopBackgroundTask();
+        this.snackBar.open(
+          `You've successfully signed out.`,
+          ``,
+          { duration: 1000 * 3 }
+        );
+      }).catch(() => {
+        this.snackBar.open(
+          `Failed to sign out of Telegram. Try again.`,
+          `Close`,
+          { duration: 1000 * 5 }
+        );
+      });
     }
   }
 }

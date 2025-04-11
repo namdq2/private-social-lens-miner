@@ -1,10 +1,9 @@
-import { Component, inject } from '@angular/core';
+import { Component, effect, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { ethers } from "ethers";
 import { ElectronIpcService } from '../../services/electron-ipc.service';
 import { Web3WalletService } from '../../services/web3-wallet.service';
-import { Router } from '@angular/router';
 import { ENCRYPTION_SEED } from '../../shared/constants';
-import { isElectron } from '../../shared/helpers';
 
 @Component({
   selector: 'app-home',
@@ -18,13 +17,18 @@ export class HomeComponent {
   private readonly web3WalletService: Web3WalletService = inject(Web3WalletService);
   private readonly router: Router = inject(Router);
 
-  public get requiresWalletSetup(): boolean {
-    // setup flow
-    // if (isElectron()) {
-    //   return !(!this.electronIpcService.walletAddress() || !this.electronIpcService.encryptionKey());
-    // }
-    return (!this.electronIpcService.walletAddress() || !this.electronIpcService.encryptionKey());
-  }
+  public requiresWalletSetup = true;
+
+  public readonly validWalletAndEncryptionKey = effect(() => {
+    const validWalletAddress = this.electronIpcService.walletAddress();
+    const validEncryptionKey = this.electronIpcService.encryptionKey();
+
+    this.requiresWalletSetup = !validWalletAddress || !validEncryptionKey;
+    if (!this.requiresWalletSetup) {
+      this.router.navigate(['app/miner']);
+    }
+    return !this.requiresWalletSetup;
+  });
 
   public showWalletSetup = false;
   public showWalletGeneration = false;

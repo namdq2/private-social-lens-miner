@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal, WritableSignal } from '@angular/core';
+import { AfterViewInit, Component, computed, inject, signal, WritableSignal } from '@angular/core';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { Api } from 'telegram';
 import { TotalList } from 'telegram/Helpers';
@@ -15,7 +15,7 @@ import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.compone
   templateUrl: './telegram-main.component.html',
   styleUrl: './telegram-main.component.scss',
 })
-export class TelegramMainComponent {
+export class TelegramMainComponent implements AfterViewInit {
 
   private readonly telegramApiService: TelegramApiService = inject(TelegramApiService);
   // private readonly cloudFlareService: CloudFlareService = inject(CloudFlareService);
@@ -69,8 +69,13 @@ export class TelegramMainComponent {
     this.nextSubmissionTime = this.electronIpcService.nextSubmissionTime;
   }
 
+  public ngAfterViewInit(): void {
+    if (this.isBackgroundTaskEnabled() && !this.electronIpcService.backgroundTaskIntervalExists()) {
+      this.electronIpcService.startBackgroundTask();
+    }
+  }
+
   public async refresh() {
-    await this.telegramApiService.getDialogs();
     this.telegramApiService.initialisePreSelectedDialogs();
   }
 

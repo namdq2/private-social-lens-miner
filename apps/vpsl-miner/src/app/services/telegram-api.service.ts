@@ -5,7 +5,6 @@ import { TotalList } from 'telegram/Helpers';
 import { StringSession } from 'telegram/sessions';
 import { Dialog } from 'telegram/tl/custom/dialog';
 import { chatDto, fileDto } from '../models/social-truth';
-import { ERROR_MSG_GENERAL } from '../shared/constants';
 import { isElectron } from '../shared/helpers';
 import { AppConfigService } from './app-config.service';
 import { CryptographyService } from './cryptography.service';
@@ -58,9 +57,7 @@ export class TelegramApiService {
     // Immediately create a client using your application data
     this.telegramClient = new TelegramClient(this.SESSION, this.apiId, this.apiHash, { connectionRetries: 5 });
 
-    this.telegramClient.connect().then((telegramStoredSessionConnectResult) => {
-      // console.log('telegramStoredSessionConnectResult', telegramStoredSessionConnectResult);
-
+    this.telegramClient.connect().then((telegramStoredSessionConnectResult: boolean) => {
       this.checkAuthorization();
     });
 
@@ -69,11 +66,11 @@ export class TelegramApiService {
       window.electron.onExecuteBackgroundTaskCode((event: any, message: any) => {
         console.warn('Received message from main process:', message);
         if (this.isAuthorized) {
-          // TODO
           this.runAutoSubmission(message);
         }
         else {
-          throw new Error('Not signed in to Telegram. Sign in to continue.');
+          this.submissionProcessingService.startProcessingState();
+          this.submissionProcessingService.displayError('Not signed in to Telegram. Sign in to continue.');
         }
       });
 
@@ -151,10 +148,7 @@ export class TelegramApiService {
   }
 
   private checkAuthorization() {
-    this.telegramClient.checkAuthorization().then(async (isAuthorized) => {
-      // console.log('isAuthorized', isAuthorized);
-      this.isAuthorized = isAuthorized;
-
+    this.telegramClient.checkAuthorization().then(async (isAuthorized: boolean) => {
       if (isAuthorized) {
         this.telegramClient.addEventHandler(
           this.newMessageHandler.bind(this),
@@ -167,9 +161,10 @@ export class TelegramApiService {
         // });
         const currentUser = await this.getUser('me');
         this.userId.set(Number(currentUser?.fullUser.id));
-        await this.getDialogs();
-        this.initialisePreSelectedDialogs();
+        await this.initialisePreSelectedDialogs();
       }
+
+      this.isAuthorized = isAuthorized;
     }).catch((error) => {
       console.error(error);
     });
@@ -258,8 +253,9 @@ export class TelegramApiService {
       console.log('telegramLoggedOutResult', telegramLoggedOutResult);
       this.isAuthorized = false;
       this.electronIpcService.stopBackgroundTask();
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
+      throw new Error(error);
     }
   }
 
@@ -326,7 +322,6 @@ export class TelegramApiService {
       const errorText: string = authParts[1];
       const token: string = authParts[2];
       if (isValid) {
-        // TODO
         this.doTelegramSubmission(token);
       }
       else {
@@ -344,7 +339,9 @@ export class TelegramApiService {
     }
   }
 
-  public initialisePreSelectedDialogs() {
+  public async initialisePreSelectedDialogs() {
+    await this.getDialogs();
+
     if (this.electronIpcService.selectedChatIdsList().length > 0) {
       const preSelectedDialogs: Array<Dialog> = [];
       this.telegramDialogs().forEach(
@@ -379,8 +376,9 @@ export class TelegramApiService {
       this.selectedDialogsList.set(selectedDialogsForSubmission);
       this.electronIpcService.setSelectedChatIdsList(selectedDialogsForSubmission.map(dialog => Number(dialog.id)));
     }
-    console.log('this.telegramApiService.selectedDialogsList()', this.selectedDialogsList());
+    // console.log('this.selectedDialogsList()', this.selectedDialogsList());
 
+    this.submissionProcessingService.startProcessingState();
     if (this.selectedDialogsList().length > 0) {
       await this.initiateSubmission();
     }
@@ -393,20 +391,17 @@ export class TelegramApiService {
   // *** social truth ******************************************************************
   public async initiateSubmission() {
     console.log('this.selectedDialogsList()', this.selectedDialogsList());
-    if (this.selectedDialogsList().length > 0) {
-      // this.cloudFlareService.openCloudFlareDialog();
-      this.submissionProcessingService.startProcessingState();
+    // this.cloudFlareService.openCloudFlareDialog();
 
-      const token = this.userId().toString();
-      this.sendBotMessage(`/social_truth_verify|${token}|TelegramMiner`).then(
-        (sendBotMsgRes) => {
-          console.log('sendBotMsgRes', sendBotMsgRes);
-          this.submissionProcessingService.displayInfo('You are being verified');
-        }
-      ).catch((error) => {
-        this.submissionProcessingService.displayError('Failed to verify with @social_truth_bot');
-      });
-    }
+    const token = this.userId().toString();
+    this.sendBotMessage(`/social_truth_verify|${token}|TelegramMiner`).then(
+      (sendBotMsgRes) => {
+        console.log('sendBotMsgRes', sendBotMsgRes);
+        this.submissionProcessingService.displayInfo('You are being verified');
+      }
+    ).catch((error) => {
+      this.submissionProcessingService.displayError('Failed to verify with @social_truth_bot');
+    });
   }
 
   public async doTelegramSubmission(token: string) {

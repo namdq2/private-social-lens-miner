@@ -1,6 +1,5 @@
 import { Component, inject, WritableSignal } from '@angular/core';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
-// import { MatSnackBar } from '@angular/material/snack-bar';
 import { ElectronIpcService } from '../../services/electron-ipc.service';
 import { TelegramApiService } from '../../services/telegram-api.service';
 
@@ -13,7 +12,6 @@ import { TelegramApiService } from '../../services/telegram-api.service';
 export class TelegramComponent {
   private readonly telegramApiService: TelegramApiService = inject(TelegramApiService);
   private readonly electronIpcService: ElectronIpcService = inject(ElectronIpcService);
-  // private readonly snackBar: MatSnackBar = inject(MatSnackBar);
 
   private phoneNumber = '';
   private authCode = '';
@@ -26,40 +24,15 @@ export class TelegramComponent {
   public showPhoneNumberError: any = null;
   public showCodeError: any = null;
 
+  public uploadFrequencyList = [4, 6, 8, 12, 24];
   public selectedFrequency: WritableSignal<number>;
-  public uploadFrequencyList: WritableSignal<Array<number>>;
   public isUploadAllChats: WritableSignal<boolean>;
   public isBackgroundTaskEnabled: WritableSignal<boolean>;
-  // public lastSubmissionTime: WritableSignal<Date | null>;
-  // public nextSubmissionTime: WritableSignal<Date | null>;
-
-  // public get lastSubmissionTimeString(): string {
-  //   if (this.lastSubmissionTime()) {
-  //     const lastSubmissionDate = new Date(this.lastSubmissionTime()!);
-  //     return lastSubmissionDate.toLocaleTimeString();
-  //   }
-  //   else {
-  //     return '';
-  //   }
-  // }
-
-  // public get nextSubmissionTimeString(): string {
-  //   if (this.nextSubmissionTime()) {
-  //     const nextSubmissionDate = new Date(this.nextSubmissionTime()!);
-  //     return nextSubmissionDate.toLocaleTimeString();
-  //   }
-  //   else {
-  //     return '';
-  //   }
-  // }
 
   constructor() {
-    this.uploadFrequencyList = this.electronIpcService.uploadFrequencyList;
     this.selectedFrequency = this.electronIpcService.uploadFrequency;
     this.isUploadAllChats = this.electronIpcService.isUploadAllChats;
     this.isBackgroundTaskEnabled = this.electronIpcService.isBackgroundTaskEnabled;
-    // this.lastSubmissionTime = this.electronIpcService.lastSubmissionTime;
-    // this.nextSubmissionTime = this.electronIpcService.nextSubmissionTime;
   }
 
   // public ngAfterViewInit(): void {
@@ -94,7 +67,6 @@ export class TelegramComponent {
     const loginSuccess: boolean = await this.telegramApiService.clientStartHandler(this.phoneNumber, this.authCode);
     if (loginSuccess) {
       console.log('Login success');
-      await this.telegramApiService.getDialogs();
       this.telegramApiService.initialisePreSelectedDialogs();
       this.showAuthCodeInput = false;
       this.showCodeError = false;
@@ -108,25 +80,9 @@ export class TelegramComponent {
     this.showAuthCodeInput = false;
   }
 
-  // public startBackgroundTask() {
-  //   if (this.telegramApiService.selectedDialogsList().length > 0) {
-  //     this.electronIpcService.startBackgroundTask();
-  //   }
-  //   else {
-  //     this.snackBar.open(
-  //       `Select at least one chat`,
-  //       `OK`,
-  //       { duration: 1000 * 2 }
-  //     );
-  //   }
-  // }
-
-  // public stopBackgroundTask() {
-  //   this.electronIpcService.stopBackgroundTask();
-  // }
-
   public selectFrequency(freqItem: number) {
-    this.selectedFrequency.set(freqItem);
+    this.electronIpcService.setUploadFrequency(freqItem);
+    this.electronIpcService.updateNextSubmissionTime();
   }
 
   public onUploadAllChatsChange(matSlideToggleChange: MatSlideToggleChange) {

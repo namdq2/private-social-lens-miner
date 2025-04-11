@@ -15,8 +15,7 @@ export default class App {
   static BrowserWindow;
   static tray: Electron.Tray | null = null;
 
-  static readonly uploadIntervalHours = 4;
-  static backgroundTaskInterval: NodeJS.Timeout | null = null; // Store the interval ID
+  static backgroundTaskInterval: NodeJS.Timer | null = null; // Store the interval ID
 
   static walletAddress = '';
   static encryptionKey = '';
@@ -27,6 +26,7 @@ export default class App {
   static nextSubmissionTime = null;
   static enableAutoLaunch = true;
   static minimizeToTray = true;
+  static uploadFrequency = 4;
 
   public static isDevelopmentMode() {
     const isEnvironmentSet: boolean = 'ELECTRON_IS_DEV' in process.env;
@@ -64,11 +64,13 @@ export default class App {
     App.walletAddress = store.get('walletAddress');
     App.encryptionKey = store.get('encryptionKey');
     App.uploadAllChats = store.get('uploadAllChats');
+    App.selectedChatIdsList = store.get('selectedChatIdsList');
     App.enableBackgroundTask = store.get('enableBackgroundTask');
     App.lastSubmissionTime = store.get('lastSubmissionTime');
     App.nextSubmissionTime = store.get('nextSubmissionTime');
     App.enableAutoLaunch = store.get('enableAutoLaunch');
     App.minimizeToTray = store.get('minimizeToTray');
+    App.uploadFrequency = store.get('uploadFrequency');
 
     if (rendererAppName) {
       App.initMainWindow();
@@ -189,7 +191,7 @@ export default class App {
   }
 
   private static startBackgroundTask() {
-    const interval = (1000 * 60 * 30) + (30 * 1000); // 30m 30s
+    const interval = (1000 * 60 * 10);
 
     // Clear any existing interval
     if (App.backgroundTaskInterval) {
@@ -199,28 +201,32 @@ export default class App {
     // Run the task immediately
     if (App.enableBackgroundTask && App.mainWindow) {
       console.log('Background task running immediately...');
-      App.mainWindow.webContents.send('execute-background-task-code', 'main process initiating background task immediate execution');
+      App.sendBackgroundTaskMessage('main process initiating background task immediate execution');
     }
 
     // Start a new interval
     App.backgroundTaskInterval = setInterval(() => {
       if (App.enableBackgroundTask && App.mainWindow) {
         console.log('Background task running...');
-        const currentDate = new Date();
-        console.log('currentDate', currentDate);
-        const nextSubmissionDate = new Date(App.nextSubmissionTime);
-        console.log('App.nextSubmissionTime', App.nextSubmissionTime);
-
-        if (!App.nextSubmissionTime || currentDate > nextSubmissionDate) {
-          // Send a message to the render/UI process to execute code
-          App.mainWindow.webContents.send('execute-background-task-code', 'main process initiating background task interval execution');
-        }
-        else {
-          console.log('main process: background task skipped, next submission time not reached');
-        }
-
+        App.sendBackgroundTaskMessage('main process initiating background task interval execution');
       }
     }, interval);
+  }
+
+  private static sendBackgroundTaskMessage(message: string) {
+    const currentDate = new Date();
+    const nextSubmissionDate = new Date(App.nextSubmissionTime);
+
+    console.log('currentDate', currentDate);
+    console.log('App.nextSubmissionTime', App.nextSubmissionTime);
+
+    if (!App.nextSubmissionTime || currentDate > nextSubmissionDate) {
+      // Send a message to the render/UI process to execute code
+      App.mainWindow.webContents.send('execute-background-task-code', message);
+    }
+    else {
+      console.log('main process: background task skipped, next submission time not reached');
+    }
   }
 
   static main(app: Electron.App, browserWindow: typeof BrowserWindow) {
@@ -340,9 +346,23 @@ export default class App {
       return App.minimizeToTray;
     });
 
-    app.on('will-quit', () => {
-      App.enableBackgroundTask = false;
-      store.set('enableBackgroundTask', false);
+    ipcMain.handle('get-background-task-interval-exists', () => {
+      return !!App.backgroundTaskInterval;
     });
+
+    ipcMain.on('set-upload-frequency', (event, value) => {
+      App.uploadFrequency = value;
+      store.set('uploadFrequency', value);
+      console.log('main process: set-upload-frequency:', value);
+    });
+
+    ipcMain.handle('get-upload-frequency', () => {
+      return App.uploadFrequency;
+    });
+
+    // app.on('will-quit', () => {
+      // clearInterval(App.backgroundTaskInterval);
+      // App.backgroundTaskInterval = null;
+    // });
   }
 }

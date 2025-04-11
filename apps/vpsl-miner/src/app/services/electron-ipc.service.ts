@@ -1,8 +1,6 @@
 import { inject, Injectable, signal, WritableSignal } from '@angular/core';
-// import { SubmissionProcessingService } from './submission-processing.service';
 import { Web3WalletService } from './web3-wallet.service';
 import { isElectron } from '../shared/helpers';
-import { UPLOAD_INTERVAL_HOURS } from '../shared/constants';
 
 declare const window: any;
 
@@ -10,14 +8,7 @@ declare const window: any;
   providedIn: 'root',
 })
 export class ElectronIpcService {
-  // private readonly submissionProcessingService: SubmissionProcessingService = inject(SubmissionProcessingService);
   private readonly web3WalletService: Web3WalletService = inject(Web3WalletService);
-
-  // private readonly LOCAL_STORAGE_UPLOAD_All_CHATS_KEY = 'uploadAllChats';
-  // private readonly LOCAL_STORAGE_SUBMISSION_CHATS_LIST_KEY = 'submissionChatsList';
-
-  public uploadFrequencyList = signal<Array<number>>([UPLOAD_INTERVAL_HOURS]);
-  public uploadFrequency = signal<number>(UPLOAD_INTERVAL_HOURS);
 
   public walletAddress: WritableSignal<string> = this.web3WalletService.walletAddress;
   public encryptionKey: WritableSignal<string> = this.web3WalletService.encryptionKey;
@@ -29,6 +20,8 @@ export class ElectronIpcService {
   public nextSubmissionTime = signal<Date | null>(null);
   public isAutoLaunchEnabled = signal<boolean>(true);
   public minimizeToTray = signal<boolean>(true);
+  public backgroundTaskIntervalExists = signal<boolean>(false);
+  public uploadFrequency = signal<number>(4);
 
   constructor() {
     if (isElectron()) {
@@ -73,6 +66,14 @@ export class ElectronIpcService {
     console.log('init minimizeToTray', minimizeToTray);
     this.minimizeToTray.set(minimizeToTray);
 
+    const backgroundTaskIntervalExists = await window.electron.getBackgroundTaskIntervalExists();
+    console.log('init backgroundTaskIntervalExists', backgroundTaskIntervalExists);
+    this.backgroundTaskIntervalExists.set(backgroundTaskIntervalExists);
+
+    const uploadFrequency = await window.electron.getUploadFrequency();
+    console.log('init uploadFrequency', uploadFrequency);
+    this.uploadFrequency.set(uploadFrequency);
+
     await this.web3WalletService.calculateBalance();
   }
 
@@ -111,17 +112,18 @@ export class ElectronIpcService {
     const lastSubmissionDate = new Date();
     this.lastSubmissionTime.set(lastSubmissionDate);
     window.electron.setLastSubmissionTime(lastSubmissionDate);
-    this.updateNextSubmissionTime(lastSubmissionDate);
+    this.updateNextSubmissionTime();
   }
 
-  public updateNextSubmissionTime(lastSubmissionTime: Date) {
-    const nextDate = new Date();
-    // milliseconds: (4 hours * 60 min * 60 sec * 1000 ms) + (1 min * 60 sec * 1000 ms)
-    // NOTE must match app.ts in electron app
-    nextDate.setTime(lastSubmissionTime.getTime() + (UPLOAD_INTERVAL_HOURS * 60 * 60 * 1000) + (2 * 60 * 1000)); // 2h 2m
+  public updateNextSubmissionTime() {
+    const lastSubmissionTime = this.lastSubmissionTime();
+    if (lastSubmissionTime) {
+      const nextDate = new Date();
+      nextDate.setTime(new Date(lastSubmissionTime).getTime() + (this.uploadFrequency() * 60 * 60 * 1000));
 
-    this.nextSubmissionTime.set(nextDate);
-    window.electron.setNextSubmissionTime(nextDate);
+      this.nextSubmissionTime.set(nextDate);
+      window.electron.setNextSubmissionTime(nextDate);
+    }
   }
 
   public enableAutoLaunch(value: boolean) {
@@ -134,16 +136,8 @@ export class ElectronIpcService {
     window.electron.setMinimizeToTray(this.minimizeToTray());
   }
 
-  // public storeUploadFrequency(frequency: number) {
-  //   localStorage.setItem(this.LOCAL_STORAGE_UPLOAD_FREQUENCY_KEY, frequency.toString());
-  //   this.uploadFrequency.set(frequency);
-  // }
-
-  // public retrieveUploadFrequency(): number {
-  //   const storedFrequency = Number(localStorage.getItem(this.LOCAL_STORAGE_UPLOAD_FREQUENCY_KEY));
-  //   if (!isNaN(storedFrequency)) {
-  //     return storedFrequency;
-  //   }
-  //   return 0;
-  // }
+  public setUploadFrequency(value: number) {
+    this.uploadFrequency.set(value);
+    window.electron.setUploadFrequency(this.uploadFrequency());
+  }
 }
