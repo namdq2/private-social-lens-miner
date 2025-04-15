@@ -1,15 +1,17 @@
-import SquirrelEvents from './app/events/squirrel.events';
+import { app, BrowserWindow } from 'electron';
+import log from 'electron-log';
+import App from './app/app';
 import ElectronEvents from './app/events/electron.events';
 import UpdateEvents from './app/events/update.events';
-import { app, BrowserWindow } from 'electron';
-import App from './app/app';
+
+// Initialize logging
+log.transports.file.level = 'debug';
 
 export default class Main {
   static initialize() {
-    if (SquirrelEvents.handleEvents()) {
-      // squirrel event handled (except first run event) and app will exit in 1000ms, so don't do anything else
-      app.quit();
-    }
+    // No Squirrel events needed for nsis
+    log.info('Initializing application...');
+    log.info('Is packaged:', app.isPackaged);
   }
 
   static bootstrapApp() {
@@ -19,19 +21,21 @@ export default class Main {
   static bootstrapAppEvents() {
     ElectronEvents.bootstrapElectronEvents();
 
-    console.log('DEBUG: Phiên bản ứng dụng:', app.getVersion());
+    log.info('Application version:', app.getVersion());
+    log.info('App path:', app.getAppPath());
+    log.info('Develop Mode:', App.isDevelopmentMode());
 
-    // initialize auto updater service
-    if (!App.isDevelopmentMode() || process.env.TEST_UPDATE === 'true') {
-      console.log('starting updating')
+    // Initialize auto-updater in production or test mode
+    if (!App.isDevelopmentMode()) {
+      log.info('Starting auto-update service...');
       UpdateEvents.initAutoUpdateService();
+    } else {
+      log.info('Skipping auto-update in development mode');
     }
   }
 }
 
-// handle setup events as quickly as possible
+// Initialize and bootstrap app
 Main.initialize();
-
-// bootstrap app
 Main.bootstrapApp();
 Main.bootstrapAppEvents();

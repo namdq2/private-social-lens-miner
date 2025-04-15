@@ -14,13 +14,48 @@
   "build": {
     "appId": "com.electron.dfusionVpslMiner",
     "productName": "dFusion-DLP-miner",
-    "extraMetadata": {
-      "version": "0.3.0"
-    },
+    "asar": true,
     "publish": [
       {
-        "provider": "generic",
-        "url": "https://dfusionai.s3.amazonaws.com/updates"
+        "provider": "s3",
+        "bucket": "dfusionai",
+        "path": "/updates"
+      }
+    ],
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "hardenedRuntime": true,
+      "entitlements": "apps/electron/build/entitlements.mac.plist",
+      "artifactName": "${productName}-${version}.${ext}"
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "artifactName": "${productName}-${version}-${arch}.${ext}"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "executableName": "dfusion-dlp-miner",
+      "artifactName": "${productName}-${version}.${ext}",
+      "category": "Utility",
+      "description": "dFusion Private Social Lens DLP miner application."
+    },
+    "files": [
+      "dist/apps/electron/**/*",
+      "!dist/apps/electron/dev-app-update.yml"
+    ],
+    "extraResources": [
+      {
+        "from": "apps/electron/build",
+        "to": "build",
+        "filter": ["entitlements.mac.plist"]
       }
     ]
   },
