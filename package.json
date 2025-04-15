@@ -4,7 +4,8 @@
   "license": "MIT",
   "author": {
     "name": "dFusion AI",
-    "url": "https://github.com/dfusionai"
+    "url": "https://github.com/dfusionai",
+    "email": "dFusionAI@gmail.com"
   },
   "description": "dFusion Private Social Lens DLP miner application.",
   "scripts": {
@@ -13,11 +14,15 @@
   "build": {
     "appId": "com.electron.dfusionVpslMiner",
     "productName": "dFusion-DLP-miner",
-    "linux": {
-      "target": "AppImage",
-      "executableName": "dfusion-dlp-miner",
-      "artifactName": "${productName}-${version}.${ext}"
-    }
+    "extraMetadata": {
+      "version": "0.3.0"
+    },
+    "publish": [
+      {
+        "provider": "generic",
+        "url": "https://dfusionai.s3.amazonaws.com/updates"
+      }
+    ]
   },
   "private": true,
   "dependencies": {
@@ -32,7 +37,9 @@
     "@gelatonetwork/relay-sdk": "^5.6.0",
     "@toruslabs/eccrypto": "^6.0.2",
     "buffer": "^6.0.3",
+    "electron-log": "^5.3.3",
     "electron-store": "8.2",
+    "electron-updater": "^6.6.2",
     "ethers": "^6.13.5",
     "openpgp": "^6.1.0",
     "pinata-web3": "^0.5.4",

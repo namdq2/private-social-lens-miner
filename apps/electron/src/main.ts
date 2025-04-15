@@ -19,9 +19,12 @@ export default class Main {
   static bootstrapAppEvents() {
     ElectronEvents.bootstrapElectronEvents();
 
+    console.log('DEBUG: Phiên bản ứng dụng:', app.getVersion());
+
     // initialize auto updater service
-    if (!App.isDevelopmentMode()) {
-      // UpdateEvents.initAutoUpdateService();
+    if (!App.isDevelopmentMode() || process.env.TEST_UPDATE === 'true') {
+      console.log('starting updating')
+      UpdateEvents.initAutoUpdateService();
     }
   }
 }

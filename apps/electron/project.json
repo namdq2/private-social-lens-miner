@@ -57,7 +57,25 @@
         "name": "electron",
         "frontendProject": "vpsl-miner",
         "sourcePath": "dist/apps",
-        "outputPath": "dist/executables"
+        "outputPath": "dist/executables",
+        "extraMetadata": {
+          "version": "0.3.0"
+        },
+        "win": {
+          "target": "squirrel",
+          "artifactName": "${productName}-${version}-${arch}.${ext}"
+        },
+        "mac": {
+          "target": ["zip", "dmg"],
+          "artifactName": "${productName}-${version}.${ext}"
+        },
+        "linux": {
+          "target": ["AppImage", "deb"],
+          "executableName": "dfusion-dlp-miner",
+          "artifactName": "${productName}-${version}.${ext}",
+          "category": "Utility",
+          "description": "dFusion Private Social Lens DLP miner application."
+        }
       }
     },
     "lint": {
