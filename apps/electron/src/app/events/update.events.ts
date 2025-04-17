@@ -2,6 +2,7 @@ import { app, dialog, MessageBoxOptions } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import App from '../app';
+import { configureAutoUpdater } from '../config/auto-updater.config';
 
 log.transports.file.level = 'debug';
 autoUpdater.logger = log;
@@ -9,8 +10,11 @@ autoUpdater.logger = log;
 export default class UpdateEvents {
   static initAutoUpdateService() {
     log.info('Initializing auto-update service...');
-
     log.info(`Current App version: ${app.getVersion()}`);
+
+    // Configure auto-updater first
+    configureAutoUpdater();
+    log.info('Auto-updater configured');
 
     if (!app.isPackaged) {
       autoUpdater.forceDevUpdateConfig = true;
@@ -57,11 +61,13 @@ autoUpdater.on('update-downloaded', (info) => {
 
   dialog.showMessageBox(dialogOpts).then((returnValue) => {
     if (returnValue.response === 0) {
-      log.info('User clicked Restart - quitting and installing update...');
-      setImmediate(() => {
-        app.removeAllListeners('window-all-closed');
+      log.info('User clicked Restart - preparing to install update...');
+      
+      // Make sure we don't have any pending dialogs or operations
+      setTimeout(() => {
+        log.info('Installing update...');
         autoUpdater.quitAndInstall(true, true);
-      });
+      }, 500);
     } else {
       log.info('User clicked Later - deferring update');
     }

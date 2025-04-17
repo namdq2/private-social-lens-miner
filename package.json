@@ -1,7 +1,8 @@
 {
   "name": "@dfusion-ai/source",
-  "version": "0.3.0",
+  "version": "0.3.4",
   "license": "MIT",
+  "homepage": "github.com/dfusionai",
   "author": {
     "name": "dFusion AI",
     "url": "https://github.com/dfusionai",
