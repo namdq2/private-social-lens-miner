@@ -1,0 +1,19 @@
+<div class="max-w-2xl flex flex-col justify-start items-stretch gap-y-8 mx-auto mt-32 pb-24">
+  <img [src]="'img/logo_vertical.svg'" class="w-auto h-32" alt="dFusion logo" />
+  @if (!isConnected) {
+  <button class="dfus-blue-btn dfus-btn-icon-group w-auto h-16" (click)="connectWallet()">Continue</button>
+  <button class="dfus-blue-btn dfus-btn-icon-group w-auto h-16" (click)="goBack()">Back</button>
+  } @else {
+  <div class="connected-wallet">
+    <h3>Connected Wallet</h3>
+    <p>Address: {{ existingWalletService.walletAddress() }}</p>
+    <div class="mt-10">
+      <span>Please choose "Sign Message" button for get signature to continue</span>
+    </div>
+    <div class="flex flex-row gap-x-12 mt-5">
+      <button class="dfus-blue-btn dfus-btn-icon-group w-auto h-16" (click)="signMessage()">Sign Message</button>
+      <button class="dfus-blue-btn dfus-btn-icon-group w-auto h-16" (click)="goBack()">Back</button>
+    </div>
+  </div>
+  }
+</div>

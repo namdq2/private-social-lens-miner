@@ -1,6 +1,7 @@
-import { inject, Injectable, signal, WritableSignal } from '@angular/core';
-import { Web3WalletService } from './web3-wallet.service';
+import { forwardRef, inject, Injectable, signal, WritableSignal } from '@angular/core';
+import { WalletType } from '../models/wallet';
 import { isElectron } from '../shared/helpers';
+import { Web3WalletService } from './web3-wallet.service';
 
 declare const window: any;
 
@@ -8,10 +9,11 @@ declare const window: any;
   providedIn: 'root',
 })
 export class ElectronIpcService {
-  private readonly web3WalletService: Web3WalletService = inject(Web3WalletService);
+  private readonly web3WalletService: Web3WalletService = inject(forwardRef(() => Web3WalletService));
 
   public walletAddress: WritableSignal<string> = this.web3WalletService.walletAddress;
   public encryptionKey: WritableSignal<string> = this.web3WalletService.encryptionKey;
+  public walletType: WritableSignal<WalletType | null> = signal<WalletType | null>(null);
 
   public isUploadAllChats = signal<boolean>(true);
   public selectedChatIdsList = signal<Array<number>>([]);
@@ -119,7 +121,7 @@ export class ElectronIpcService {
     const lastSubmissionTime = this.lastSubmissionTime();
     if (lastSubmissionTime) {
       const nextDate = new Date();
-      nextDate.setTime(new Date(lastSubmissionTime).getTime() + (this.uploadFrequency() * 60 * 60 * 1000));
+      nextDate.setTime(new Date(lastSubmissionTime).getTime() + this.uploadFrequency() * 60 * 60 * 1000);
 
       this.nextSubmissionTime.set(nextDate);
       window.electron.setNextSubmissionTime(nextDate);
@@ -139,5 +141,35 @@ export class ElectronIpcService {
   public setUploadFrequency(value: number) {
     this.uploadFrequency.set(value);
     window.electron.setUploadFrequency(this.uploadFrequency());
+  }
+
+  public async switchWallet(): Promise<void> {
+    if (this.walletType() === WalletType.HOT_WALLET) {
+      const confirmed = await this.showHotWalletWarning();
+      if (!confirmed) {
+        return;
+      }
+    }
+
+    await this.disconnectWallet();
+  }
+
+  private async showHotWalletWarning(): Promise<boolean> {
+    return window.confirm(
+      'Warning: If you switch from hot wallet, you will need your recovery phrase to access it again. ' +
+        'Make sure you have saved your recovery phrase before proceeding. Continue?',
+    );
+  }
+
+  public disconnectWallet() {
+    try {
+      this.walletAddress.set('');
+      this.encryptionKey.set('');
+      this.walletType.set(null);
+      window.electron.setWalletAddress(this.walletAddress());
+      window.electron.setEncryptionKey(this.encryptionKey());
+    } catch (error) {
+      console.error('Error disconnecting wallet:', error);
+    }
   }
 }

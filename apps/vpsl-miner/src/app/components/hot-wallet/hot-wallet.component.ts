@@ -6,12 +6,12 @@ import { Web3WalletService } from '../../services/web3-wallet.service';
 import { ENCRYPTION_SEED } from '../../shared/constants';
 
 @Component({
-  selector: 'app-home',
+  selector: 'app-hot-wallet',
   standalone: false,
-  templateUrl: './home.component.html',
-  styleUrl: './home.component.scss',
+  templateUrl: './hot-wallet.component.html',
+  styleUrl: './hot-wallet.component.scss',
 })
-export class HomeComponent {
+export class HotWalletComponent {
 
   private readonly electronIpcService: ElectronIpcService = inject(ElectronIpcService);
   private readonly web3WalletService: Web3WalletService = inject(Web3WalletService);
