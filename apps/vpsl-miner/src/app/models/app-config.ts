@@ -50,4 +50,6 @@ export interface IGelato {
 
 export interface IReownAppkit {
   projectId: string;
+  domain: string;
+  icon: string;
 }

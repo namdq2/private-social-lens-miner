@@ -2,6 +2,8 @@ import { Component, effect, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ElectronIpcService } from '../../services/electron-ipc.service';
 import { WalletType } from '../../models/wallet';
+import { ExistingWalletService } from '../../services/existing-wallet.service';
+import { Web3WalletService } from '../../services/web3-wallet.service';
 
 @Component({
   selector: 'app-wallet-connection',
@@ -12,13 +14,15 @@ import { WalletType } from '../../models/wallet';
 export class WalletConnectionComponent {
   private readonly router: Router = inject(Router);
   private readonly electronIpcService: ElectronIpcService = inject(ElectronIpcService);
+  private readonly existingWalletService: ExistingWalletService = inject(ExistingWalletService);
+  private readonly web3WalletService: any = inject(Web3WalletService);
 
   constructor() {
-    effect(() => {
+    effect(async () => {
       const validWalletAddress = this.electronIpcService.walletAddress();
       const validEncryptionKey = this.electronIpcService.encryptionKey();
-
       if (validWalletAddress && validEncryptionKey) {
+        await this.web3WalletService.calculateBalance();
         this.router.navigate(['app/miner']);
       } else {
         this.router.navigate(['']);
@@ -33,6 +37,6 @@ export class WalletConnectionComponent {
 
   connectExternalWallet() {
     this.electronIpcService.walletType.set(WalletType.EXISTING_WALLET);
-    this.router.navigate(['existing-wallet']);
+    this.existingWalletService.connectWallet();
   }
 }

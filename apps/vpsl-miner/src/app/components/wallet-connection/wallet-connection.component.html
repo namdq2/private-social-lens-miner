@@ -1,8 +1,22 @@
 <div class="max-w-2xl flex flex-col justify-start items-stretch gap-y-8 mx-auto mt-32 pb-24">
   <img [src]="'img/logo_vertical.svg'" class="w-auto h-32" alt="dFusion logo" />
-  <h2>Wallet Connection Options</h2>
-  <div class="flex flex-col gap-y-4">
-    <button class="dfus-blue-btn dfus-btn-icon-group w-full h-16" (click)="createHotWallet()">Create a Hot Wallet</button>
-    <button class="dfus-blue-btn dfus-btn-icon-group w-full h-16" (click)="connectExternalWallet()">Connect an Existing Wallet</button>
+  <div class="w-full flex flex-col justify-start items-stretch gap-y-8 text-center">
+    <!-- <img [src]="'img/logo_vertical.svg'" class="w-auto h-32" alt="dFusion logo" /> -->
+
+    <div class="flex flex-col justify-start items-center">
+      <p class="text-[#848689]">This Application will run in the background and automatically complete the tasks you wish to run, earning you $VFSN tokens.</p>
+    </div>
+
+    <div class="flex flex-col justify-start items-center">
+      <h1>Welcome to the</h1>
+      <h1 class="text-[#FB9C2D]">dFusion DLP Miner</h1>
+    </div>
+  </div>
+
+  <div class="w-full flex flex-col justify-start items-center gap-y-4 mt-12">
+    <span>Get started by connecting your wallet</span>
+    <button class="dfus-blue-btn dfus-btn-icon-group w-full h-16" (click)="connectExternalWallet()">Connect Your Wallet</button>
+    <span>Alternatively, set up a hot wallet</span>
+    <button class="dfus-blue-btn dfus-btn-icon-group w-full h-16" (click)="createHotWallet()">Create Hot Wallet</button>
   </div>
 </div>

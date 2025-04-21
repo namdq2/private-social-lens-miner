@@ -2,6 +2,8 @@ import { forwardRef, inject, Injectable, signal, WritableSignal } from '@angular
 import { WalletType } from '../models/wallet';
 import { isElectron } from '../shared/helpers';
 import { Web3WalletService } from './web3-wallet.service';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmWalletDialogComponent } from '../components/confirm-wallet-dialog/confirm-wallet-dialog.component';
 
 declare const window: any;
 
@@ -10,6 +12,7 @@ declare const window: any;
 })
 export class ElectronIpcService {
   private readonly web3WalletService: Web3WalletService = inject(forwardRef(() => Web3WalletService));
+  private readonly matDialog: MatDialog = inject(MatDialog);
 
   public walletAddress: WritableSignal<string> = this.web3WalletService.walletAddress;
   public encryptionKey: WritableSignal<string> = this.web3WalletService.encryptionKey;
@@ -24,6 +27,7 @@ export class ElectronIpcService {
   public minimizeToTray = signal<boolean>(true);
   public backgroundTaskIntervalExists = signal<boolean>(false);
   public uploadFrequency = signal<number>(4);
+  public isConfirmDisconnectWallet = signal<boolean>(false);
 
   constructor() {
     if (isElectron()) {
@@ -145,20 +149,20 @@ export class ElectronIpcService {
 
   public async switchWallet(): Promise<void> {
     if (this.walletType() === WalletType.HOT_WALLET) {
-      const confirmed = await this.showHotWalletWarning();
-      if (!confirmed) {
-        return;
-      }
+      const dialogRef = this.matDialog.open(ConfirmWalletDialogComponent, {
+        data: null,
+        disableClose: true,
+      });
+
+      dialogRef.afterClosed().subscribe(async (result: any) => {
+        if (result) {
+          await this.disconnectWallet();
+          this.isConfirmDisconnectWallet.set(true);
+        }
+      });
+      return;
     }
-
     await this.disconnectWallet();
-  }
-
-  private async showHotWalletWarning(): Promise<boolean> {
-    return window.confirm(
-      'Warning: If you switch from hot wallet, you will need your recovery phrase to access it again. ' +
-        'Make sure you have saved your recovery phrase before proceeding. Continue?',
-    );
   }
 
   public disconnectWallet() {

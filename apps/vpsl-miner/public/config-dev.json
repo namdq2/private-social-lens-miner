@@ -33,6 +33,8 @@
     "apiKey": "i851bh80pHB4FI55cmAHb3OZW3qGe_zvn3UZGr7PY58_"
   },
   "reownAppkit": {
-    "projectId": "b56e18d47c72ab683b10814fe9495694"
+    "projectId": "b5ca679f8742229883b5fc1de5972536",
+    "domain": "https://dfusion-mocha.vercel.app",
+    "icon": "https://dfusion-mocha.vercel.app/favicon.ico"
   }
 }

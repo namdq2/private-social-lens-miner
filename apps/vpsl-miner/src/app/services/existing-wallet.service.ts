@@ -18,6 +18,13 @@ export class ExistingWalletService {
     return this.appConfigService.reownAppkit?.projectId || '';
   }
 
+  public get domain() {
+    return this.appConfigService.reownAppkit?.domain || '';
+  }
+  public get icon() {
+    return this.appConfigService.reownAppkit?.icon || '';
+  }
+
   private reownAppKit: any;
   private eip155Provider: any;
   private connectionWatcherInterval: any;
@@ -36,9 +43,16 @@ export class ExistingWalletService {
   }
 
   private async initializeAppKit() {
+    const metadata = {
+      name: 'dfusion',
+      description: 'AppKit Example',
+      url: this.domain,
+      icons: [this.icon]
+    }
     this.reownAppKit = await createAppKit({
       adapters: [this.wagmiAdapter],
       networks: [arbitrum, ...this.networks.slice(1)],
+      metadata,
       projectId: this.projectId,
       themeMode: 'light',
       themeVariables: {
@@ -77,7 +91,14 @@ export class ExistingWalletService {
         this.isConnected.set(true);
         const address = await this.reownAppKit.getAddress();
         this.walletAddress.set(address);
+        this.electronIpcService.setWalletAddress(address);
+        if (!this.encryptionKey()) {
+          const signature = await this.signMessage();
+          this.encryptionKey.set(signature);
+          this.electronIpcService.setEncryptionKey(signature);
+        }
       } else {
+        console.log("Connection lost");
         this.isConnected.set(false);
         this.walletAddress.set('');
       }
@@ -94,7 +115,6 @@ export class ExistingWalletService {
     try {
       await this.reownAppKit?.disconnect();
       this.eip155Provider = null;
-      this.electronIpcService.walletType.set(null);
       this.isConnected.set(false);
       this.walletAddress.set('');
       this.encryptionKey.set('');
@@ -104,14 +124,16 @@ export class ExistingWalletService {
     }
   }
 
-  public signMessage() {
+  public async signMessage() {
     const walletAddress = this.walletAddress();
     if (!walletAddress) {
       throw new Error('The wallet address does not exist');
     }
-    return this.eip155Provider.request({
+    const signature = await this.eip155Provider.request({
       method: 'personal_sign',
       params: [ENCRYPTION_SEED, walletAddress],
     });
+
+    return signature;
   }
 }

@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, effect, inject, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { ElectronIpcService } from '../../services/electron-ipc.service';
 import { Web3WalletService } from '../../services/web3-wallet.service';
@@ -24,6 +24,17 @@ export class WalletComponent implements OnInit {
 
   public dlpTokenVanaScanUrl = this.web3WalletService.dlpTokenVanaScanUrl;
 
+  constructor() {
+    effect(async () => {
+      const isConfirmDisconnectWallet = this.electronIpcService.isConfirmDisconnectWallet();
+      if (isConfirmDisconnectWallet) {
+        this.web3WalletService.disconnectWallet();
+        this.existingWalletService.disconnectWallet();
+        this.router.navigate(['']);
+      }
+    });
+  }
+
   public async ngOnInit() {
     this.dlpTokenAmount = this.web3WalletService.dlpTokenAmount;
     this.vanaTokenAmount = this.web3WalletService.vanaTokenAmount;
@@ -32,10 +43,14 @@ export class WalletComponent implements OnInit {
     // await this.web3WalletService.calculateBalance();
   }
 
-  disconnectWallet() {
-    this.electronIpcService.switchWallet();
-    this.web3WalletService.disconnectWallet();
-    this.existingWalletService.disconnectWallet();
-    this.router.navigate(['']);
+  async disconnectWallet() {
+    if (this.walletType() === WalletType.HOT_WALLET) {
+      this.electronIpcService.switchWallet();
+    } else {
+      await this.electronIpcService.switchWallet();
+      this.web3WalletService.disconnectWallet();
+      this.existingWalletService.disconnectWallet();
+      this.router.navigate(['']);
+    }
   }
 }

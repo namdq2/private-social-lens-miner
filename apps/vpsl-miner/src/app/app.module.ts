@@ -1,3 +1,4 @@
+import { ConfirmWalletDialogComponent } from './components/confirm-wallet-dialog/confirm-wallet-dialog.component';
 import { NgOptimizedImage } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { APP_INITIALIZER, NgModule } from '@angular/core';
@@ -33,7 +34,6 @@ import { WalletComponent } from './components/wallet/wallet.component';
 import { PhoneInputDirective } from './directives/phone-input.directive';
 import { AppConfigService } from './services/app-config.service';
 import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
-import { ExistingWalletComponent } from './components/existing-wallet/existing-wallet.component';
 
 @NgModule({
   schemas: [
@@ -58,7 +58,7 @@ import { ExistingWalletComponent } from './components/existing-wallet/existing-w
     SubmissionProcessingComponent,
     MinerSettingsComponent,
     ConfirmDialogComponent,
-    ExistingWalletComponent,
+    ConfirmWalletDialogComponent,
   ],
   imports: [
     BrowserModule,
