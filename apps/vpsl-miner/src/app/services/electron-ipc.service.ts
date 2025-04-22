@@ -22,6 +22,7 @@ export class ElectronIpcService {
   public minimizeToTray = signal<boolean>(true);
   public backgroundTaskIntervalExists = signal<boolean>(false);
   public uploadFrequency = signal<number>(4);
+  public appVersion = signal<string>('');
 
   constructor() {
     if (isElectron()) {
@@ -73,6 +74,10 @@ export class ElectronIpcService {
     const uploadFrequency = await window.electron.getUploadFrequency();
     console.log('init uploadFrequency', uploadFrequency);
     this.uploadFrequency.set(uploadFrequency);
+
+    const version = await window.electron.getAppVersion();
+    console.log('init appVersion', version);
+    this.appVersion.set(version);
 
     await this.web3WalletService.calculateBalance();
   }
@@ -139,5 +144,14 @@ export class ElectronIpcService {
   public setUploadFrequency(value: number) {
     this.uploadFrequency.set(value);
     window.electron.setUploadFrequency(this.uploadFrequency());
+  }
+
+  public async getAppVersion(): Promise<string> {
+    if (isElectron()) {
+      const version = await window.electron.getAppVersion();
+      this.appVersion.set(version);
+      return version;
+    }
+    return '';
   }
 }

@@ -1,4 +1,4 @@
-import { Component, effect, inject } from '@angular/core';
+import { Component, effect, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ethers } from "ethers";
 import { ElectronIpcService } from '../../services/electron-ipc.service';
@@ -11,13 +11,14 @@ import { ENCRYPTION_SEED } from '../../shared/constants';
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
 })
-export class HomeComponent {
+export class HomeComponent implements OnInit {
 
   private readonly electronIpcService: ElectronIpcService = inject(ElectronIpcService);
   private readonly web3WalletService: Web3WalletService = inject(Web3WalletService);
   private readonly router: Router = inject(Router);
 
   public requiresWalletSetup = true;
+  public appVersion = '';
 
   public readonly validWalletAndEncryptionKey = effect(() => {
     const validWalletAddress = this.electronIpcService.walletAddress();
@@ -49,6 +50,10 @@ export class HomeComponent {
   public hasUserAgreed = false;
 
   constructor() { }
+
+  ngOnInit() {
+    this.appVersion = this.electronIpcService.appVersion() || '';
+  }
 
   public onNextClick() {
     if (this.requiresWalletSetup) {
