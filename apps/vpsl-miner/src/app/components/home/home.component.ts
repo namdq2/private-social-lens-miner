@@ -18,7 +18,6 @@ export class HomeComponent implements OnInit {
   private readonly router: Router = inject(Router);
 
   public requiresWalletSetup = true;
-  public appVersion = '';
 
   public readonly validWalletAndEncryptionKey = effect(() => {
     const validWalletAddress = this.electronIpcService.walletAddress();
@@ -51,8 +50,12 @@ export class HomeComponent implements OnInit {
 
   constructor() { }
 
-  ngOnInit() {
-    this.appVersion = this.electronIpcService.appVersion() || '';
+  async ngOnInit() {
+    await this.electronIpcService.getAppVersion();
+  }
+
+  get appVersion(): string {
+    return this.electronIpcService.appVersion();
   }
 
   public onNextClick() {
