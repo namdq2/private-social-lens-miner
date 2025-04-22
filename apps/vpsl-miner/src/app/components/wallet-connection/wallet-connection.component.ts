@@ -37,6 +37,7 @@ export class WalletConnectionComponent {
 
   connectExternalWallet() {
     this.electronIpcService.walletType.set(WalletType.EXISTING_WALLET);
+    this.existingWalletService.walletType.set(WalletType.EXISTING_WALLET);
     this.existingWalletService.connectWallet();
   }
 }

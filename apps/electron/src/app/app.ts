@@ -1,9 +1,11 @@
 import { BrowserWindow, ipcMain, Menu, nativeImage, screen, shell, Tray } from 'electron';
 import * as Store from 'electron-store';
-import { join } from 'path';
+import { extname, join } from 'path';
 import { format } from 'url';
 import { environment } from '../environments/environment';
 import { rendererAppName, rendererAppPort } from './constants';
+import * as http from 'http'
+import * as fs from 'fs'
 
 const store = new Store() as any;
 
@@ -28,6 +30,53 @@ export default class App {
   static minimizeToTray = true;
   static uploadFrequency = 4;
 
+  // Create server local
+  static localServer: http.Server
+
+  private static createLocalServer() {
+    return new Promise<number>((resolve) => {
+      const server = http.createServer((req, res) => {
+        let filePath = join(__dirname, '..', rendererAppName, req.url || 'index.html')
+
+        fs.stat(filePath, (err, stats) => {
+          if (err || !stats.isFile()) {
+            filePath = join(__dirname, '..', rendererAppName, 'index.html')
+          }
+
+          fs.readFile(filePath, (err, data) => {
+            if (err) {
+              res.writeHead(404)
+              res.end()
+              return
+            }
+
+            const ext = extname(filePath)
+            const contentType = {
+              '.html': 'text/html',
+              '.js': 'text/javascript',
+              '.css': 'text/css',
+              '.json': 'application/json',
+              '.png': 'image/png',
+              '.jpg': 'image/jpeg',
+              '.gif': 'image/gif',
+              '.svg': 'image/svg+xml',
+              '.ico': 'image/x-icon'
+            }[ext] || 'text/plain'
+
+            res.writeHead(200, { 'Content-Type': contentType })
+            res.end(data)
+          })
+        })
+      })
+
+      server.listen(0, () => {
+        const port = (server.address() as any).port
+        App.localServer = server
+        resolve(port)
+      })
+    })
+  }
+
   public static isDevelopmentMode() {
     const isEnvironmentSet: boolean = 'ELECTRON_IS_DEV' in process.env;
     const getFromEnvironment: boolean = parseInt(process.env.ELECTRON_IS_DEV, 10) === 1;
@@ -36,6 +85,9 @@ export default class App {
   }
 
   private static onWindowAllClosed() {
+    if (App.localServer) {
+      App.localServer.close();
+    }
     if (process.platform !== 'darwin') {
       App.application.quit();
     }
@@ -139,19 +191,14 @@ export default class App {
     App.createTray();
   }
 
-  private static loadMainWindow() {
+  private static async loadMainWindow() {
     // load the index.html of the app.
     if (!App.application.isPackaged) {
       App.mainWindow.loadURL(`http://localhost:${rendererAppPort}`);
       App.mainWindow.webContents.openDevTools();
     } else {
-      App.mainWindow.loadURL(
-        format({
-          pathname: join(__dirname, '..', rendererAppName, 'index.html'),
-          protocol: 'file:',
-          slashes: true,
-        }),
-      );
+      const port = await App.createLocalServer();
+      App.mainWindow.loadURL(`http://localhost:${port}`);
     }
   }
 
