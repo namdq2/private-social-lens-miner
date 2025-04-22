@@ -32,6 +32,60 @@ To create the executables (windows .exe, mac .dmg, ...), run:
 npx nx run electron:make
 ```
 
+## macOS Code Signing
+
+To distribute your app on macOS, you'll need to code sign and notarize it. Follow these steps:
+
+### Prerequisites
+
+1. An active Apple Developer account
+2. Apple Developer ID certificate
+3. App-specific password for your Apple ID
+
+### Configuration
+
+1. Get your Developer ID certificate from Apple Developer Portal
+2. Find your Team ID in the Apple Developer Portal (Membership details)
+3. Update the `package.json` file with your signing details:
+
+```json
+"mac": {
+  "hardenedRuntime": true,
+  "gatekeeperAssess": false,
+  "entitlements": "apps/electron/build/entitlements.mac.plist",
+  "entitlementsInherit": "apps/electron/build/entitlements.mac.plist",
+  "identity": "Developer ID Application: Your Company Name (YOUR_TEAM_ID)",
+  "notarize": {
+    "teamId": "YOUR_TEAM_ID"
+  }
+}
+```
+
+4. Set up environment variables for notarization:
+
+```sh
+export APPLE_ID=your.apple.id@example.com
+export APPLE_APP_SPECIFIC_PASSWORD=xxxx-xxxx-xxxx-xxxx
+```
+
+5. Build the application with code signing:
+
+```sh
+export APPLE_ID="your.apple.id@example.com"
+export APPLE_APP_SPECIFIC_PASSWORD="xxxx-xxxx-xxxx-xxxx"
+export APPLE_TEAM_ID="xxxxxxxx"
+export CSC_LINK="~/Keys/certificate.p12"
+export CSC_KEY_PASSWORD="xxxxxxxxxxxx"
+npx nx package electron
+npx nx make electron
+```
+
+### Troubleshooting
+
+- If code signing fails, check your certificate is valid and accessible in Keychain Access
+- Ensure the entitlements file has the correct permissions configured
+- For notarization issues, check Apple's developer documentation or logs
+
 <a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
 
 [Learn more about this workspace setup and its capabilities](https://nx.dev/getting-started/tutorials/angular-monorepo-tutorial?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!

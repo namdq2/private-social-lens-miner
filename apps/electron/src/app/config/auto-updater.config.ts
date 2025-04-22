@@ -9,6 +9,11 @@ export function configureAutoUpdater() {
   // Configure auto-updater
   autoUpdater.autoDownload = true;
   autoUpdater.autoInstallOnAppQuit = true;
+
+  autoUpdater.allowPrerelease = true;
+  autoUpdater.disableWebInstaller = false;
+  // This is important - allows updates with different signature
+  autoUpdater.allowDowngrade = true; 
   
   // Set update server URL if needed
   autoUpdater.setFeedURL({

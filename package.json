@@ -1,6 +1,6 @@
 {
   "name": "@dfusion-ai/source",
-  "version": "0.3.4",
+  "version": "0.3.6",
   "license": "MIT",
   "homepage": "github.com/dfusionai",
   "author": {
@@ -24,19 +24,38 @@
       }
     ],
     "mac": {
+      "category": "public.app-category.productivity",
       "target": [
         "dmg",
         "zip"
       ],
+      "artifactName": "${productName}-${version}.${ext}",
+      "type": "distribution",
       "hardenedRuntime": true,
       "entitlements": "apps/electron/build/entitlements.mac.plist",
-      "artifactName": "${productName}-${version}.${ext}"
+      "entitlementsInherit": "apps/electron/build/entitlements.mac.plist",
+      "gatekeeperAssess": false,
+      "notarize": true
+    },
+    "dmg": {
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
     },
     "win": {
       "target": [
         "nsis"
       ],
-      "artifactName": "${productName}-${version}-${arch}.${ext}"
+      "artifactName": "${productName}-${version}.${ext}"
     },
     "linux": {
       "target": [
