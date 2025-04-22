@@ -4,22 +4,18 @@ import { app } from 'electron';
 import { execFile } from 'child_process';
 import * as path from 'path';
 import * as fs from 'fs';
+import { environment } from '../../environments/environment';
 
 export function configureAutoUpdater() {
   // Configure auto-updater
   autoUpdater.autoDownload = true;
   autoUpdater.autoInstallOnAppQuit = true;
 
-  autoUpdater.allowPrerelease = true;
+  // Production settings
+  autoUpdater.allowPrerelease = false;
   autoUpdater.disableWebInstaller = false;
-  // This is important - allows updates with different signature
-  autoUpdater.allowDowngrade = true; 
+  autoUpdater.allowDowngrade = false;
   
-  // Set update server URL if needed
-  autoUpdater.setFeedURL({
-    provider: 's3',
-    bucket: 'dfusionai',
-    path: '/updates',
-    region: 'ap-southeast-1'
-  });
+  // Set update server URL from environment configuration
+  autoUpdater.setFeedURL(environment.updateFeed);
 } 

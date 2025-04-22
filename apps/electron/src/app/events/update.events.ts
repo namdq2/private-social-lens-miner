@@ -21,7 +21,7 @@ export default class UpdateEvents {
       log.info('Running in development mode with dev-app-update config');
     }
 
-    if (!App.isDevelopmentMode() || process.env.TEST_UPDATE === 'true') {
+    if (!App.isDevelopmentMode()) {
       UpdateEvents.checkForUpdates();
     } else {
       log.info('Skipping update check in development mode');
@@ -48,6 +48,10 @@ autoUpdater.on('update-not-available', () => {
   log.info('No updates available');
 });
 
+autoUpdater.on('download-progress', (progressObj) => {
+  log.info('Download progress:', progressObj);
+});
+
 autoUpdater.on('update-downloaded', (info) => {
   log.info('Update downloaded:', info.version);
 
@@ -62,7 +66,7 @@ autoUpdater.on('update-downloaded', (info) => {
   dialog.showMessageBox(dialogOpts).then((returnValue) => {
     if (returnValue.response === 0) {
       log.info('User clicked Restart - preparing to install update...');
-      
+
       // Make sure we don't have any pending dialogs or operations
       setTimeout(() => {
         log.info('Installing update...');

@@ -86,6 +86,36 @@ npx nx make electron
 - Ensure the entitlements file has the correct permissions configured
 - For notarization issues, check Apple's developer documentation or logs
 
+## Auto-Updater Configuration
+
+The application uses electron-updater with S3 as the update provider. The update configuration can be customized using environment variables.
+
+### Environment Variables
+
+Configure the following environment variables to customize the update feed:
+
+- `UPDATE_FEED_BUCKET`: S3 bucket name (default: 'dfusionai')
+- `UPDATE_FEED_PATH`: Path within the bucket (default: '/updates')
+- `UPDATE_FEED_REGION`: AWS region (default: 'ap-southeast-1')
+
+### Configuration Example
+
+Create a `.env` file in your project root:
+
+```sh
+UPDATE_FEED_BUCKET=your-bucket-name
+UPDATE_FEED_PATH=/your-path
+UPDATE_FEED_REGION=your-region
+```
+
+### Update Behavior
+
+The auto-updater is configured with the following settings:
+- Automatic downloads enabled
+- Updates install on application quit
+- Only stable releases are allowed (no pre-releases)
+- Downgrades are disabled for security
+
 <a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
 
 [Learn more about this workspace setup and its capabilities](https://nx.dev/getting-started/tutorials/angular-monorepo-tutorial?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
