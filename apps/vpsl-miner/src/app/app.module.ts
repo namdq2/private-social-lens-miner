@@ -34,6 +34,7 @@ import { WalletComponent } from './components/wallet/wallet.component';
 import { PhoneInputDirective } from './directives/phone-input.directive';
 import { AppConfigService } from './services/app-config.service';
 import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
+import { SignMessageWalletComponent } from './components/sign-message-wallet/sign-message-wallet.component';
 
 @NgModule({
   schemas: [
@@ -59,6 +60,7 @@ import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dial
     MinerSettingsComponent,
     ConfirmDialogComponent,
     ConfirmWalletDialogComponent,
+    SignMessageWalletComponent,
   ],
   imports: [
     BrowserModule,

@@ -2,10 +2,11 @@ import { forwardRef, inject, Injectable, signal } from '@angular/core';
 import { createAppKit } from '@reown/appkit';
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
 import { AppKitNetwork } from '@reown/appkit/networks';
-import { ElectronIpcService } from './electron-ipc.service';
 import { WalletType } from '../models/wallet';
-import { AppConfigService } from './app-config.service';
 import { ENCRYPTION_SEED } from '../shared/constants';
+import { AppConfigService } from './app-config.service';
+import { ElectronIpcService } from './electron-ipc.service';
+import { http } from 'viem';
 
 @Injectable({
   providedIn: 'root',
@@ -21,23 +22,20 @@ export class ExistingWalletService {
   public get domain() {
     return this.appConfigService.reownAppkit?.domain || '';
   }
+
   public get icon() {
     return this.appConfigService.reownAppkit?.icon || '';
   }
 
   private reownAppKit: any;
-  private eip155Provider: any;
-
+  public eip155Provider: any;
   public isConnected = signal<boolean>(false);
-  public walletAddress = signal<string>('');
-  public encryptionKey = signal<string>('');
-  public walletType = signal<WalletType | null>(null);
   public isOpenModal = signal<boolean>(false);
-  
+
   // Define Vana networks
   public vanaMainnet: AppKitNetwork = {
     id: 1480,
-    name: 'Vana Mainnet',
+    name: 'Vana',
     nativeCurrency: {
       name: 'VANA',
       symbol: 'VANA',
@@ -45,16 +43,14 @@ export class ExistingWalletService {
     },
     rpcUrls: {
       default: {
-        http: ['https://rpc.vana.org'],
-      },
-      public: {
-        http: ['https://rpc.vana.org'],
-      },
+        http: ['https://rpc.vana.org']
+      }
     },
     blockExplorers: {
       default: {
         name: 'Vana Explorer',
         url: 'https://vanascan.io',
+        apiUrl: 'https://api.vanascan.io/api',
       },
     },
   };
@@ -69,26 +65,28 @@ export class ExistingWalletService {
     },
     rpcUrls: {
       default: {
-        http: ['https://rpc.moksha.vana.org'],
-      },
-      public: {
-        http: ['https://rpc.moksha.vana.org'],
-      },
+        http: ['https://rpc.moksha.vana.org']
+      }
     },
     blockExplorers: {
       default: {
         name: 'Vana Moksha Explorer',
         url: 'https://moksha.vanascan.io',
+        apiUrl: 'https://api.moksha.vanascan.io/api',
       },
     },
     testnet: true,
   };
 
   public networks = [this.vanaMainnet, this.vanaMokshaTestnet];
-  
+
   public wagmiAdapter = new WagmiAdapter({
     projectId: this.projectId,
     networks: this.networks,
+    transports: {
+      [this.vanaMainnet.id]: http('https://rpc.vana.org'),
+      [this.vanaMokshaTestnet.id]: http('https://rpc.moksha.vana.org')
+    }
   });
 
   constructor() {
@@ -121,59 +119,44 @@ export class ExistingWalletService {
     });
 
     // Subscribe events
-    this.reownAppKit.subscribeProviders(async (state: any) => {
+    this.reownAppKit.subscribeProviders((state: any) => {
       this.eip155Provider = state['eip155'];
 
-      const isConnected = await this.reownAppKit.getIsConnectedState();
+      const isConnected = this?.reownAppKit?.getIsConnectedState() || false;
       this.isConnected.set(isConnected);
-      if (isConnected && !this.isOpenModal()) {
+      if (isConnected) {
         try {
           this.isOpenModal.set(true);
-          const address = await this.reownAppKit.getAddress();
-          this.walletAddress.set(address);
+          const address = this.reownAppKit.getAddress();
           this.electronIpcService.setWalletAddress(address);
-
-          if (!this.encryptionKey()) {
-            const signature = await this.signMessage();
-            this.encryptionKey.set(signature);
-            this.electronIpcService.setEncryptionKey(signature);
-          }
         } catch (error) {
-          console.log("Save data connected wallet error: ", error);
+          console.log('Save data connected wallet error: ', error);
         }
       }
     });
   }
 
-  public async connectWallet(): Promise<void> {
-    if (this.walletType() === WalletType.EXISTING_WALLET && !this.isOpenModal()) {
-      await this.reownAppKit.open();
-    }
-
-    const isConnected = this.isConnected();
-    if (isConnected && !this.encryptionKey()) {
-      const signature = await this.signMessage();
-      this.encryptionKey.set(signature);
-      this.electronIpcService.setEncryptionKey(signature);
+  public connectWallet(walletType: WalletType) {
+    if (walletType === WalletType.EXISTING_WALLET && !this.isOpenModal()) {
+      this.reownAppKit.open();
     }
   }
 
-  public async disconnectWallet(): Promise<void> {
+  public async disconnectWallet() {
     try {
-      await this.reownAppKit?.disconnect();
+      if (this.reownAppKit) {
+        await this.reownAppKit.disconnect();
+      }
       this.eip155Provider = null;
       this.isConnected.set(false);
       this.isOpenModal.set(false);
-      this.walletAddress.set('');
-      this.encryptionKey.set('');
       console.log('Existing Wallet disconnected');
     } catch (error) {
       console.error('Error disconnecting wallet:', error);
     }
   }
 
-  public async signMessage() {
-    const walletAddress = this.walletAddress();
+  public async signMessage(walletAddress: string) {
     if (!walletAddress) {
       throw new Error('The wallet address does not exist');
     }

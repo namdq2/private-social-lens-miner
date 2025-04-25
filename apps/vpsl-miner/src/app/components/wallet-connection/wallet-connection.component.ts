@@ -24,20 +24,27 @@ export class WalletConnectionComponent {
       if (validWalletAddress && validEncryptionKey) {
         await this.web3WalletService.calculateBalance();
         this.router.navigate(['app/miner']);
-      } else {
-        this.router.navigate(['']);
+      }
+    });
+
+    effect(async () => {
+      const walletAddress = this.electronIpcService.walletAddress();
+      const encryptionKey = this.electronIpcService.encryptionKey();
+      const walletType = this.electronIpcService.walletType();
+      const eip155Provider = this.existingWalletService.eip155Provider;
+      if (walletAddress && !encryptionKey && walletType === WalletType.EXISTING_WALLET && eip155Provider) {
+        this.router.navigate(['sign-message']);
       }
     });
   }
 
   createHotWallet() {
-    this.electronIpcService.walletType.set(WalletType.HOT_WALLET);
+    this.electronIpcService.setWalletType(WalletType.HOT_WALLET);
     this.router.navigate(['hot-wallet']);
   }
 
   connectExternalWallet() {
-    this.electronIpcService.walletType.set(WalletType.EXISTING_WALLET);
-    this.existingWalletService.walletType.set(WalletType.EXISTING_WALLET);
-    this.existingWalletService.connectWallet();
+    this.electronIpcService.setWalletType(WalletType.EXISTING_WALLET);
+    this.existingWalletService.connectWallet(WalletType.EXISTING_WALLET);
   }
 }

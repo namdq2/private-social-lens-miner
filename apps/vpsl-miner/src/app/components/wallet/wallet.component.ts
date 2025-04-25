@@ -28,9 +28,7 @@ export class WalletComponent implements OnInit {
     effect(async () => {
       const isConfirmDisconnectWallet = this.electronIpcService.isConfirmDisconnectWallet();
       if (isConfirmDisconnectWallet) {
-        this.web3WalletService.disconnectWallet();
-        this.existingWalletService.disconnectWallet();
-        this.router.navigate(['']);
+        this.disconnectWallet();
       }
     });
   }
@@ -43,14 +41,26 @@ export class WalletComponent implements OnInit {
     // await this.web3WalletService.calculateBalance();
   }
 
+  async handleDisconnectWallet() {
+    try {
+      if (this.walletType() === WalletType.HOT_WALLET) {
+        await this.electronIpcService.switchWallet();
+      } else {
+        this.disconnectWallet();
+      }
+    } catch (error) {
+      console.error('Error handle disconnecting wallet:', error);
+    }
+  }
+
   async disconnectWallet() {
-    if (this.walletType() === WalletType.HOT_WALLET) {
-      this.electronIpcService.switchWallet();
-    } else {
-      await this.electronIpcService.switchWallet();
+    try {
+      await this.existingWalletService.disconnectWallet();
       this.web3WalletService.disconnectWallet();
-      this.existingWalletService.disconnectWallet();
+      this.electronIpcService.disconnectWallet();
       this.router.navigate(['']);
+    } catch (error) {
+      console.error('Error disconnecting wallet:', error);
     }
   }
 }

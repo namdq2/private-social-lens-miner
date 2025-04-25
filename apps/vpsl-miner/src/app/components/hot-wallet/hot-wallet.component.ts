@@ -17,20 +17,17 @@ export class HotWalletComponent {
   private readonly web3WalletService: Web3WalletService = inject(Web3WalletService);
   private readonly router: Router = inject(Router);
 
-  public requiresWalletSetup = true;
 
   public readonly validWalletAndEncryptionKey = effect(() => {
     const validWalletAddress = this.electronIpcService.walletAddress();
     const validEncryptionKey = this.electronIpcService.encryptionKey();
 
-    this.requiresWalletSetup = !validWalletAddress || !validEncryptionKey;
-    if (!this.requiresWalletSetup) {
+    if (validWalletAddress && validEncryptionKey) {
       this.router.navigate(['app/miner']);
     }
-    return !this.requiresWalletSetup;
   });
 
-  public showWalletSetup = false;
+  public showWalletSetup = true;
   public showWalletGeneration = false;
   public showVerification = false;
   public showEncryptionKeyCreation = false;
@@ -49,15 +46,6 @@ export class HotWalletComponent {
   public hasUserAgreed = false;
 
   constructor() { }
-
-  public onNextClick() {
-    if (this.requiresWalletSetup) {
-      this.showWalletSetup = true;
-    }
-    else {
-      this.router.navigate(['app/miner']);
-    }
-  }
 
   public onGenerateClick() {
     if (this.hasUserAgreed) {

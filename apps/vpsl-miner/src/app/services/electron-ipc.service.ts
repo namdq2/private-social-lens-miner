@@ -28,6 +28,7 @@ export class ElectronIpcService {
   public backgroundTaskIntervalExists = signal<boolean>(false);
   public uploadFrequency = signal<number>(4);
   public isConfirmDisconnectWallet = signal<boolean>(false);
+  public telegramSession = signal<string>('');
 
   constructor() {
     if (isElectron()) {
@@ -43,6 +44,10 @@ export class ElectronIpcService {
     const encryptionKey = await window.electron.getEncryptionKey();
     console.log('init encryptionKey', encryptionKey);
     this.encryptionKey.set(encryptionKey);
+
+    const walletType = await window.electron.getWalletType();
+    console.log('init walletType', walletType);
+    this.walletType.set(walletType);
 
     const isUploadAllChats = await window.electron.getUploadAllChats();
     console.log('init isUploadAllChats', isUploadAllChats);
@@ -80,6 +85,10 @@ export class ElectronIpcService {
     console.log('init uploadFrequency', uploadFrequency);
     this.uploadFrequency.set(uploadFrequency);
 
+    const telegramSession = await window.electron.getTelegramSession();
+    console.log('init telegramSession', telegramSession);
+    this.telegramSession.set(telegramSession);
+
     await this.web3WalletService.calculateBalance();
   }
 
@@ -91,6 +100,11 @@ export class ElectronIpcService {
   public setEncryptionKey(value: string) {
     this.encryptionKey.set(value);
     window.electron.setEncryptionKey(this.encryptionKey());
+  }
+
+  public setWalletType(value: WalletType | null) {
+    this.walletType.set(value);
+    window.electron.setWalletType(this.walletType());
   }
 
   public setUploadAllChats(value: boolean) {
@@ -147,31 +161,33 @@ export class ElectronIpcService {
     window.electron.setUploadFrequency(this.uploadFrequency());
   }
 
-  public async switchWallet(): Promise<void> {
+  public setTelegramSession(value: string) {
+    this.telegramSession.set(value);
+    window.electron.setTelegramSession(this.telegramSession());
+  }
+
+  public switchWallet() {
     if (this.walletType() === WalletType.HOT_WALLET) {
       const dialogRef = this.matDialog.open(ConfirmWalletDialogComponent, {
         data: null,
         disableClose: true,
       });
 
-      dialogRef.afterClosed().subscribe(async (result: any) => {
+      dialogRef.afterClosed().subscribe((result: any) => {
         if (result) {
-          await this.disconnectWallet();
           this.isConfirmDisconnectWallet.set(true);
         }
       });
-      return;
     }
-    await this.disconnectWallet();
   }
 
-  public disconnectWallet() {
+  public async disconnectWallet() {
     try {
-      this.walletAddress.set('');
-      this.encryptionKey.set('');
-      this.walletType.set(null);
-      window.electron.setWalletAddress(this.walletAddress());
-      window.electron.setEncryptionKey(this.encryptionKey());
+      this.setWalletAddress('');
+      this.setEncryptionKey('');
+      this.setWalletType(null);
+      this.isConfirmDisconnectWallet.set(false);
+      console.log('Ipc wallet disconnected');
     } catch (error) {
       console.error('Error disconnecting wallet:', error);
     }

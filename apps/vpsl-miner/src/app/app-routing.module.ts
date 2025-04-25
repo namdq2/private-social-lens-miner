@@ -6,11 +6,16 @@ import { MinerAppContainerComponent } from './components/miner-app-container/min
 import { StakingRewardsInfoComponent } from './components/staking-rewards-info/staking-rewards-info.component';
 import { WalletConnectionComponent } from './components/wallet-connection/wallet-connection.component';
 import { authGuard } from './guards/auth.guard';
+import { SignMessageWalletComponent } from './components/sign-message-wallet/sign-message-wallet.component';
 
 const routes: Routes = [
   {
     path: '',
     component: WalletConnectionComponent,
+  },
+  {
+    path: 'sign-message',
+    component: SignMessageWalletComponent,
   },
   {
     path: 'hot-wallet',

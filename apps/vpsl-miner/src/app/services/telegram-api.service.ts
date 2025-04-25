@@ -28,7 +28,6 @@ export class TelegramApiService {
   private readonly electronIpcService: ElectronIpcService = inject(ElectronIpcService);
   private readonly web3WalletService: Web3WalletService = inject(Web3WalletService);
 
-  private readonly LOCAL_STORAGE_SESSION_KEY = 'telegram-session';
   private currentPhoneCodeHash: string = '';
 
   public SESSION = new StringSession(''); // create a new StringSession, also you can use StoreSession
@@ -51,7 +50,7 @@ export class TelegramApiService {
 
   constructor() {
     // Get session from local storage
-    const storedSession = localStorage.getItem(this.LOCAL_STORAGE_SESSION_KEY);
+    const storedSession = this.electronIpcService.telegramSession();
     this.SESSION = storedSession ? new StringSession(JSON.parse(storedSession)) : new StringSession('');
 
     // Immediately create a client using your application data
@@ -60,6 +59,7 @@ export class TelegramApiService {
     this.telegramClient.connect().then((telegramStoredSessionConnectResult: boolean) => {
       this.checkAuthorization();
     });
+
 
     // Listen for messages from the main process
     if (isElectron()) {
@@ -121,8 +121,8 @@ export class TelegramApiService {
         },
       });
 
-      // Save session to local storage
-      localStorage.setItem(this.LOCAL_STORAGE_SESSION_KEY, JSON.stringify(this.telegramClient.session.save()));
+      // Save session
+      this.electronIpcService.setTelegramSession(JSON.stringify(this.telegramClient.session.save()))
 
       await this.telegramClient.sendMessage('me', {
         message: `You're successfully logged in!`,
@@ -342,7 +342,7 @@ export class TelegramApiService {
   public async initialisePreSelectedDialogs() {
     await this.getDialogs();
 
-    if (this.electronIpcService.selectedChatIdsList().length > 0) {
+    if (this.electronIpcService.selectedChatIdsList()?.length > 0) {
       const preSelectedDialogs: Array<Dialog> = [];
       this.telegramDialogs().forEach(
         telDialog => {
