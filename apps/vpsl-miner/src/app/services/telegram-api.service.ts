@@ -224,7 +224,7 @@ export class TelegramApiService {
       return sentMessage;
     } catch (error: any) {
       console.error('Error sending message to telegram bot:', error);
-      throw new Error(error);
+      return Promise.reject(error);
     }
   }
 
