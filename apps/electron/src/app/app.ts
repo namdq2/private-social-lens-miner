@@ -64,7 +64,7 @@ export default class App {
     App.walletAddress = store.get('walletAddress');
     App.encryptionKey = store.get('encryptionKey');
     App.uploadAllChats = store.get('uploadAllChats');
-    App.selectedChatIdsList = store.get('selectedChatIdsList');
+    App.selectedChatIdsList = store.get('selectedChatIdsList') ?? [];
     App.enableBackgroundTask = store.get('enableBackgroundTask');
     App.lastSubmissionTime = store.get('lastSubmissionTime');
     App.nextSubmissionTime = store.get('nextSubmissionTime');
