@@ -38,7 +38,7 @@
   @if (!isTelegramAuthorized) {
     <div class="flex flex-1 flex-col">
       <app-telegram-signin class="h-full w-full" (sendPhoneNumber)="getAuthCode($event)" (sendAuthCode)="submitAuthCode($event)"
-        [showAuthCodeInput]="showAuthCodeInput" (editNumber)="onEditNumber()" [showPhoneNumberError]="showPhoneNumberError" [showCodeError]="showCodeError">
+        [showAuthCodeInput]="showAuthCodeInput" (editNumber)="onEditNumber()" [showPhoneNumberError]="showPhoneNumberError" [showCodeError]="showCodeError" [showTelegramError]="showTelegramError()">
       </app-telegram-signin>
     </div>
   }

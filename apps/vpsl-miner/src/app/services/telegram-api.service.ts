@@ -40,7 +40,7 @@ export class TelegramApiService {
     return this.appConfigService.telegram!.apiHash;
   }
 
-  public telegramClient = new TelegramClient(this.SESSION, this.apiId, this.apiHash, { connectionRetries: 5 });
+  public telegramClient: TelegramClient;
 
   public isAuthorized = false;
   public userId = signal<number>(-1);
@@ -48,16 +48,27 @@ export class TelegramApiService {
   public telegramDialogs = signal<TotalList<Dialog>>(new TotalList<Dialog>());
   public selectedDialogsList = signal<Array<Dialog>>([]);
 
+  public showTelegramError = signal<boolean>(false);
+
   constructor() {
     // Get session from local storage
     const storedSession = this.electronIpcService.telegramSession();
     this.SESSION = storedSession ? new StringSession(JSON.parse(storedSession)) : new StringSession('');
 
     // Immediately create a client using your application data
-    this.telegramClient = new TelegramClient(this.SESSION, this.apiId, this.apiHash, { connectionRetries: 5 });
+    this.telegramClient = new TelegramClient(this.SESSION, this.apiId, this.apiHash, { connectionRetries: 5, useWSS: true });
 
-    this.telegramClient.connect().then((telegramStoredSessionConnectResult: boolean) => {
-      this.checkAuthorization();
+    this.telegramClient.connect().then((storedSessionConnectResult: boolean) => {
+      if (storedSessionConnectResult) {
+        this.showTelegramError.set(false);
+        this.checkAuthorization();
+      }
+      else {
+        throw new Error('Failed to connect to Telegram client.');
+      }
+    }).catch((error) => {
+      this.showTelegramError.set(true);
+      console.error('TelegramClient connect error', error);
     });
 
 
