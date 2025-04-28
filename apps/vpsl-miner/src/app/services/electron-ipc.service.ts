@@ -1,6 +1,9 @@
-import { inject, Injectable, signal, WritableSignal } from '@angular/core';
-import { Web3WalletService } from './web3-wallet.service';
+import { forwardRef, inject, Injectable, signal, WritableSignal } from '@angular/core';
+import { WalletType } from '../models/wallet';
 import { isElectron } from '../shared/helpers';
+import { Web3WalletService } from './web3-wallet.service';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmWalletDialogComponent } from '../components/confirm-wallet-dialog/confirm-wallet-dialog.component';
 
 declare const window: any;
 
@@ -8,10 +11,12 @@ declare const window: any;
   providedIn: 'root',
 })
 export class ElectronIpcService {
-  private readonly web3WalletService: Web3WalletService = inject(Web3WalletService);
+  private readonly web3WalletService: Web3WalletService = inject(forwardRef(() => Web3WalletService));
+  private readonly matDialog: MatDialog = inject(MatDialog);
 
   public walletAddress: WritableSignal<string> = this.web3WalletService.walletAddress;
   public encryptionKey: WritableSignal<string> = this.web3WalletService.encryptionKey;
+  public walletType: WritableSignal<WalletType | null> = signal<WalletType | null>(null);
 
   public isUploadAllChats = signal<boolean>(true);
   public selectedChatIdsList = signal<Array<number>>([]);
@@ -22,6 +27,8 @@ export class ElectronIpcService {
   public minimizeToTray = signal<boolean>(true);
   public backgroundTaskIntervalExists = signal<boolean>(false);
   public uploadFrequency = signal<number>(4);
+  public isConfirmDisconnectWallet = signal<boolean>(false);
+  public telegramSession = signal<string>('');
 
   constructor() {
     if (isElectron()) {
@@ -37,6 +44,10 @@ export class ElectronIpcService {
     const encryptionKey = await window.electron.getEncryptionKey();
     console.log('init encryptionKey', encryptionKey);
     this.encryptionKey.set(encryptionKey);
+
+    const walletType = await window.electron.getWalletType();
+    console.log('init walletType', walletType);
+    this.walletType.set(walletType);
 
     const isUploadAllChats = await window.electron.getUploadAllChats();
     console.log('init isUploadAllChats', isUploadAllChats);
@@ -74,6 +85,10 @@ export class ElectronIpcService {
     console.log('init uploadFrequency', uploadFrequency);
     this.uploadFrequency.set(uploadFrequency);
 
+    const telegramSession = await window.electron.getTelegramSession();
+    console.log('init telegramSession', telegramSession);
+    this.telegramSession.set(telegramSession);
+
     await this.web3WalletService.calculateBalance();
   }
 
@@ -85,6 +100,11 @@ export class ElectronIpcService {
   public setEncryptionKey(value: string) {
     this.encryptionKey.set(value);
     window.electron.setEncryptionKey(this.encryptionKey());
+  }
+
+  public setWalletType(value: WalletType | null) {
+    this.walletType.set(value);
+    window.electron.setWalletType(this.walletType());
   }
 
   public setUploadAllChats(value: boolean) {
@@ -119,7 +139,7 @@ export class ElectronIpcService {
     const lastSubmissionTime = this.lastSubmissionTime();
     if (lastSubmissionTime) {
       const nextDate = new Date();
-      nextDate.setTime(new Date(lastSubmissionTime).getTime() + (this.uploadFrequency() * 60 * 60 * 1000));
+      nextDate.setTime(new Date(lastSubmissionTime).getTime() + this.uploadFrequency() * 60 * 60 * 1000);
 
       this.nextSubmissionTime.set(nextDate);
       window.electron.setNextSubmissionTime(nextDate);
@@ -139,5 +159,37 @@ export class ElectronIpcService {
   public setUploadFrequency(value: number) {
     this.uploadFrequency.set(value);
     window.electron.setUploadFrequency(this.uploadFrequency());
+  }
+
+  public setTelegramSession(value: string) {
+    this.telegramSession.set(value);
+    window.electron.setTelegramSession(this.telegramSession());
+  }
+
+  public switchWallet() {
+    if (this.walletType() === WalletType.HOT_WALLET) {
+      const dialogRef = this.matDialog.open(ConfirmWalletDialogComponent, {
+        data: null,
+        disableClose: true,
+      });
+
+      dialogRef.afterClosed().subscribe((result: any) => {
+        if (result) {
+          this.isConfirmDisconnectWallet.set(true);
+        }
+      });
+    }
+  }
+
+  public async disconnectWallet() {
+    try {
+      this.setWalletAddress('');
+      this.setEncryptionKey('');
+      this.setWalletType(null);
+      this.isConfirmDisconnectWallet.set(false);
+      console.log('Ipc wallet disconnected');
+    } catch (error) {
+      console.error('Error disconnecting wallet:', error);
+    }
   }
 }
