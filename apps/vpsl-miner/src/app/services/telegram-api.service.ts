@@ -13,6 +13,7 @@ import { GelatoApiService } from './gelato-api.service';
 import { PinataApiService } from './pinata-api.service';
 import { SubmissionProcessingService } from './submission-processing.service';
 import { Web3WalletService } from './web3-wallet.service';
+import { RefinementApiService } from './refinement-api.service';
 
 declare const window: any;
 
@@ -27,6 +28,7 @@ export class TelegramApiService {
   private readonly gelatoApiService: GelatoApiService = inject(GelatoApiService);
   private readonly electronIpcService: ElectronIpcService = inject(ElectronIpcService);
   private readonly web3WalletService: Web3WalletService = inject(Web3WalletService);
+  private readonly refinementApiService: RefinementApiService = inject(RefinementApiService);
 
   private readonly LOCAL_STORAGE_SESSION_KEY = 'telegram-session';
   private currentPhoneCodeHash: string = '';
@@ -406,8 +408,8 @@ export class TelegramApiService {
 
   public async doTelegramSubmission(token: string) {
     try {
-      // * 1. sign message - get signature
-      const encryptionKey = this.web3WalletService.encryptionKey(); // signature from signed message
+      // * 1. Get signature
+      const encryptionKey = this.web3WalletService.encryptionKey();
       console.log('encryptionKey', encryptionKey);
       if (!encryptionKey) {
         console.error('Signature / encryption does not exist!');
@@ -419,22 +421,58 @@ export class TelegramApiService {
       const uploadedEncryptedFileUrl = await this.encryptAndUploadFile(token, encryptionKey);
       console.log('uploadedEncryptedFileUrl', uploadedEncryptedFileUrl);
       this.submissionProcessingService.displayInfo('Data has been encrypted');
+      
       if (uploadedEncryptedFileUrl) {
-        // * 5. get public key
-        // * 6. encrypt signature with public key (EEK)
-        const encryptedEncryptionKey = await this.cryptographyService.encryptWithWalletPublicKey(encryptionKey, this.appConfigService.vana!.dlpPublicKey);
+        // * Encrypt encryption key with public key
+        const encryptedEncryptionKey = await this.cryptographyService.encryptWithWalletPublicKey(
+          encryptionKey, 
+          this.appConfigService.vana!.dlpPublicKey
+        );
         console.log('encryptedEncryptionKey', encryptedEncryptionKey);
-        // * 7. addFileWithPermissions to vana dataregistry
-        // * 8. get file id
+        
+        // * Add file with permissions to data registry
         await this.gelatoApiService.relayAddFileWithPermissions(encryptedEncryptionKey, uploadedEncryptedFileUrl);
         this.submissionProcessingService.displayInfo('Data is being added to the data registry');
-      }
-      else {
+        
+        // Wait for fileId to be set (after transaction completed)
+        // Use a simple timeout polling mechanism
+        let maxAttempts = 30; // 30 seconds timeout
+        let fileId = -1;
+        
+        while (maxAttempts > 0 && fileId === -1) {
+          fileId = this.gelatoApiService.currentSubmissionFileId();
+          if (fileId !== -1) {
+            break;
+          }
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
+          maxAttempts--;
+        }
+        
+        if (fileId !== -1) {
+          try {
+            // Call refinement service with the fileId
+            this.submissionProcessingService.displayInfo('Starting data refinement process');
+            const refinementResult = await this.refinementApiService.callRefinementService(
+              fileId,
+              encryptionKey
+            );
+            
+            this.submissionProcessingService.displayInfo(
+              `Data refinement complete. Transaction hash: ${refinementResult.add_refinement_tx_hash}`
+            );
+          } catch (refinementError) {
+            console.error('Failed to refine data:', refinementError);
+            // Continue with the normal flow, don't fail the submission
+            this.submissionProcessingService.displayInfo(
+              'Data refinement failed, but submission process continues'
+            );
+          }
+        }
+      } else {
         console.error('no upload file url');
         throw new Error('Failed to submit encrypted data. Please try again.');
       }
-    }
-    catch(err: any) {
+    } catch(err: any) {
       console.error('Failed to doTelegramSubmission');
       this.submissionProcessingService.displayError(err);
     }

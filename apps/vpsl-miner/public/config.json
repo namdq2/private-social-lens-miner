@@ -24,7 +24,9 @@
     "dlpPublicKey": "0x8e7fe10528804e68f61e1d315b964648dd36d899fbc0396190ea2b3e64b7101d8be4a1ab9a4ae75a89e85b301bda8bdb2a66c61e427dd96ec73f040933306436",
     "stakingSmartContractAddress": "0xf4262BA729C2465d254a7CFF8524375700319979",
     "vanaScanUrl": "https://vanascan.io",
-    "rpcUrl": "https://rpc.vana.org"
+    "rpcUrl": "https://rpc.vana.org",
+    "refinementServiceUrl": "https://a7df0ae43df690b889c1201546d7058ceb04d21b-8000.dstack-prod5.phala.network/refine",
+    "refinerId": 12
   },
   "cloudFlare": {
     "siteKey": "0x4AAAAAAA2Kz8YigmJDTyyc"

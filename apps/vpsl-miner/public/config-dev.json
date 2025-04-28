@@ -24,7 +24,9 @@
     "dlpPublicKey": "0x4a5acfaed75c732d67f62ed8620e06482825b11001f266581f2abf790adc6cd9e2c1bbfdcaa8770b1c2e33bbf3b823a81fdf96591e21215fe1c6bf2968c5c6f4",
     "stakingSmartContractAddress": "0x9B9bD709844a3Fa34EfFAd67a7cB91d881ca4fA0",
     "vanaScanUrl": "https://moksha.vanascan.io",
-    "rpcUrl": "https://rpc.moksha.vana.org"
+    "rpcUrl": "https://rpc.moksha.vana.org",
+    "refinementServiceUrl": "https://a7df0ae43df690b889c1201546d7058ceb04d21b-8000.dstack-prod5.phala.network/refine",
+    "refinerId": 12
   },
   "cloudFlare": {
     "siteKey": "1x00000000000000000000AA"

@@ -64,6 +64,9 @@
       @if(gelatoTaskType() === gelatoTaskTypeNone) {
       <p>Your rewards are still being processed. They will be awarded to you shortly.</p>
       }
+      @if(fileId() !== -1) {
+        <p class="font-bold mt-4">File ID: {{fileId()}}</p>
+      }
     </div>
     }
     @else if (showFailure()) {
