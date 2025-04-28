@@ -1,0 +1,10 @@
+.gradient-divider {
+  height: 1px;
+  background: linear-gradient(to right, transparent, white, transparent);
+}
+
+::ng-deep .custom-dialog-container {
+  min-width: 800px !important;
+  max-width: 90vw !important;
+  padding: 40px !important;
+}

@@ -1,0 +1,81 @@
+<div class="flex flex-col justify-start items-stretch">
+  <div class="my-8">
+    <div class="flex justify-end">
+      <div class="flex items-center bg-dfus-black text-white rounded-full p-2 space-x-2">
+        <div class="flex items-center justify-center bg-dfus-gray-dark rounded-full h-8 w-8">
+          <img src="/icons/wallet-logo.svg" alt="Icon" class="h-4 w-4" />
+        </div>
+        <span class="font-bold">{{ vanaTokenAmount() }}</span>
+        <div class="flex items-center bg-dfus-gray-dark rounded-full px-3 py-1">
+          <img src="/icons/account-icon.svg" alt="Another Icon" class="h-4 w-4 mr-1" />
+          <span>{{walletAddress().slice(0, 5) }} ... {{ walletAddress().slice(-5)}}</span>
+        </div>
+      </div>
+    </div>
+    <div class="flex justify-between items-end mb-4">
+      <div>
+        <div>VFSN: {{ dlpTokenAmount() }}</div>
+        <div>VANA: {{ vanaTokenAmount() }}</div>
+        <div class="inline-block text-sm"><a href="#" class="underline" target="_blank">View tokens</a></div>
+      </div>
+      <button class="dfus-blue-btn dfus-btn-icon-group" [matMenuTriggerFor]="menu">Stake $VFSN</button>
+      <mat-menu #menu="matMenu" class="w-[150px] !bg-dfus-gray !rounded-md">
+        <button class="!px-5" mat-menu-item (click)="openDialog()">Stake $VFSN</button>
+        <button class="!px-5" mat-menu-item (click)="onViewStakeRecords()">View Stakes</button>
+      </mat-menu>
+    </div>
+
+    <div class="flex flex-row justify-between items-center">
+      <div class="flex items-center">
+        <span class="text-sm cursor-pointer">Add token to MetaMask</span>
+        <img src="/icons/metamask.svg" alt="MetaMask icon" class="h-8 w-8 ml-4 cursor-pointer" />
+      </div>
+
+      <div class="flex flex-row justify-end items-center">
+        <div class="flex flex-row justify-end items-center gap-x-2 text-sm cursor-pointer">
+          <img src="icons/hint_info.svg" alt="Hint info icon" />
+          <span class="underline hover:text-dfus-dark-blue">Learn how staking rewards work</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex flex-1 flex-col justify-start items-center gap-y-8 notification-container p-8 mt-14 max-w-[410px] mx-auto">
+      <h4 class="text-center text-[22px]">Connect your Telegram account</h4>
+      <button class="w-full dfus-blue-btn flex flex-row justify-center items-center gap-x-2">
+        Connect
+        <img src="/icons/chevron_right.svg" alt="Right chevron icon" />
+      </button>
+    </div>
+  </div>
+
+  <div class="section-container flex flex-col gap-y-4 p-4">
+    <div class="text-center font-medium">
+      <div class="text-xl">Automate Rewards and Tasks by</div>
+      <div class="text-xl">Downloading our Miner</div>
+    </div>
+    <div class="flex flex-col sm:flex-row sm:justify-center sm:items-center gap-4">
+      <a
+        class="dfus-orange-btn flex flex-1 flex-col sm:flex-row gap-4 cursor-pointer"
+        href="https://github.com/dfusionai/private-social-lens-miner/releases/download/v0.3.0/dFusion-DLP-miner.Setup.0.3.0.exe"
+        ><img src="/icons/windows.svg" alt="Windows icon" class="h-12 sm:h-20" />
+        <div class="flex flex-row gap-x-1 sm:flex-col justify-center items-start text-left">
+          <span>Download</span><span>for <span class="font-bold">Windows</span> 11 / 10</span>
+        </div></a
+      ><a
+        class="dfus-orange-btn flex flex-1 flex-col sm:flex-row gap-4 cursor-pointer"
+        href="https://github.com/dfusionai/private-social-lens-miner/releases/download/v0.3.0/dFusion-DLP-miner-0.3.0-arm64.dmg"
+        ><img src="/icons/macOS.svg" alt="macOS icon" class="h-12 sm:h-20" />
+        <div class="flex flex-row gap-x-1 sm:flex-col justify-center items-start">
+          <span>Download</span><span>for <span class="font-bold">macOS</span></span>
+        </div></a
+      ><a
+        class="dfus-orange-btn flex flex-1 flex-col sm:flex-row gap-4 cursor-pointer"
+        href="https://github.com/dfusionai/private-social-lens-miner/releases/download/v0.3.0/dFusion-DLP-miner-0.3.0.AppImage"
+        ><img src="/icons/linux.svg" alt="Linux icon" class="h-12 sm:h-20" />
+        <div class="flex flex-row gap-x-1 sm:flex-col justify-center items-start">
+          <span>Download</span><span>for <span class="font-bold">Linux</span></span>
+        </div></a
+      >
+    </div>
+  </div>
+</div>

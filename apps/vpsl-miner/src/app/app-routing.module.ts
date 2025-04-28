@@ -7,6 +7,7 @@ import { StakingRewardsInfoComponent } from './components/staking-rewards-info/s
 import { WalletConnectionComponent } from './components/wallet-connection/wallet-connection.component';
 import { authGuard } from './guards/auth.guard';
 import { SignMessageWalletComponent } from './components/sign-message-wallet/sign-message-wallet.component';
+import { StakePlaceComponent } from './components/stake-place/stake-place.component';
 
 const routes: Routes = [
   {
@@ -22,6 +23,10 @@ const routes: Routes = [
     component: HotWalletComponent,
   },
   {
+    path: 'stake-place',
+    component: StakePlaceComponent,
+  },
+  {
     path: 'app',
     component: MinerAppContainerComponent,
     canActivate: [authGuard],
@@ -33,10 +38,10 @@ const routes: Routes = [
       {
         path: 'staking-rewards',
         component: StakingRewardsInfoComponent,
-      }
+      },
     ]
   },
-
+  
 ];
 
 @NgModule({

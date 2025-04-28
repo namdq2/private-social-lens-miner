@@ -2,7 +2,7 @@ import { ConfirmWalletDialogComponent } from './components/confirm-wallet-dialog
 import { NgOptimizedImage } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { APP_INITIALIZER, NgModule } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -35,6 +35,16 @@ import { PhoneInputDirective } from './directives/phone-input.directive';
 import { AppConfigService } from './services/app-config.service';
 import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
 import { SignMessageWalletComponent } from './components/sign-message-wallet/sign-message-wallet.component';
+import { StakeModalComponent } from './components/stake-modal/stake-modal.component';
+import { StakePlaceComponent } from './components/stake-place/stake-place.component';
+import { MatInputModule } from '@angular/material/input';
+import { StakeRecordsComponent } from './components/stake-records/stake-records.component';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatTableModule } from '@angular/material/table';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { StakeResultModalComponent } from './components/stake-result-modal/stake-result-modal.component';
+import { StakePlaceMainComponent } from './components/stake-place-main/stake-place-main';
+import { PasswordDialogueComponent } from './components/password-dialog/password-dialogue.component';
 
 @NgModule({
   schemas: [
@@ -53,7 +63,6 @@ import { SignMessageWalletComponent } from './components/sign-message-wallet/sig
     TelegramDialogComponent,
     TelegramSigninComponent,
     TelegramMessageComponent,
-
     PhoneInputDirective,
     // StakingComponent,
     SubmissionProcessingComponent,
@@ -61,6 +70,12 @@ import { SignMessageWalletComponent } from './components/sign-message-wallet/sig
     ConfirmDialogComponent,
     ConfirmWalletDialogComponent,
     SignMessageWalletComponent,
+    StakeModalComponent,
+    StakePlaceComponent,
+    StakeRecordsComponent,
+    StakeResultModalComponent,
+    StakePlaceMainComponent,
+    PasswordDialogueComponent,
   ],
   imports: [
     BrowserModule,
@@ -80,6 +95,11 @@ import { SignMessageWalletComponent } from './components/sign-message-wallet/sig
     MatSnackBarModule,
     MatSidenavModule,
     ClipboardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatTableModule,
+    MatPaginatorModule,
+    ReactiveFormsModule,
     // MatStepperModule
   ],
   providers: [

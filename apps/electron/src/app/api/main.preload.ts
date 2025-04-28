@@ -12,6 +12,11 @@ contextBridge.exposeInMainWorld('electron', {
 
   setWalletType: (value) => ipcRenderer.send('set-wallet-type', value),
   getWalletType: () => ipcRenderer.invoke('get-wallet-type'),
+  setPrivateKey: (value) => ipcRenderer.invoke('set-private-key', value),
+  getPrivateKey: () => ipcRenderer.invoke('get-private-key'),
+
+  setSalt: (value) => ipcRenderer.invoke('set-salt', value),
+  getSalt: () => ipcRenderer.invoke('get-salt'),
 
   setUploadAllChats: (value) => ipcRenderer.send('set-upload-all-chats', value),
   getUploadAllChats: () => ipcRenderer.invoke('get-upload-all-chats'),

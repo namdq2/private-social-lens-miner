@@ -42,6 +42,7 @@ export class Web3WalletService {
 
   public walletAddress = signal<string>('');
   public encryptionKey = signal<string>('');
+  public privateKey = signal<string>('');
 
   public dlpContract = new ethers.Contract(this.appConfigService.vana!.dlpSmartContractAddress, DataLiquidityPoolABI.abi, this.rpcProvider);
 

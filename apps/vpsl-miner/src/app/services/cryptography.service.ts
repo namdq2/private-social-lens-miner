@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import * as eccrypto from '@toruslabs/eccrypto';
 import * as openpgp from 'openpgp';
+import * as CryptoJS from 'crypto-js';
 
 @Injectable({
   providedIn: 'root',
@@ -67,5 +68,33 @@ export class CryptographyService {
       hexString += hex;
     }
     return '0x' + hexString;
+  }
+
+  encryptPrivateKey(privateKey: string, password: string): { encryptedKey: string, salt: string } {
+    const salt = CryptoJS.lib.WordArray.random(128 / 8).toString();
+    const key = CryptoJS.PBKDF2(password, CryptoJS.enc.Hex.parse(salt), {
+      keySize: 256 / 32,
+      iterations: 1000,
+    });
+    const iv = CryptoJS.lib.WordArray.random(128 / 8);
+    const encrypted = CryptoJS.AES.encrypt(privateKey, key, { iv: iv });
+
+    return {
+      encryptedKey: iv.toString() + ':' + encrypted.toString(),
+      salt: salt,
+    };
+  }
+
+  decryptPrivateKey(encryptedKey: string, password: string, salt: string): string {
+    const key = CryptoJS.PBKDF2(password, CryptoJS.enc.Hex.parse(salt), {
+      keySize: 256 / 32,
+      iterations: 1000,
+    });
+    const textParts = encryptedKey.split(':');
+    const iv = CryptoJS.enc.Hex.parse(textParts.shift()!);
+    const encryptedText = textParts.join(':');
+    const decrypted = CryptoJS.AES.decrypt(encryptedText, key, { iv: iv });
+
+    return decrypted.toString(CryptoJS.enc.Utf8);
   }
 }
