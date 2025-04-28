@@ -116,18 +116,18 @@ export default class App {
     // initialization and is ready to create browser windows.
     // Some APIs can only be used after this event occurs.
 
-    App.walletAddress = store.get('walletAddress');
-    App.encryptionKey = store.get('encryptionKey');
-    App.walletType = store.get('walletType');
-    App.uploadAllChats = store.get('uploadAllChats');
+    App.walletAddress = store.get('walletAddress') ?? '';
+    App.encryptionKey = store.get('encryptionKey') ?? '';
+    App.walletType = store.get('walletType') ?? '';
+    App.uploadAllChats = store.get('uploadAllChats') ?? true;
     App.selectedChatIdsList = store.get('selectedChatIdsList') ?? [];
-    App.enableBackgroundTask = store.get('enableBackgroundTask');
-    App.lastSubmissionTime = store.get('lastSubmissionTime');
-    App.nextSubmissionTime = store.get('nextSubmissionTime');
-    App.enableAutoLaunch = store.get('enableAutoLaunch');
-    App.minimizeToTray = store.get('minimizeToTray');
-    App.uploadFrequency = store.get('uploadFrequency');
-    App.telegramSession = store.get('telegramSession');
+    App.enableBackgroundTask = store.get('enableBackgroundTask') ?? false;
+    App.lastSubmissionTime = store.get('lastSubmissionTime') || null;
+    App.nextSubmissionTime = store.get('nextSubmissionTime') || null;
+    App.enableAutoLaunch = store.get('enableAutoLaunch') ?? true;
+    App.minimizeToTray = store.get('minimizeToTray') ?? true;
+    App.uploadFrequency = store.get('uploadFrequency') ?? 4;
+    App.telegramSession = store.get('telegramSession') ?? '';
 
     if (rendererAppName) {
       App.initMainWindow();
