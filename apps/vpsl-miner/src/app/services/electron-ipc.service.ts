@@ -18,8 +18,6 @@ export class ElectronIpcService {
   public encryptionKey: WritableSignal<string> = this.web3WalletService.encryptionKey;
   public walletType: WritableSignal<WalletType | null> = signal<WalletType | null>(null);
 
-  public privateKey: WritableSignal<string> = signal('');
-  public salt: WritableSignal<string> = signal('');
   public isUploadAllChats = signal<boolean>(true);
   public selectedChatIdsList = signal<Array<number>>([]);
   public isBackgroundTaskEnabled = signal<boolean>(false);
@@ -51,14 +49,6 @@ export class ElectronIpcService {
     console.log('init walletType', walletType);
     this.walletType.set(walletType);
     
-    const privateKey = await window.electron.getPrivateKey();
-    console.log('init privateKey', privateKey);
-    this.privateKey.set(privateKey);
-
-    const salt = await window.electron.getSalt();
-    console.log('init salt', salt);
-    this.salt.set(salt);
-
     const isUploadAllChats = await window.electron.getUploadAllChats();
     console.log('init isUploadAllChats', isUploadAllChats);
     this.isUploadAllChats.set(isUploadAllChats);
@@ -105,16 +95,6 @@ export class ElectronIpcService {
   public setWalletAddress(value: string) {
     this.walletAddress.set(value);
     window.electron.setWalletAddress(this.walletAddress());
-  }
-
-  public setPrivateKey(value: string) {
-    this.privateKey.set(value);
-    window.electron.setPrivateKey(this.privateKey());
-  }
-
-  public setSalt(value: string) {
-    this.salt.set(value);
-    window.electron.setSalt(this.salt());
   }
 
   public setEncryptionKey(value: string) {

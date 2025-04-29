@@ -22,8 +22,6 @@ export default class App {
   static walletAddress = '';
   static encryptionKey = '';
   static walletType = '';
-  static privateKey = '';
-  static salt = '';
   static uploadAllChats = true;
   static selectedChatIdsList = [];
   static enableBackgroundTask = false; // Flag to control the background task
@@ -119,9 +117,8 @@ export default class App {
     // Some APIs can only be used after this event occurs.
 
     App.walletAddress = store.get('walletAddress');
+    App.walletType = store.get('walletType');
     App.encryptionKey = store.get('encryptionKey');
-    App.privateKey = store.get('privateKey');
-    App.salt = store.get('salt');
     App.uploadAllChats = store.get('uploadAllChats');
     App.selectedChatIdsList = store.get('selectedChatIdsList') ?? [];
     App.enableBackgroundTask = store.get('enableBackgroundTask');
@@ -301,26 +298,6 @@ export default class App {
       App.walletAddress = value;
       store.set('walletAddress', value);
       console.log('main process: set-wallet-address:', value);
-    });
-
-    ipcMain.handle('set-private-key', (event, value) => {
-      App.privateKey = value;
-      store.set('privateKey', value);
-      console.log('main process: set-private-key:', value);
-    });
-
-    ipcMain.handle('get-private-key', () => {
-      return App.privateKey;
-    });
-
-    ipcMain.handle('set-salt', (event, value) => {
-      App.salt = value;
-      store.set('salt', value);
-      console.log('main process: set-salt:', value);
-    });
-
-    ipcMain.handle('get-salt', () => {
-      return App.salt;
     });
 
     ipcMain.handle('get-wallet-address', () => {

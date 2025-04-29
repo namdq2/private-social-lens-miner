@@ -1,4 +1,4 @@
-import { Component, effect, inject, OnInit } from '@angular/core';
+import { Component, effect, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { ElectronIpcService } from '../../services/electron-ipc.service';
 import { WalletType } from '../../models/wallet';

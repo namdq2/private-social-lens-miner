@@ -23,10 +23,6 @@ const routes: Routes = [
     component: HotWalletComponent,
   },
   {
-    path: 'stake-place',
-    component: StakePlaceComponent,
-  },
-  {
     path: 'app',
     component: MinerAppContainerComponent,
     canActivate: [authGuard],
@@ -38,6 +34,10 @@ const routes: Routes = [
       {
         path: 'staking-rewards',
         component: StakingRewardsInfoComponent,
+      },
+      {
+        path: 'stake-place',
+        component: StakePlaceComponent,
       },
     ]
   },

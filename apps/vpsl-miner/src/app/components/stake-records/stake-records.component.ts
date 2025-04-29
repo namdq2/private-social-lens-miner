@@ -2,16 +2,15 @@ import { Component, inject } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { StakeModalComponent } from '../stake-modal/stake-modal.component';
 import { Web3WalletService } from '../../services/web3-wallet.service';
-import { ethers } from 'ethers';
+import { BrowserProvider, Eip1193Provider, ethers } from 'ethers';
 import StakingABI from '../../assets/contracts/StakingImplemenation.json';
 import { ElectronIpcService } from '../../services/electron-ipc.service';
 import { CryptographyService } from '../../services/cryptography.service';
-import { PasswordDialogueComponent } from '../password-dialog/password-dialogue.component';
 import { calculateTimeRemaining, formatUnixTimestampToDateString } from '../../shared/helpers';
 import { StakeResultModalComponent } from '../stake-result-modal/stake-result-modal.component';
-
+import { WalletType } from '../../models/wallet';
+import { ExistingWalletService } from '../../services/existing-wallet.service';
 interface StakeRecord {
   amount: number;
   startTime: string;
@@ -42,45 +41,39 @@ export class StakeRecordsComponent {
   private readonly matDialog: MatDialog = inject(MatDialog);
   private stakingContract: ethers.Contract | null = null;
   private walletAddress: string = ''; 
-  private rpcProvider: ethers.JsonRpcProvider | null = null;
-  private password: string = '';
+  private isHotWallet: boolean = false;
+  private signer: ethers.JsonRpcSigner | ethers.Wallet | null = null;
   public displayedColumns: string[] = ['amount', 'startTime', 'timeRemaining', 'hasWithdrawn'];
   public dataSource = new MatTableDataSource<StakeRecord>(ELEMENT_DATA);
   public unstakingItem: StakeRecord | null = null;
-  public loadActiveStakesPending: boolean = false;
+  public reloadActiveStakesPending: boolean = false;
   public availableVFSNBalance: string = '';
 
-  constructor(private web3WalletService: Web3WalletService, private cryptographyService: CryptographyService, private electronIpcService: ElectronIpcService) {
+  constructor(private web3WalletService: Web3WalletService, private cryptographyService: CryptographyService, private electronIpcService: ElectronIpcService, private existingWalletService: ExistingWalletService) {
     this.stakingContract = this.web3WalletService.stakingContract;
     this.walletAddress = this.web3WalletService.walletAddress();
-    this.rpcProvider = new ethers.JsonRpcProvider(this.web3WalletService.rpcUrl);
     this.availableVFSNBalance = Number(this.web3WalletService.dlpTokenAmount() || 0).toFixed(5);
+    this.isHotWallet = this.electronIpcService.walletType() === WalletType.HOT_WALLET;
     this.loadActiveStakes();
   }
 
-  openStakeDialog(): void {
-    this.matDialog.open(StakeModalComponent, {
-      panelClass: 'custom-dialog-container',
-      data: {
-        /* data */
-      },
-    });
-  }
-
   async onUnStake(stake: StakeRecord) {
-    const privateKey = this.cryptographyService.decryptPrivateKey(this.electronIpcService.privateKey(), this.password, this.electronIpcService.salt());
-
-    if (!this.stakingContract || !privateKey) {
-      this.password = '';
+    if (!this.stakingContract) {
       this.openResultDialog(false, false); 
       return;
     }
 
     try {
+      if(this.isHotWallet) {
+        this.signer = this.web3WalletService.wallet?.connect(this.web3WalletService.rpcProvider) || null;
+      } else {
+        // Create provider without network parameter
+        const provider = new BrowserProvider(this.existingWalletService.eip155Provider as unknown as Eip1193Provider);
+        // Get signer from provider
+        this.signer = await provider.getSigner() || null;
+      }
       const stakingContractAddress = this.stakingContract.target;
-      const wallet = new ethers.Wallet(privateKey);
-      const signer = wallet.connect(this.rpcProvider);
-      const stakingContractWithSigner = new ethers.Contract(stakingContractAddress, StakingABI.abi, signer);
+      const stakingContractWithSigner = new ethers.Contract(stakingContractAddress, StakingABI.abi, this.signer);
       this.unstakingItem = stake;
       const tx = await stakingContractWithSigner['unstakeTokens'](stake.stakeIndex);
       await tx.wait();
@@ -90,14 +83,13 @@ export class StakeRecordsComponent {
       this.openResultDialog(false, false);  
     } finally {
       this.unstakingItem = null;
-      this.password = '';
     }
   }
 
   async onReload() {
-    this.loadActiveStakesPending = true;
+    this.reloadActiveStakesPending = true;
     await this.loadActiveStakes();
-    this.loadActiveStakesPending = false;
+    this.reloadActiveStakesPending = false;
   }
 
   async loadActiveStakes() {
@@ -125,20 +117,6 @@ export class StakeRecordsComponent {
     } catch (error) {
       console.error('Error fetching active stakes:', error);
     }
-  }
-
-  onOpenPasswordDialog(stake: StakeRecord): void {
-    const dialogRef = this.matDialog.open(PasswordDialogueComponent, {
-      width: '500px',
-      data: { isForCreate: false },
-    });
-
-    dialogRef.afterClosed().subscribe((password: string) => {
-      if (password) {
-        this.password = password;
-        this.onUnStake(stake);
-      }
-    });
   }
 
   openResultDialog(isLoading: boolean, isSuccess: boolean): void {

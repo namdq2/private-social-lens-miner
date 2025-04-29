@@ -5,8 +5,6 @@ import { ElectronIpcService } from '../../services/electron-ipc.service';
 import { Web3WalletService } from '../../services/web3-wallet.service';
 import { ENCRYPTION_SEED } from '../../shared/constants';
 import { MatDialog } from '@angular/material/dialog';
-import { PasswordDialogueComponent } from '../password-dialog/password-dialogue.component';
-import { CryptographyService } from '../../services/cryptography.service';
 
 
 @Component({
@@ -21,15 +19,12 @@ export class HotWalletComponent {
   private readonly web3WalletService: Web3WalletService = inject(Web3WalletService);
   private readonly router: Router = inject(Router);
   private readonly matDialog: MatDialog = inject(MatDialog);
-  private password = '';
-
 
   public readonly validWalletAndEncryptionKey = effect(() => {
     const validWalletAddress = this.electronIpcService.walletAddress();
     const validEncryptionKey = this.electronIpcService.encryptionKey();
-    const validPrivateKey = this.electronIpcService.privateKey();
 
-    if (validWalletAddress && validEncryptionKey && validPrivateKey) {
+    if (validWalletAddress && validEncryptionKey) {
       this.router.navigate(['app/miner']);
     }
   });
@@ -52,7 +47,7 @@ export class HotWalletComponent {
 
   public hasUserAgreed = false;
 
-  constructor(private cryptographyService: CryptographyService) { }
+  constructor() { }
 
   public onGenerateClick() {
     if (this.hasUserAgreed) {
@@ -98,9 +93,7 @@ export class HotWalletComponent {
         this.wallet
           .signMessage(ENCRYPTION_SEED)
           .then(async (res: string) => {
-            const { salt, encryptedKey: encryptionPrivateKey } = await this.cryptographyService.encryptPrivateKey(this.privateKey, this.password);
-            this.electronIpcService.setSalt(salt);
-            this.electronIpcService.setPrivateKey(encryptionPrivateKey);
+            this.web3WalletService.wallet = new ethers.Wallet(this.privateKey);
             this.electronIpcService.setWalletAddress(this.wallet!.address);
             this.electronIpcService.setEncryptionKey(res);
           })
@@ -109,22 +102,6 @@ export class HotWalletComponent {
         console.error('Wallet not created');
       }
     }
-  }
-
-  public onOpenPasswordDialog () {
-    const dialogRef = this.matDialog.open(PasswordDialogueComponent, {
-      width: '500px',
-      data: {
-        isForCreate: true,
-      },
-    });
-
-    dialogRef.afterClosed().subscribe((password: string) => {
-      if (password) {
-        this.password = password;
-        this.onConfirmClick();
-      }
-    });
   }
 
   public async onDoneClick() {

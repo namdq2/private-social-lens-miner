@@ -44,7 +44,6 @@ import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { StakeResultModalComponent } from './components/stake-result-modal/stake-result-modal.component';
 import { StakePlaceMainComponent } from './components/stake-place-main/stake-place-main';
-import { PasswordDialogueComponent } from './components/password-dialog/password-dialogue.component';
 
 @NgModule({
   schemas: [
@@ -75,7 +74,6 @@ import { PasswordDialogueComponent } from './components/password-dialog/password
     StakeRecordsComponent,
     StakeResultModalComponent,
     StakePlaceMainComponent,
-    PasswordDialogueComponent,
   ],
   imports: [
     BrowserModule,

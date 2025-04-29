@@ -14,12 +14,17 @@
     </div>
 
     <div class="stake-amount-container section-container max-w-[650px] !h-[200px] mx-auto flex flex-col gap-y-5 p-6 mb-5">
-      <div class="text-base font-bold">Staking Amount</div>
-      <div class="flex items-center gap-8">
-        <mat-form-field class="w-full h-14" appearance="outline">
-          <mat-label class="stake-amount-label text-dfus-gray-medium">Enter staking amount</mat-label>
-          <input matInput type="text" formControlName="stakeAmount" class="!px-3" min="0" (input)="validateNumericInput($event)" />
-        </mat-form-field>
+      <div class="flex items-end gap-8">
+        <div class="w-full">
+          <label for="stake-amount-input" class="dfus-input-label !mb-4">Staking Amount</label>
+          <input 
+            type="text" 
+            id="stake-amount-input" 
+            formControlName="stakeAmount" 
+            class="dfus-input !h-14" 
+            (input)="validateNumericInput($event)"
+            placeholder="Enter amount to stake">
+        </div>
 
         <button class="dfus-blue-btn h-14 min-w-28 hover:border-white" (click)="stakeAll()">Stake All</button>
       </div>
@@ -53,10 +58,16 @@
     <div class="section-container max-w-[650px] mx-auto flex flex-col gap-y-5 p-5">
       <div class="text-base font-bold">Staking Period</div>
       <div class="flex items-center mb-2">
-        <mat-form-field class="w-full h-14" appearance="outline">
-          <mat-label class="text-dfus-gray-medium">Days staked</mat-label>
-          <input class="!px-3" matInput type="number" value="{{ stakePeriod }}" readonly />
-        </mat-form-field>
+        <div class="w-full">
+          <label for="days-staked-input" class="dfus-input-label">Days staked</label>
+          <input 
+            type="number" 
+            id="days-staked-input" 
+            class="dfus-input !h-14" 
+            [value]="stakePeriod" 
+            readonly
+            placeholder="Days staked">
+        </div>
       </div>
       <div class="grid grid-cols-2 gap-4">
         <button class="dfus-blue-btn hover:border-white" (click)="updateStakePeriod(7)">7 Days</button>
@@ -72,7 +83,7 @@
         <span class="flex items-center text-base">I confirm that the information entered is accurate and agree to the terms and conditions of staking.</span>
       </mat-checkbox>
 
-      <button class="bg-dfus-bg-dark text-white py-2 px-6 rounded-lg w-full text-base mt-5" [disabled]="stakeForm.invalid" (click)="onOpenPasswordDialog()">
+      <button class="bg-dfus-bg-dark text-white py-2 px-6 rounded-lg w-full text-base mt-5" [disabled]="stakeForm.invalid" (click)="stakeCoins(); onNoClick()">
         Stake &gt;
       </button>
     </div>

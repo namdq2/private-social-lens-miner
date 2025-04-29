@@ -38,11 +38,11 @@ export class Web3WalletService {
   // private walletPrivateKey = '';
   // public wallet = new ethers.Wallet(this.walletPrivateKey);
   public rpcProvider: ethers.JsonRpcProvider = new ethers.JsonRpcProvider(this.rpcUrl);
+  public wallet: ethers.Wallet | null = null;
   // public signer = this.wallet.connect(this.rpcProvider);
 
   public walletAddress = signal<string>('');
   public encryptionKey = signal<string>('');
-  public privateKey = signal<string>('');
 
   public dlpContract = new ethers.Contract(this.appConfigService.vana!.dlpSmartContractAddress, DataLiquidityPoolABI.abi, this.rpcProvider);
 
@@ -102,6 +102,7 @@ export class Web3WalletService {
   public disconnectWallet() {
     this.walletAddress.set('');
     this.encryptionKey.set('');
+    this.wallet = null;
     console.log('Hot Wallet disconnected');
   }
 }
