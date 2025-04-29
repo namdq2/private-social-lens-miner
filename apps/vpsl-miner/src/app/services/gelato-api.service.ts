@@ -187,7 +187,6 @@ export class GelatoApiService {
         this.currentSubmissionFileId.set(fileId);
 
         if (fileId) {
-          this.submissionProcessingService.displayInfo(`Data has been added to the data registry. File ID: ${fileId}`);
           const teeFee = (await this.web3WalletService.teePoolContract['teeFee']()) as number;
           await this.relayRequestContributionProof(teeFee);
           this.submissionProcessingService.displayInfo(`Contribution proof job has been requested. Your data is being validated`);
