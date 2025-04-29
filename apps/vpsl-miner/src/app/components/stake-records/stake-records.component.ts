@@ -83,6 +83,8 @@ export class StakeRecordsComponent {
       this.openResultDialog(false, false);  
     } finally {
       this.unstakingItem = null;
+      await this.web3WalletService.calculateBalance();
+      this.availableVFSNBalance = Number(this.web3WalletService.dlpTokenAmount() || 0).toFixed(5);
     }
   }
 
@@ -116,6 +118,9 @@ export class StakeRecordsComponent {
       this.dataSource.data = stakeRecords;
     } catch (error) {
       console.error('Error fetching active stakes:', error);
+    } finally {
+      await this.web3WalletService.calculateBalance();
+      this.availableVFSNBalance = Number(this.web3WalletService.dlpTokenAmount() || 0).toFixed(5);
     }
   }
 
@@ -127,6 +132,6 @@ export class StakeRecordsComponent {
   }
 
   onBackToStakePlace() {
-    this.router.navigate([], { queryParams: { viewStakeRecords: 'false' } });
+    this.router.navigate(['/app/stake-place']);
   }
 }

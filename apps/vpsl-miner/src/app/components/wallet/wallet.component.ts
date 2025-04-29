@@ -40,7 +40,7 @@ export class WalletComponent implements OnInit {
     this.walletAddress = this.web3WalletService.walletAddress;
     this.walletType = this.electronIpcService.walletType;
     this.vanaTestnetExplorerUrl.set("https://moksha.vanascan.io/address/" + this.walletAddress());
-    // await this.web3WalletService.calculateBalance();
+    await this.web3WalletService.calculateBalance();
   }
 
   async handleDisconnectWallet() {

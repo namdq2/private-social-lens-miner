@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, effect, inject, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { StakeModalComponent } from '../stake-modal/stake-modal.component';
@@ -20,9 +20,13 @@ export class StakePlaceMainComponent {
   public walletAddress = signal<string>('');
 
   constructor() {
-    this.dlpTokenAmount.set(Number(this.web3WalletService.dlpTokenAmount() || 0).toFixed(5));
-    this.vanaTokenAmount.set(Number(this.web3WalletService.vanaTokenAmount() || 0).toFixed(5));
     this.walletAddress = this.web3WalletService.walletAddress;
+    
+    // Watch Web3WalletService signals
+    effect(() => {
+      this.dlpTokenAmount.set(Number(this.web3WalletService.dlpTokenAmount() || 0).toFixed(5));
+      this.vanaTokenAmount.set(Number(this.web3WalletService.vanaTokenAmount() || 0).toFixed(5));
+    });
   }
 
   openDialog(): void {

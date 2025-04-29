@@ -88,12 +88,15 @@ export class StakeModalComponent {
       // Stake tokens
       const stakeTx = await stakingContractWithSigner['stakeTokens'](amountWei, durationSeconds);
       await stakeTx.wait();
+      //re calculate balance
       this.matDialog.closeAll();
       this.openResultDialog(false, true, Number(stakeAmountValue)?.toFixed(5), this.stakePeriod?.toString());
     } catch (error) {
       console.error('Error staking coins:', error);
       this.matDialog.closeAll();
       this.openResultDialog(false, false);
+    } finally {
+      await this.web3WalletService.calculateBalance();
     }
   }
 
