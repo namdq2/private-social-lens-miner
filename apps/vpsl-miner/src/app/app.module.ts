@@ -1,3 +1,4 @@
+import { ConfirmWalletDialogComponent } from './components/confirm-wallet-dialog/confirm-wallet-dialog.component';
 import { NgOptimizedImage } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { APP_INITIALIZER, NgModule } from '@angular/core';
@@ -13,7 +14,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HeaderComponent } from './components/header/header.component';
-import { HomeComponent } from './components/home/home.component';
+import { HotWalletComponent } from './components/hot-wallet/hot-wallet.component';
 import { MinerAppContainerComponent } from './components/miner-app-container/miner-app-container.component';
 import { MinerMainComponent } from './components/miner-main/miner-main.component';
 import { StakingRewardsInfoComponent } from './components/staking-rewards-info/staking-rewards-info.component';
@@ -33,6 +34,7 @@ import { WalletComponent } from './components/wallet/wallet.component';
 import { PhoneInputDirective } from './directives/phone-input.directive';
 import { AppConfigService } from './services/app-config.service';
 import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
+import { SignMessageWalletComponent } from './components/sign-message-wallet/sign-message-wallet.component';
 
 @NgModule({
   schemas: [
@@ -41,7 +43,7 @@ import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dial
   declarations: [
     AppComponent,
     HeaderComponent,
-    HomeComponent,
+    HotWalletComponent,
     StakingRewardsInfoComponent,
     MinerMainComponent,
     WalletComponent,
@@ -57,6 +59,8 @@ import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dial
     SubmissionProcessingComponent,
     MinerSettingsComponent,
     ConfirmDialogComponent,
+    ConfirmWalletDialogComponent,
+    SignMessageWalletComponent,
   ],
   imports: [
     BrowserModule,

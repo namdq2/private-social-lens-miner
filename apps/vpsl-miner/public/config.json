@@ -33,5 +33,10 @@
   },
   "gelato": {
     "apiKey": "8mK_rHJJsaOSwQPfOvM6Qc5FdNkSs5PR_9HjlK8zKbw_"
+  },
+  "reownAppkit": {
+    "projectId": "b5ca679f8742229883b5fc1de5972536",
+    "domain": "https://vana.genesis.dfusion.ai",
+    "icon": "https://vana.genesis.dfusion.ai/img/dFusionLogo.png"
   }
 }

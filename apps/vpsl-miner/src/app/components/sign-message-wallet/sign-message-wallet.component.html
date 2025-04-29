@@ -1,0 +1,16 @@
+<div class="h-svh flex items-center">
+  <div class="max-w-2xl flex flex-col justify-start items-stretch gap-y-8 mx-auto">
+    <img [src]="'img/logo_vertical.svg'" class="w-auto h-32" alt="dFusion logo" />
+
+    <div id="sign-message-container" class="w-full flex flex-col justify-start items-center gap-y-4 mt-12">
+      <div class="content">
+        <img [src]="'img/sign-message.svg'" class="w-auto h-16" alt="dFusion logo" />
+        <span>
+          To continue, approve the signature request to generate your unique encryption key. This will secure your contributions and verify your ownership of
+          your data.
+        </span>
+      </div>
+      <button class="dfus-blue-btn dfus-btn-icon-group w-full h-16" (click)="signMessage()">Sign Message <img src="icons/chevron_right.svg" alt="Right chevron icon" /></button>
+    </div>
+  </div>
+</div>
