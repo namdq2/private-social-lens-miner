@@ -23,6 +23,7 @@ export class TelegramComponent {
   public showAuthCodeInput = false;
   public showPhoneNumberError: any = null;
   public showCodeError: any = null;
+  public readonly showTelegramError: WritableSignal<boolean> = this.telegramApiService.showTelegramError;
 
   public uploadFrequencyList = [4, 6, 8, 12, 24];
   public selectedFrequency: WritableSignal<number>;
@@ -67,8 +68,6 @@ export class TelegramComponent {
     const loginSuccess: boolean = await this.telegramApiService.clientStartHandler(this.phoneNumber, this.authCode);
     if (loginSuccess) {
       console.log('Login success');
-      this.telegramApiService.initialisePreSelectedDialogs();
-      this.showAuthCodeInput = false;
       this.showCodeError = false;
     }
     else {

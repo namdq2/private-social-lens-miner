@@ -2,92 +2,103 @@
   class="h-full w-full flex flex-1 flex-col justify-start items-center gap-y-8 pt-28 rounded-xl bg-[#101520] border border-[#2a303a]">
 
   @if(showConnectTelegramButton) {
-  <h3>
-    Connect your Messaging App Accounts
-  </h3>
+    <h3>
+      Connect your Messaging App Accounts
+    </h3>
 
-  <button class="dfus-blue-btn dfus-btn-icon-group w-full max-w-lg h-16" (click)="showConnectTelegramButton = false">
-    Connect Telegram
-    <img src="icons/chevron_right.svg" alt="Right chevron icon" />
-  </button>
-
-  <div class="text-center text-[#848689]">
-    <p>Currently only Telegram is supported.</p>
-    <p>More messaging apps will be added soon.</p>
-  </div>
-  }
-  @else {
-
-  <div class="h-full w-full flex flex-col justify-start items-center gap-y-8">
-    @if(!showAuthCodeInput) {
-      <h4>Enter your phone number with your country code</h4>
-      <div class="w-full max-w-lg">
-        <label for="phone-number-input" class="dfus-input-label">Your Phone Number:</label>
-        <input type="text" id="phone-number-input" [(ngModel)]="phoneNumber" class="dfus-input" appPhoneInput placeholder="e.g. +15551234567">
-      </div>
-
-      @if (showPhoneNumberError) {
-        <div class="flex flex-row justify-start items-start gap-x-2">
-          <img src="icons/hint_error.svg" alt="Hint error icon" />
-          <span class="text-[#FF8389]">
-            Make sure you've entered your phone number correctly.
-          </span>
-        </div>
-      }
-
-      <button class="dfus-blue-btn dfus-btn-icon-group w-full max-w-lg h-16" (click)="submitPhoneNumber()">
-        Get Code
-        <img src="icons/chevron_right.svg" alt="Right chevron icon" />
-      </button>
-    }
-    @else {
-      <div class="flex flex-row justify-center items-center gap-x-4">
-        <h4>{{phoneNumber}}</h4>
-        <button class="dfus-basic-btn" (click)="editNumberClick()">
-          Edit
-        </button>
-      </div>
-
-      <div class="w-full max-w-lg">
-        <label for="auth-code-input" class="dfus-input-label">Enter Code</label>
-        <input type="text" id="auth-code-input" [(ngModel)]="authCode" class="dfus-input">
-      </div>
-
-    @if (showCodeError) {
-      <div class="flex flex-row justify-start items-start gap-x-2">
-        <img src="icons/hint_error.svg" alt="Hint error icon" />
-        <span class="text-[#FF8389]">
-          Make sure you've entered the code correctly.
-        </span>
-      </div>
-    }
-
-    <button class="dfus-blue-btn dfus-btn-icon-group w-full max-w-lg h-16" (click)="submitAuthCode()">
-      Next
+    <button class="dfus-blue-btn dfus-btn-icon-group w-full max-w-lg h-16" (click)="showConnectTelegramButton = false">
+      Connect Telegram
       <img src="icons/chevron_right.svg" alt="Right chevron icon" />
     </button>
 
-
-    <div class="w-full max-w-lg">
-      <p>A code has been sent to your telegram account.</p>
-
-      <div class="flex flex-col justify-start items-stretch text-sm gap-y-2 mt-6 p-4 text-left notification-container">
-        <div class="flex flex-row justify-start items-center gap-x-2 text-base font-semibold">
-          <img src="icons/info.svg" alt="Important notification icon" />
-          <span>Please Note</span>
+    <div class="text-center text-[#848689]">
+      <p>Currently only Telegram is supported.</p>
+      <p>More messaging apps will be added soon.</p>
+    </div>
+  }
+  @else {
+    <div class="w-full flex flex-col justify-start items-center gap-y-8">
+      @if(!showAuthCodeInput) {
+        <h4>Enter your phone number with your country code</h4>
+        <div class="w-full max-w-lg">
+          <label for="phone-number-input" class="dfus-input-label">Your Phone Number:</label>
+          <input type="text" id="phone-number-input" [(ngModel)]="phoneNumber" class="dfus-input" appPhoneInput placeholder="e.g. +15551234567">
         </div>
-        <p>To ensure your account is secure, Telegram may send you a notification asking you to confirm this login
-          attempt.</p>
-        <p>
-          You will need to confirm the login by selecting: <span class="font-semibold">"Yes, it's me"</span> if it's
-          you.
-        </p>
-      </div>
+
+        @if (showPhoneNumberError) {
+          <div class="flex flex-row justify-start items-start gap-x-2">
+            <img src="icons/hint_error.svg" alt="Hint error icon" />
+            <span class="text-[#FF8389]">
+              Make sure you've entered your phone number correctly.
+            </span>
+          </div>
+        }
+
+        <button class="dfus-blue-btn dfus-btn-icon-group w-full max-w-lg h-16" (click)="submitPhoneNumber()">
+          Get Code
+          <img src="icons/chevron_right.svg" alt="Right chevron icon" />
+        </button>
+      }
+      @else {
+        <div class="flex flex-row justify-center items-center gap-x-4">
+          <h4>{{phoneNumber}}</h4>
+          <button class="dfus-basic-btn" (click)="editNumberClick()">
+            Edit
+          </button>
+        </div>
+
+        <div class="w-full max-w-lg">
+          <label for="auth-code-input" class="dfus-input-label">Enter Code</label>
+          <input type="text" id="auth-code-input" [(ngModel)]="authCode" class="dfus-input">
+        </div>
+
+        @if (showCodeError) {
+          <div class="flex flex-row justify-start items-start gap-x-2">
+            <img src="icons/hint_error.svg" alt="Hint error icon" />
+            <span class="text-[#FF8389]">
+              Make sure you've entered the code correctly.
+            </span>
+          </div>
+        }
+
+        <button class="dfus-blue-btn dfus-btn-icon-group w-full max-w-lg h-16" (click)="submitAuthCode()">
+          Next
+          <img src="icons/chevron_right.svg" alt="Right chevron icon" />
+        </button>
+
+        <div class="w-full max-w-lg">
+          <p>A code has been sent to your telegram account.</p>
+
+          <div class="flex flex-col justify-start items-stretch text-sm gap-y-2 mt-6 p-4 text-left notification-container">
+            <div class="flex flex-row justify-start items-center gap-x-2 text-base font-semibold">
+              <img src="icons/info.svg" alt="Important notification icon" />
+              <span>Please Note</span>
+            </div>
+            <p>To ensure your account is secure, Telegram may send you a notification asking you to confirm this login
+              attempt.</p>
+            <p>
+              You will need to confirm the login by selecting: <span class="font-semibold">"Yes, it's me"</span> if it's
+              you.
+            </p>
+          </div>
+        </div>
+      }
     </div>
   }
 
-  </div>
+  @if(showTelegramError) {
+    <div class="flex flex-col justify-start items-center">
+      <div class="flex flex-row justify-start items-start gap-x-2">
+        <img src="icons/hint_error.svg" alt="Hint error icon" />
+        <span class="text-[#FF8389]">
+          Failed to connect to Telegram. Try restarting the app.
+        </span>
+      </div>
+      <div class="flex flex-row justify-start items-start gap-x-2">
+        <span class="text-[#FF8389]">
+          If it keeps happening, please contact the dFusion Team for assistance.
+        </span>
+      </div>
+    </div>
   }
-
-
 </div>

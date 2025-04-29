@@ -1,6 +1,6 @@
 {
   "name": "@dfusion-ai/source",
-  "version": "0.3.4",
+  "version": "0.5.0",
   "license": "MIT",
   "homepage": "github.com/dfusionai",
   "author": {
@@ -90,6 +90,8 @@
     "@angular/platform-browser-dynamic": "~19.1.0",
     "@angular/router": "~19.1.0",
     "@gelatonetwork/relay-sdk": "^5.6.0",
+    "@reown/appkit": "^1.7.2",
+    "@reown/appkit-adapter-wagmi": "^1.7.2",
     "@toruslabs/eccrypto": "^6.0.2",
     "buffer": "^6.0.3",
     "electron-log": "^5.3.3",
@@ -100,6 +102,8 @@
     "pinata-web3": "^0.5.4",
     "rxjs": "~7.8.0",
     "telegram": "^2.26.21",
+    "viem": "^2.26.5",
+    "wagmi": "^2.14.16",
     "zone.js": "~0.15.0"
   },
   "devDependencies": {

@@ -1,4 +1,4 @@
-import { Component, effect, inject, OnInit } from '@angular/core';
+import { Component, effect, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { ethers } from "ethers";
 import { ElectronIpcService } from '../../services/electron-ipc.service';
@@ -6,31 +6,28 @@ import { Web3WalletService } from '../../services/web3-wallet.service';
 import { ENCRYPTION_SEED } from '../../shared/constants';
 
 @Component({
-  selector: 'app-home',
+  selector: 'app-hot-wallet',
   standalone: false,
-  templateUrl: './home.component.html',
-  styleUrl: './home.component.scss',
+  templateUrl: './hot-wallet.component.html',
+  styleUrl: './hot-wallet.component.scss',
 })
-export class HomeComponent implements OnInit {
+export class HotWalletComponent {
 
   private readonly electronIpcService: ElectronIpcService = inject(ElectronIpcService);
   private readonly web3WalletService: Web3WalletService = inject(Web3WalletService);
   private readonly router: Router = inject(Router);
 
-  public requiresWalletSetup = true;
 
   public readonly validWalletAndEncryptionKey = effect(() => {
     const validWalletAddress = this.electronIpcService.walletAddress();
     const validEncryptionKey = this.electronIpcService.encryptionKey();
 
-    this.requiresWalletSetup = !validWalletAddress || !validEncryptionKey;
-    if (!this.requiresWalletSetup) {
+    if (validWalletAddress && validEncryptionKey) {
       this.router.navigate(['app/miner']);
     }
-    return !this.requiresWalletSetup;
   });
 
-  public showWalletSetup = false;
+  public showWalletSetup = true;
   public showWalletGeneration = false;
   public showVerification = false;
   public showEncryptionKeyCreation = false;
@@ -49,23 +46,6 @@ export class HomeComponent implements OnInit {
   public hasUserAgreed = false;
 
   constructor() { }
-
-  async ngOnInit() {
-    await this.electronIpcService.getAppVersion();
-  }
-
-  get appVersion(): string {
-    return this.electronIpcService.appVersion();
-  }
-
-  public onNextClick() {
-    if (this.requiresWalletSetup) {
-      this.showWalletSetup = true;
-    }
-    else {
-      this.router.navigate(['app/miner']);
-    }
-  }
 
   public onGenerateClick() {
     if (this.hasUserAgreed) {
