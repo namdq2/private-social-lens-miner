@@ -30,11 +30,6 @@ export class SubmissionProcessingComponent {
     return this.gelatoApiService.currentTaskType;
   }
   
-  // Add getter to access fileId from the template
-  public get fileId() {
-    return this.gelatoApiService.currentSubmissionFileId;
-  }
-
   public readonly gelatoTaskTypeRequestReward = GelatoTaskRelay.REQUEST_REWARD;
   public readonly gelatoTaskTypeNone = GelatoTaskRelay.NONE;
 

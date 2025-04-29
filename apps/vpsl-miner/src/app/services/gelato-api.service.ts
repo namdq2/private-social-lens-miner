@@ -8,6 +8,7 @@ import { ethers, TransactionReceipt } from 'ethers';
 import { SubmissionProcessingService } from './submission-processing.service';
 import { ContractService } from './contract.service';
 import { ElectronIpcService } from './electron-ipc.service';
+import { RefinementApiService } from './refinement-api.service';
 
 import DataRegistryImplementationABI from '../assets/contracts/DataRegistryImplementation.json';
 
@@ -20,6 +21,7 @@ export class GelatoApiService {
   private readonly submissionProcessingService: SubmissionProcessingService = inject(SubmissionProcessingService);
   private readonly contractService: ContractService = inject(ContractService);
   private readonly electronIpcService: ElectronIpcService = inject(ElectronIpcService);
+  private readonly refinementApiService: RefinementApiService = inject(RefinementApiService);
 
   private gelatoRelay = new GelatoRelay();
   public currentTaskType = signal<GelatoTaskRelay>(GelatoTaskRelay.NONE);
@@ -180,7 +182,7 @@ export class GelatoApiService {
         // Extract fileId from the event arguments
         const fileId = Number(parsedLog.args['fileId']); // Or `parsedLog.args[0]`
         console.log('Uploaded File ID:', fileId);
-        
+
         // Set the fileId signal
         this.currentSubmissionFileId.set(fileId);
 
@@ -191,8 +193,7 @@ export class GelatoApiService {
           this.submissionProcessingService.displayInfo(`Contribution proof job has been requested. Your data is being validated`);
         }
       }
-    }
-    catch(err: any) {
+    } catch (err: any) {
       throw new Error(err);
     }
   }
@@ -248,6 +249,17 @@ export class GelatoApiService {
 
       this.electronIpcService.updateLastSubmissionTime();
 
+      // Call refinement service after successful RunProof
+      try {
+        this.submissionProcessingService.displayInfo('Starting data refinement process');
+        const refinementResult = await this.refinementApiService.callRefinementService(this.currentSubmissionFileId(), this.currentSignature());
+        this.submissionProcessingService.displayInfo(`Data refinement complete. Transaction hash: ${refinementResult.add_refinement_tx_hash}`);
+      } catch (refinementError) {
+        console.error('Failed to refine data:', refinementError);
+        // Continue with the normal flow, don't fail the submission
+        this.submissionProcessingService.displayInfo('Data refinement failed, but submission process continues');
+      }
+
       this.submissionProcessingService.displayInfo('Your data has been verified and attested. Claiming your reward');
 
       console.log('Contribution proof response:', contributionProofData);
@@ -266,10 +278,9 @@ export class GelatoApiService {
         this.submissionProcessingService.successRewardsAmount.set(rewards);
         await this.relayRequestReward(); // proof index always 1
       } else {
-        this.submissionProcessingService.displayFailure('The score for your data submission was below the acceptable limit. No rewards were awarded.')
+        this.submissionProcessingService.displayFailure('The score for your data submission was below the acceptable limit. No rewards were awarded.');
       }
-    }
-    catch(err: any) {
+    } catch (err: any) {
       this.submissionProcessingService.displayError(err);
       throw new Error(err);
     }

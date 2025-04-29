@@ -449,24 +449,8 @@ export class TelegramApiService {
         }
         
         if (fileId !== -1) {
-          try {
-            // Call refinement service with the fileId
-            this.submissionProcessingService.displayInfo('Starting data refinement process');
-            const refinementResult = await this.refinementApiService.callRefinementService(
-              fileId,
-              encryptionKey
-            );
-            
-            this.submissionProcessingService.displayInfo(
-              `Data refinement complete. Transaction hash: ${refinementResult.add_refinement_tx_hash}`
-            );
-          } catch (refinementError) {
-            console.error('Failed to refine data:', refinementError);
-            // Continue with the normal flow, don't fail the submission
-            this.submissionProcessingService.displayInfo(
-              'Data refinement failed, but submission process continues'
-            );
-          }
+          // File ID is set, continue with normal flow
+          this.submissionProcessingService.displayInfo('Data has been added to the data registry');
         }
       } else {
         console.error('no upload file url');
