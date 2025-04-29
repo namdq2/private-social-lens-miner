@@ -1,0 +1,57 @@
+#sign-message-container {
+  width: 641;
+  height: 332;
+  border-radius: 16px;
+  padding: 40px;
+  gap: 32px;
+  position: relative;
+  box-shadow: 0px 0px 22.17px 0px #3470E54D inset;
+  background-color: transparent; // Đảm bảo nền trong suốt
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 16px;
+    z-index: -1;
+    background: linear-gradient(125.77deg, #1A56CB -8.71%, rgba(26, 86, 203, 0) 94.63%);
+    padding: 0.74px;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  .content {
+    width: 641;
+    height: 332;
+    border-radius: 16px;
+    padding: 40px;
+    gap: 32px;
+    display: flex;
+    justify-content: flex-start;
+    position: relative;
+    box-shadow: 0px 0px 22.17px 0px #3470E54D inset;
+    backdrop-filter: blur(12px);
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-radius: 16px;
+      z-index: -1;
+      background: linear-gradient(265.64deg, rgba(26, 86, 203, 0) 0%, #1A56CB 100%);
+      padding: 0.74px;
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+  }
+}

@@ -22,6 +22,7 @@ export class TelegramSigninComponent {
   @Input() showAuthCodeInput = false;
   @Input() showPhoneNumberError: boolean = false;
   @Input() showCodeError: boolean = false;
+  @Input() showTelegramError: boolean = false;
 
   public submitPhoneNumber() {
     this.sendPhoneNumber.emit(this.phoneNumber);

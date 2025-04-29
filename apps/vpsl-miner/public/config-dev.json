@@ -17,7 +17,7 @@
   "vana": {
     "dlpSmartContractAddress": "0x308bFf8Ad48f11ff5692adE73B8Fd4af6aE9381d",
     "dataRegistrySmartContractAddress": "0x8C8788f98385F6ba1adD4234e551ABba0f82Cb7C",
-    "teePoolSmartContractAddress": "0x3c92fD91639b41f13338CE62f19131e7d19eaa0D",
+    "teePoolSmartContractAddress": "0xE8EC6BD73b23Ad40E6B9a6f4bD343FAc411bD99A",
     "tokenSmartContractAddress": "0x4f6502027Ef5887453E167df84F430B1b1f6726b",
     "tokenSymbolSmartContractAddress": "VTK",
     "tokenDecimalsSmartContractAddress": 18,
@@ -33,5 +33,10 @@
   },
   "gelato": {
     "apiKey": "i851bh80pHB4FI55cmAHb3OZW3qGe_zvn3UZGr7PY58_"
+  },
+  "reownAppkit": {
+    "projectId": "b5ca679f8742229883b5fc1de5972536",
+    "domain": "https://vana.genesis.dfusion.ai",
+    "icon": "https://vana.genesis.dfusion.ai/img/dFusionLogo.png"
   }
 }

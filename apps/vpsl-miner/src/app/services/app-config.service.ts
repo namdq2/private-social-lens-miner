@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { map, share } from 'rxjs';
-import { IAppConfigItem, IDFusion, IGelato, IPinata, ITelegram, IVana } from '../models/app-config';
+import { IAppConfigItem, IDFusion, IGelato, IPinata, IReownAppkit, ITelegram, IVana } from '../models/app-config';
 
 @Injectable({
   providedIn: 'root',
@@ -15,6 +15,7 @@ export class AppConfigService {
   public vana: IVana | null = null;
   // public cloudFlare: ICloudFlare | null = null;
   public gelato: IGelato | null = null;
+  public reownAppkit: IReownAppkit | null = null;
 
   constructor() {}
 
@@ -27,6 +28,7 @@ export class AppConfigService {
     this.vana = appConfigItem.vana;
     // this.cloudFlare = appConfigItem.cloudFlare;
     this.gelato = appConfigItem.gelato;
+    this.reownAppkit = appConfigItem.reownAppkit;
   }
 
   private validateConfigItem(appConfigItem: IAppConfigItem) {
@@ -47,6 +49,9 @@ export class AppConfigService {
     // }
     if (!appConfigItem.gelato) {
         throw new Error('Gelato configuration is missing.');
+    }
+    if (!appConfigItem.reownAppkit) {
+        throw new Error('ReownAppkit configuration is missing.');
     }
   }
 

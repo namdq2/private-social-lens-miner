@@ -98,4 +98,9 @@ export class Web3WalletService {
     }
   }
 
+  public disconnectWallet() {
+    this.walletAddress.set('');
+    this.encryptionKey.set('');
+    console.log('Hot Wallet disconnected');
+  }
 }
