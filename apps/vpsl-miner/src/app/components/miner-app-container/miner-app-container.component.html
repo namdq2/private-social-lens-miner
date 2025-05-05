@@ -15,7 +15,6 @@
 
         <li>
           <a routerLink="/app/stake-place" 
-             [routerLinkActiveOptions]="{exact: true}"
              routerLinkActive="text-[#5B92FD]"
              class="flex items-center p-2 rounded-lg hover:bg-gray-700 group">
             <mat-icon aria-hidden="false" fontIcon="paid"></mat-icon>
@@ -24,8 +23,7 @@
         </li>
 
         <li>
-          <a routerLink="/app/stake-place" 
-             [queryParams]="{viewStakeRecords: 'true'}"
+          <a routerLink="/app/stake-records" 
              routerLinkActive="text-[#5B92FD]"
              class="flex items-center p-2 rounded-lg hover:bg-gray-700 group">
             <mat-icon aria-hidden="false" fontIcon="dataset"></mat-icon>

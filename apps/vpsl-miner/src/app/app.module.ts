@@ -35,7 +35,6 @@ import { PhoneInputDirective } from './directives/phone-input.directive';
 import { AppConfigService } from './services/app-config.service';
 import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
 import { SignMessageWalletComponent } from './components/sign-message-wallet/sign-message-wallet.component';
-import { StakeModalComponent } from './components/stake-modal/stake-modal.component';
 import { StakePlaceComponent } from './components/stake-place/stake-place.component';
 import { MatInputModule } from '@angular/material/input';
 import { StakeRecordsComponent } from './components/stake-records/stake-records.component';
@@ -43,7 +42,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { StakeResultModalComponent } from './components/stake-result-modal/stake-result-modal.component';
-import { StakePlaceMainComponent } from './components/stake-place-main/stake-place-main';
+import { ReconnectInstructionDialogComponent } from './components/reconnect-instruction-dialog/reconnect-instruction-dialog.component';
+import { ResignMessageComponent } from './components/resign-message/resign-message.component';
 
 @NgModule({
   schemas: [
@@ -69,11 +69,11 @@ import { StakePlaceMainComponent } from './components/stake-place-main/stake-pla
     ConfirmDialogComponent,
     ConfirmWalletDialogComponent,
     SignMessageWalletComponent,
-    StakeModalComponent,
     StakePlaceComponent,
     StakeRecordsComponent,
     StakeResultModalComponent,
-    StakePlaceMainComponent,
+    ReconnectInstructionDialogComponent,
+    ResignMessageComponent,
   ],
   imports: [
     BrowserModule,

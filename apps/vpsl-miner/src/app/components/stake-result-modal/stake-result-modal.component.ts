@@ -14,7 +14,7 @@ export class StakeResultModalComponent {
 
   constructor(
     public dialogRef: MatDialogRef<StakeResultModalComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { isLoading: boolean; isSuccess: boolean; stakeAmount?: number; stakePeriod?: number },
+    @Inject(MAT_DIALOG_DATA) public data: { isLoading: boolean; isSuccess: boolean; stakeAmount?: number; stakePeriod?: number, isUnstake?: boolean },
   ) {}
 
   onNoClick(): void {
@@ -22,6 +22,6 @@ export class StakeResultModalComponent {
   }
 
   onViewStakes() {
-    this.router.navigate([], { queryParams: { viewStakeRecords: 'true' } });
+    this.router.navigate(['/app/stake-records']);
   }
 }
