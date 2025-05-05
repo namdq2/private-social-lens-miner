@@ -7,14 +7,15 @@ import { ENCRYPTION_SEED } from '../shared/constants';
 import { AppConfigService } from './app-config.service';
 import { ElectronIpcService } from './electron-ipc.service';
 import { http } from 'viem';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ExistingWalletService {
+  private readonly router: Router = inject(Router);
   private readonly electronIpcService: ElectronIpcService = inject(forwardRef(() => ElectronIpcService));
   private readonly appConfigService: AppConfigService = inject(AppConfigService);
-
   public get projectId() {
     return this.appConfigService.reownAppkit?.projectId || '';
   }
@@ -27,11 +28,11 @@ export class ExistingWalletService {
     return this.appConfigService.reownAppkit?.icon || '';
   }
 
-  private reownAppKit: any;
+  public reownAppKit: any;
   public eip155Provider: any;
   public isConnected = signal<boolean>(false);
   public isOpenModal = signal<boolean>(false);
-
+  private isReconnect = signal<boolean>(false);
   // Define Vana networks
   public vanaMainnet: AppKitNetwork = {
     id: 1480,
@@ -121,24 +122,30 @@ export class ExistingWalletService {
     // Subscribe events
     this.reownAppKit.subscribeProviders((state: any) => {
       this.eip155Provider = state['eip155'];
-
       const isConnected = this?.reownAppKit?.getIsConnectedState() || false;
+      const existingWalletAddress = this.electronIpcService.walletAddress();
       this.isConnected.set(isConnected);
+   
       if (isConnected) {
         try {
           this.isOpenModal.set(true);
           const address = this.reownAppKit.getAddress();
-          this.electronIpcService.setWalletAddress(address);
+          if(existingWalletAddress !== address) {
+            this.electronIpcService.setWalletAddress(address);
+            if(this.isReconnect()) {
+              this.router.navigate(['/resign-message']);  
+            }
+          }
         } catch (error) {
           console.log('Save data connected wallet error: ', error);
         }
       }
     });
-  }
-
-  public connectWallet(walletType: WalletType) {
+  } 
+  public connectWallet(walletType: WalletType, isReconnect: boolean = false) {
     if (walletType === WalletType.EXISTING_WALLET && !this.isOpenModal()) {
       this.reownAppKit.open();
+      this.isReconnect.set(isReconnect);
     }
   }
 

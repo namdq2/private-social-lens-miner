@@ -9,8 +9,10 @@ import { ElectronIpcService } from '../../services/electron-ipc.service';
 import { CryptographyService } from '../../services/cryptography.service';
 import { calculateTimeRemaining, formatUnixTimestampToDateString } from '../../shared/helpers';
 import { StakeResultModalComponent } from '../stake-result-modal/stake-result-modal.component';
-import { WalletType } from '../../models/wallet';
 import { ExistingWalletService } from '../../services/existing-wallet.service';
+import { ReconnectInstructionDialogComponent } from '../reconnect-instruction-dialog/reconnect-instruction-dialog.component';
+import { WalletType } from '../../models/wallet';
+
 interface StakeRecord {
   amount: number;
   startTime: string;
@@ -41,13 +43,13 @@ export class StakeRecordsComponent {
   private readonly matDialog: MatDialog = inject(MatDialog);
   private stakingContract: ethers.Contract | null = null;
   private walletAddress: string = ''; 
-  private isHotWallet: boolean = false;
   private signer: ethers.JsonRpcSigner | ethers.Wallet | null = null;
   public displayedColumns: string[] = ['amount', 'startTime', 'timeRemaining', 'hasWithdrawn'];
   public dataSource = new MatTableDataSource<StakeRecord>(ELEMENT_DATA);
   public unstakingItem: StakeRecord | null = null;
   public reloadActiveStakesPending: boolean = false;
   public availableVFSNBalance: string = '';
+  public isHotWallet: boolean = false;
 
   constructor(private web3WalletService: Web3WalletService, private cryptographyService: CryptographyService, private electronIpcService: ElectronIpcService, private existingWalletService: ExistingWalletService) {
     this.stakingContract = this.web3WalletService.stakingContract;
@@ -57,30 +59,79 @@ export class StakeRecordsComponent {
     this.loadActiveStakes();
   }
 
+  checkIsConnected() {
+    if(!this.existingWalletService.eip155Provider || !this.existingWalletService?.reownAppKit?.getIsConnectedState()) {
+      this.existingWalletService.isConnected.set(false);
+    } else {
+      this.existingWalletService.isConnected.set(true);
+    }
+  }
+
   async onUnStake(stake: StakeRecord) {
-    if (!this.stakingContract) {
-      this.openResultDialog(false, false); 
+    this.checkIsConnected();
+
+    if(!this.existingWalletService.isConnected()) {
+      this.openReconnectInstructionDialog();
+      return;
+    }
+
+    if (stake.hasWithdrawn) {
+      this.openResultDialog({
+        isLoading: false,
+        isSuccess: false,
+        errMessage: "Stake has already been withdrawn.",
+      });
+      return
+    }
+
+    if (!stake.stakingPeriodOver) {
+      this.openResultDialog({
+        isLoading: false,
+        isSuccess: false,
+        errMessage: "Staking duration has not elapsed yet.",
+      });
+      return
+    }
+
+    if (!this.stakingContract || !stake || !this.existingWalletService.eip155Provider) {
+      this.openResultDialog({
+        isLoading: false,
+        isSuccess: false,
+      });
       return;
     }
 
     try {
-      if(this.isHotWallet) {
-        this.signer = this.web3WalletService.wallet?.connect(this.web3WalletService.rpcProvider) || null;
-      } else {
-        // Create provider without network parameter
-        const provider = new BrowserProvider(this.existingWalletService.eip155Provider as unknown as Eip1193Provider);
-        // Get signer from provider
-        this.signer = await provider.getSigner() || null;
-      }
+      // Create provider without network parameter
+      const provider = new BrowserProvider(this.existingWalletService.eip155Provider as unknown as Eip1193Provider);
+      // Get signer from provider
+      this.signer = await provider.getSigner() || null;
+      // create contract instance with signer
       const stakingContractAddress = this.stakingContract.target;
       const stakingContractWithSigner = new ethers.Contract(stakingContractAddress, StakingABI.abi, this.signer);
       this.unstakingItem = stake;
+      // unstake tokens
+      this.openResultDialog({
+        isLoading: true,
+        isSuccess: false
+      });
       const tx = await stakingContractWithSigner['unstakeTokens'](stake.stakeIndex);
       await tx.wait();
       this.loadActiveStakes();
+      this.matDialog.closeAll();
+      this.openResultDialog({
+        isLoading: false,
+        isSuccess: true,
+        isUnstake: true,
+      });
     } catch (error) {
       console.error('Error unstaking:', error);
-      this.openResultDialog(false, false);  
+      this.matDialog.closeAll();
+      this.openResultDialog({
+        isLoading: false,
+        isSuccess: false,
+        isUnstake: true,
+      });
     } finally {
       this.unstakingItem = null;
       await this.web3WalletService.calculateBalance();
@@ -102,7 +153,7 @@ export class StakeRecordsComponent {
     try {
       const activeStakes = await this.stakingContract?.['getActiveStakes'](this.walletAddress);
 
-      const stakeRecords: StakeRecord[] = activeStakes.map((stake: IStakeItemResponse, index: number) => {
+      const stakeRecords: StakeRecord[] = activeStakes?.map((stake: IStakeItemResponse, index: number) => {
         const formattedStartTime = formatUnixTimestampToDateString(stake.startTime);
         const timeRemaining = calculateTimeRemaining(stake.startTime, stake.duration);
         return {
@@ -115,7 +166,9 @@ export class StakeRecordsComponent {
         };
       });
 
-      this.dataSource.data = stakeRecords;
+      const filteredStakeRecords = stakeRecords?.filter((stake: StakeRecord) => !stake.hasWithdrawn);
+
+      this.dataSource.data = filteredStakeRecords || [];
     } catch (error) {
       console.error('Error fetching active stakes:', error);
     } finally {
@@ -124,10 +177,25 @@ export class StakeRecordsComponent {
     }
   }
 
-  openResultDialog(isLoading: boolean, isSuccess: boolean): void {
+  openResultDialog(params: {
+    isLoading: boolean;
+    isSuccess: boolean;
+    isUnstake?: boolean;
+    errMessage?: string;
+  }): void {
     this.matDialog.open(StakeResultModalComponent, {
+      disableClose: true,
       panelClass: 'custom-dialog-container',
-      data: { isLoading, isSuccess },
+      width: '100%',
+      maxWidth: '800px',
+      data: params,
+    });
+  }
+
+  openReconnectInstructionDialog(): void {
+    this.matDialog.open(ReconnectInstructionDialogComponent, {
+      width: '500px',
+      disableClose: true,
     });
   }
 

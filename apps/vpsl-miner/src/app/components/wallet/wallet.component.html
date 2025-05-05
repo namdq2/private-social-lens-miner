@@ -10,35 +10,16 @@
     </div> -->
   </div>
 
-    <!-- <button class="dfus-blue-btn">
-      <a [href]="dlpTokenVanaScanUrl" target="_blank">View Tokens</a>
-    </button> -->
-    <div class="flex flex-col items-end">
-      <button class="dfus-basic-btn flex flex-row justify-center items-center gap-x-2" #trigger="matMenuTrigger" [matMenuTriggerFor]="menu">
-        {{walletAddress().slice(0, 5) }} ... {{ walletAddress().slice(-5)}}
-        @if (trigger.menuOpen) {
-          <mat-icon>arrow_drop_up</mat-icon>
-        }
-        @else {
-          <mat-icon>arrow_drop_down</mat-icon>
-        }
-
-        <a [href]="vanaTestnetExplorerUrl()" target="_blank">
-          <button class="dfus-basic-btn !p-0 !border-0 !h-6">
-            <mat-icon class="text-xl hover:text-dfus-blue" aria-hidden="false" fontIcon="open_in_new" />
-          </button>
-        </a>
-      </button>
-      <mat-menu #menu="matMenu" xPosition="before">
-          <button mat-menu-item (click)="handleDisconnectWallet()">
-            Disconnect Wallet
-          </button>
-      </mat-menu>
-      <div class="flex flex-row justify-end items-center mt-2">
-        <a class="flex flex-row justify-end items-center gap-x-2 text-sm cursor-pointer" [href]="vanaTestnetExplorerUrl()" target="_blank">
-          <span class="underline text-dfus-blue">View Transaction History</span>
-          <mat-icon class="text-base text-dfus-blue" fontIcon="open_in_new"></mat-icon>
-        </a>
-      </div>
+  <!-- <button class="dfus-blue-btn">
+    <a [href]="dlpTokenVanaScanUrl" target="_blank">View Tokens</a>
+  </button> -->
+  <div class="flex flex-col items-end">
+    <app-wallet-button></app-wallet-button>
+    <div class="flex flex-row justify-end items-center mt-2">
+      <a class="flex flex-row justify-end items-center gap-x-2 text-sm cursor-pointer" [href]="vanaTestnetExplorerUrl()" target="_blank">
+        <span class="underline text-dfus-blue">View Transaction History</span>
+        <mat-icon class="text-base text-dfus-blue" fontIcon="open_in_new"></mat-icon>
+      </a>
     </div>
+  </div>
 </div>

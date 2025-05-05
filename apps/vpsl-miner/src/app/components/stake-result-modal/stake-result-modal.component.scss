@@ -1,3 +1,6 @@
-::ng-deep .stake-result-modal-content.mat-mdc-dialog-content {
-  padding: 80px !important;
+.custom-dialog-container {
+  .stake-result-modal-content {
+    padding: 80px;
+    width: 100%;
+  }
 }
