@@ -22,6 +22,7 @@ export class WalletComponent implements OnInit {
   public walletAddress = signal<string>('');
   public walletType = signal<WalletType | null>(null);
 
+  public vanaTestnetExplorerUrl = signal<string>('');
   public dlpTokenVanaScanUrl = this.web3WalletService.dlpTokenVanaScanUrl;
 
   constructor() {
@@ -38,6 +39,7 @@ export class WalletComponent implements OnInit {
     this.vanaTokenAmount = this.web3WalletService.vanaTokenAmount;
     this.walletAddress = this.web3WalletService.walletAddress;
     this.walletType = this.electronIpcService.walletType;
+    this.vanaTestnetExplorerUrl.set(`${this.web3WalletService.vanaScanUrl}/address/${this.walletAddress()}`);
     // await this.web3WalletService.calculateBalance();
   }
 

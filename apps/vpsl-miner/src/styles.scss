@@ -123,6 +123,12 @@ body {
     container-color: white,
     button-color: white,
   ));
+
+  @include mat.tooltip-overrides((
+    container-color: #1a1a1a,
+    supporting-text-color: #ffffff,
+    supporting-text-size: 12px
+  ));
 }
 
 // ??

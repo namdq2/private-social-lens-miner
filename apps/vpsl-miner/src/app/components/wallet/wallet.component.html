@@ -13,7 +13,7 @@
     <!-- <button class="dfus-blue-btn">
       <a [href]="dlpTokenVanaScanUrl" target="_blank">View Tokens</a>
     </button> -->
-    <div>
+    <div class="flex flex-col items-end">
       <button class="dfus-basic-btn flex flex-row justify-center items-center gap-x-2" #trigger="matMenuTrigger" [matMenuTriggerFor]="menu">
         {{walletAddress().slice(0, 5) }} ... {{ walletAddress().slice(-5)}}
         @if (trigger.menuOpen) {
@@ -28,5 +28,11 @@
             Disconnect Wallet
           </button>
       </mat-menu>
+      <div class="flex flex-row justify-end items-center mt-2">
+        <a class="flex flex-row justify-end items-center gap-x-2 text-sm cursor-pointer" [href]="vanaTestnetExplorerUrl()" target="_blank">
+          <span class="underline text-dfus-blue">View Transaction History</span>
+          <mat-icon class="text-base text-dfus-blue" fontIcon="open_in_new"></mat-icon>
+        </a>
+      </div>
     </div>
 </div>
