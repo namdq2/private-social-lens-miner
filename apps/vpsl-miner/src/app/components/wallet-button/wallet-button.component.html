@@ -1,0 +1,13 @@
+<div>
+  <button class="dfus-basic-btn flex flex-row justify-center items-center gap-x-2" #trigger="matMenuTrigger" [matMenuTriggerFor]="menu">
+    {{ walletAddress().slice(0, 5) }} ... {{ walletAddress().slice(-5) }}
+    @if (trigger.menuOpen) {
+    <mat-icon>arrow_drop_up</mat-icon>
+    } @else {
+    <mat-icon>arrow_drop_down</mat-icon>
+    }
+  </button>
+  <mat-menu #menu="matMenu" xPosition="before">
+    <button mat-menu-item (click)="handleDisconnectWallet()">Disconnect Wallet</button>
+  </mat-menu>
+</div>

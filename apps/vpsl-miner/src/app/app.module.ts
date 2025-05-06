@@ -44,7 +44,7 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { StakeResultModalComponent } from './components/stake-result-modal/stake-result-modal.component';
 import { ReconnectInstructionDialogComponent } from './components/reconnect-instruction-dialog/reconnect-instruction-dialog.component';
 import { ResignMessageComponent } from './components/resign-message/resign-message.component';
-
+import { WalletButtonComponent } from './components/wallet-button/wallet-button.component';
 @NgModule({
   schemas: [
     // CUSTOM_ELEMENTS_SCHEMA,
@@ -74,6 +74,7 @@ import { ResignMessageComponent } from './components/resign-message/resign-messa
     StakeResultModalComponent,
     ReconnectInstructionDialogComponent,
     ResignMessageComponent,
+    WalletButtonComponent
   ],
   imports: [
     BrowserModule,

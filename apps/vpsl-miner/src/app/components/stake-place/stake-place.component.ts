@@ -6,6 +6,8 @@ import { Web3WalletService } from '../../services/web3-wallet.service';
 import { BrowserProvider, ethers, Eip1193Provider } from 'ethers';
 import StakingABI from '../../assets/contracts/StakingImplemenation.json';
 import TokenABI from '../../assets/contracts/TokenImplementation.json';
+import { BN } from 'bn.js';
+
 
 import { ElectronIpcService } from '../../services/electron-ipc.service';
 import { ExistingWalletService } from '../../services/existing-wallet.service';
@@ -92,9 +94,17 @@ export class StakePlaceComponent {
       const tokenContractWithSigner = new ethers.Contract(tokenContractAddress, TokenABI.abi, this.signer);
       const stakingContractWithSigner = new ethers.Contract(stakingContractAddress, StakingABI.abi, this.signer);
       this.openResultDialog(true, false);
+
+      const allowanceBigInt = await tokenContractWithSigner['allowance'](
+        this.signer.address,
+        stakingContractAddress
+      );
       //approve tokens
-      const approveTx = await tokenContractWithSigner['approve'](stakingContractAddress, amountWei);
-      await approveTx.wait();
+      if (!(new BN(String(allowanceBigInt)).gte(new BN(String(amountWei))))) { 
+        const maxUint256 = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+        const approveTx = await tokenContractWithSigner['approve'](stakingContractAddress, maxUint256);
+        await approveTx.wait();
+      }
       // Stake tokens
       const stakeTx = await stakingContractWithSigner['stakeTokens'](amountWei, durationSeconds);
       await stakeTx.wait();

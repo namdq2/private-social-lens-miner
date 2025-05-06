@@ -14,7 +14,7 @@ export class StakeResultModalComponent {
 
   constructor(
     public dialogRef: MatDialogRef<StakeResultModalComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { isLoading: boolean; isSuccess: boolean; stakeAmount?: number; stakePeriod?: number, isUnstake?: boolean },
+    @Inject(MAT_DIALOG_DATA) public data: { isLoading: boolean; isSuccess: boolean; stakeAmount?: number; stakePeriod?: number, isUnstake?: boolean, errMessage?: string },
   ) {}
 
   onNoClick(): void {

@@ -75,8 +75,29 @@ export class StakeRecordsComponent {
       return;
     }
 
+    if (stake.hasWithdrawn) {
+      this.openResultDialog({
+        isLoading: false,
+        isSuccess: false,
+        errMessage: "Stake has already been withdrawn.",
+      });
+      return
+    }
+
+    if (!stake.stakingPeriodOver) {
+      this.openResultDialog({
+        isLoading: false,
+        isSuccess: false,
+        errMessage: "Staking duration has not elapsed yet.",
+      });
+      return
+    }
+
     if (!this.stakingContract || !stake || !this.existingWalletService.eip155Provider) {
-      this.openResultDialog(false, false); 
+      this.openResultDialog({
+        isLoading: false,
+        isSuccess: false,
+      });
       return;
     }
 
@@ -90,16 +111,27 @@ export class StakeRecordsComponent {
       const stakingContractWithSigner = new ethers.Contract(stakingContractAddress, StakingABI.abi, this.signer);
       this.unstakingItem = stake;
       // unstake tokens
-      this.openResultDialog(true, false, true);  
+      this.openResultDialog({
+        isLoading: true,
+        isSuccess: false
+      });
       const tx = await stakingContractWithSigner['unstakeTokens'](stake.stakeIndex);
       await tx.wait();
       this.loadActiveStakes();
       this.matDialog.closeAll();
-      this.openResultDialog(false, true, true, stake.amount);  
+      this.openResultDialog({
+        isLoading: false,
+        isSuccess: true,
+        isUnstake: true,
+      });
     } catch (error) {
       console.error('Error unstaking:', error);
       this.matDialog.closeAll();
-      this.openResultDialog(false, false, true);  
+      this.openResultDialog({
+        isLoading: false,
+        isSuccess: false,
+        isUnstake: true,
+      });
     } finally {
       this.unstakingItem = null;
       await this.web3WalletService.calculateBalance();
@@ -121,7 +153,7 @@ export class StakeRecordsComponent {
     try {
       const activeStakes = await this.stakingContract?.['getActiveStakes'](this.walletAddress);
 
-      const stakeRecords: StakeRecord[] = activeStakes.map((stake: IStakeItemResponse, index: number) => {
+      const stakeRecords: StakeRecord[] = activeStakes?.map((stake: IStakeItemResponse, index: number) => {
         const formattedStartTime = formatUnixTimestampToDateString(stake.startTime);
         const timeRemaining = calculateTimeRemaining(stake.startTime, stake.duration);
         return {
@@ -134,7 +166,9 @@ export class StakeRecordsComponent {
         };
       });
 
-      this.dataSource.data = stakeRecords;
+      const filteredStakeRecords = stakeRecords?.filter((stake: StakeRecord) => !stake.hasWithdrawn);
+
+      this.dataSource.data = filteredStakeRecords || [];
     } catch (error) {
       console.error('Error fetching active stakes:', error);
     } finally {
@@ -143,13 +177,18 @@ export class StakeRecordsComponent {
     }
   }
 
-  openResultDialog(isLoading: boolean, isSuccess: boolean, isUnstake?: boolean, stakeAmount?: number, stakePeriod?: number): void {
+  openResultDialog(params: {
+    isLoading: boolean;
+    isSuccess: boolean;
+    isUnstake?: boolean;
+    errMessage?: string;
+  }): void {
     this.matDialog.open(StakeResultModalComponent, {
       disableClose: true,
       panelClass: 'custom-dialog-container',
       width: '100%',
       maxWidth: '800px',
-      data: { isLoading, isSuccess, stakeAmount, stakePeriod, isUnstake },
+      data: params,
     });
   }
 

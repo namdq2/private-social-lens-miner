@@ -1,15 +1,17 @@
 <div class="mt-5">
-  <div class="flex flex-row justify-between items-center md:flex-col md:gap-4 mt-5">
-    <div class="w-full flex flex-col justify-start items-start md:flex-row md:justify-center gap-2">
+  <div class="flex flex-row justify-between items-center md:gap-4 mt-5">
+    <div class="flex flex-col justify-start items-start md:flex-row md:justify-center gap-2">
       <div class="text-2xl">Your <span class="text-dfus-orange">$VFSN</span></div>
       <div class="text-dfus-orange text-2xl">Stakes</div>
     </div>
+
+    <app-wallet-button></app-wallet-button>
   </div>
 
   <div class="flex justify-between items-center mb-4 mt-5">
     <div>
-      <p class="text-sm">Available Balance</p>
-      <p class="text-xl font-bold">{{ availableVFSNBalance }} VTK</p>
+      <h4 class="text-2xl">Available Balance</h4>
+      <h2 class="font-semibold text-4xl">{{ availableVFSNBalance }} VTK</h2>
     </div>
     <div class="flex flex-row gap-4">
       <button class="p-0" (click)="onReload()">
@@ -20,32 +22,34 @@
   </div>
 
   <div class="flex flex-row justify-end items-center">
-    <div class="flex flex-row justify-end items-center gap-x-2 text-sm cursor-pointer">
-      <img src="icons/hint_info.svg" alt="Hint info icon" />
-      <span class="underline hover:text-dfus-dark-blue">Learn how staking rewards work</span>
-    </div>
+    <a routerLink="/app/staking-rewards">
+      <div class="flex flex-row justify-end items-center gap-x-2 text-sm cursor-pointer">
+        <img src="icons/hint_info.svg" alt="Hint info icon" />
+        <span class="underline hover:text-dfus-dark-blue text-base">Learn how staking rewards work</span>
+      </div>
+    </a>
   </div>
 
   <div class="mat-elevation-z8 !text-white my-4">
     <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
       <ng-container matColumnDef="amount">
-        <th mat-header-cell *matHeaderCellDef class="text-white !bg-dfus-dark !border-b !border-b-dfus-border !text-end">Stake Amount</th>
-        <td mat-cell *matCellDef="let element" class="text-white !text-end !border-b !border-b-dfus-border">{{ element.amount }}</td>
+        <th mat-header-cell *matHeaderCellDef class="text-white !bg-dfus-dark !border-b !border-b-dfus-border !text-end text-base">Stake Amount</th>
+        <td mat-cell *matCellDef="let element" class="text-white !text-end !border-b !border-b-dfus-border text-base">{{ element.amount }}</td>
       </ng-container>
 
       <ng-container matColumnDef="startTime">
-        <th mat-header-cell *matHeaderCellDef class="text-white !bg-dfus-dark !border-b !border-b-dfus-border">Stake Date</th>
-        <td mat-cell *matCellDef="let element" class="text-white !border-b !border-b-dfus-border">{{ element.startTime }}</td>
+        <th mat-header-cell *matHeaderCellDef class="text-white !bg-dfus-dark !border-b !border-b-dfus-border text-base">Stake Date</th>
+        <td mat-cell *matCellDef="let element" class="text-white !border-b !border-b-dfus-border text-base">{{ element.startTime }}</td>
       </ng-container>
 
       <ng-container matColumnDef="timeRemaining">
-        <th mat-header-cell *matHeaderCellDef class="text-white !bg-dfus-dark !border-b !border-b-dfus-border">Time Remaining</th>
-        <td mat-cell *matCellDef="let element" class="text-white !border-b !border-b-dfus-border">{{ element.timeRemaining }}</td>
+        <th mat-header-cell *matHeaderCellDef class="text-white !bg-dfus-dark !border-b !border-b-dfus-border text-base">Time Remaining</th>
+        <td mat-cell *matCellDef="let element" class="text-white !border-b !border-b-dfus-border text-base">{{ element.timeRemaining }}</td>
       </ng-container>
 
       <ng-container matColumnDef="hasWithdrawn">
-        <th mat-header-cell *matHeaderCellDef class="text-white !bg-dfus-dark !border-b !border-b-dfus-border"></th>
-        <td mat-cell *matCellDef="let element" class="text-white !border-b !border-b-dfus-border">
+        <th mat-header-cell *matHeaderCellDef class="text-white !bg-dfus-dark !border-b !border-b-dfus-border text-base"></th>
+        <td mat-cell *matCellDef="let element" class="text-white !border-b !border-b-dfus-border text-base">
           <button
             class="dfus-orange-btn"
             *ngIf="!element.hasWithdrawn && element.stakingPeriodOver"
@@ -53,7 +57,7 @@
             [disabled]="unstakingItem?.stakeIndex === element.stakeIndex || isHotWallet"
             [class.opacity-50]="unstakingItem?.stakeIndex === element.stakeIndex || isHotWallet"
           >
-            {{ unstakingItem?.stakeIndex === element.stakeIndex ? 'Unstaking...' : 'UnStake' }}
+            {{ unstakingItem?.stakeIndex === element.stakeIndex ? 'Unstaking...' : 'Unstake' }}
           </button>
         </td>
       </ng-container>
@@ -63,6 +67,6 @@
     </table>
 
     <!-- No data message -->
-    <div *ngIf="dataSource.data.length === 0" class="text-center text-white mt-4">No data</div>
+    <div *ngIf="dataSource.data.length === 0" class="text-center text-white mt-4 text-base">No data</div>
   </div>
 </div>

@@ -1,6 +1,6 @@
 <div class="custom-dialog-container">
   <mat-dialog-content class="stake-result-modal-content">
-    <button class="absolute top-0 right-0" (click)="onNoClick()" *ngIf="!data.isLoading">
+    <button class="absolute top-4 right-4" (click)="onNoClick()" *ngIf="!data.isLoading">
       <mat-icon class="text-2xl text-dfus-gray-light" aria-hidden="false" fontIcon="close" />
     </button>
   
@@ -20,39 +20,46 @@
     <div class="flex flex-col items-center justify-center mt-10 gap-5" *ngIf="!data.isLoading && !data.isSuccess">
       <img src="icons/report_error.svg" alt="Stake result modal" class="w-14 h-14 mt-5" />
   
-      <p class="text-center mb-4">Transaction signing request was rejected.</p>
+      <p class="text-center mb-4"> {{ data.errMessage ? data.errMessage : 'Transaction signing request was rejected.' }}</p>
   
       <button class="dfus-blue-btn w-[250px]" (click)="onNoClick()">Back</button>
     </div>
   
     <div class="flex flex-col items-center justify-center mt-4 gap-5" *ngIf="!data.isLoading && data.isSuccess">
-      <img src="icons/verified.svg" alt="Stake result modal" class="w-14 h-14 mt-5" />
-  
-      <div>
-        <div class="text-center">Thank you for {{ data.isUnstake ? 'unstaking' : 'staking' }} with us!</div>
+      <img src="icons/verified.svg" alt="Stake result modal" class="w-14 h-14 mt-5" *ngIf="!data.isUnstake"/>
+      <mat-icon class="!w-14 !h-14 text-5xl mt-5" *ngIf="data.isUnstake">info</mat-icon>
+      
+      <div *ngIf="!data.isUnstake">
+        <div class="text-center">Thank you for staking with us!</div>
   
         <div class="text-center mb-4">Glad to have you on board.</div>
       </div>
+
+      <div *ngIf="data.isUnstake">
+        <div class="text-center">You have successfully unstaked your $VFSN.</div>
   
-      <div class="section-container w-full p-5">
+        <div class="text-center mb-4">Your balance will be updated shortly</div>
+      </div>
+  
+      <div class="section-container w-full p-5" *ngIf="!data.isUnstake">
         <div class="flex justify-between mb-5"  [class.mb-0]="data.isUnstake" >
           <span>Staked VTK:</span>
           <span class="text-green-500">{{ data.stakeAmount }}</span>
         </div>
-        <div class="flex justify-between" *ngIf="!data.isUnstake">
+        <div class="flex justify-between">
           <span>Duration:</span>
           <span class="text-green-500">{{ data.stakePeriod }} days</span>
         </div>
       </div>
   
-      <div class="flex flex-row my-4 w-full">
+      <div class="flex flex-row my-4 w-full" *ngIf="!data.isUnstake">
         <div class="flex flex-row gap-x-2 text-sm cursor-pointer">
           <img src="icons/hint_info.svg" alt="Hint info icon" />
-          <span class="underline hover:text-dfus-dark-blue">Learn how staking rewards work</span>
+          <span class="underline hover:text-dfus-dark-blue">Your stake will reflect shortly</span>
         </div>
       </div>
   
-      <div class="flex gap-4 w-full">
+      <div class="flex gap-14 w-full">
         <button class="dfus-blue-btn" [class.w-[300px]]="data.isUnstake" [class.mx-auto]="data.isUnstake" [class.w-full]="!data.isUnstake" (click)="onNoClick()">Close</button>
         <button class="dfus-orange-btn w-full" (click)="onViewStakes(); onNoClick()" *ngIf="!data.isUnstake">View Stakes</button>
       </div>
