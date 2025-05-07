@@ -1,0 +1,41 @@
+<div class="custom-dialog-container">
+  <mat-dialog-content class="stake-result-modal-content">
+    <button class="absolute top-4 right-4" (click)="onNoClick()" *ngIf="!data.isLoading">
+      <mat-icon class="text-2xl text-dfus-gray-light" aria-hidden="false" fontIcon="close" />
+    </button>
+  
+    <div class="w-full flex flex-col justify-start items-start md:flex-row md:justify-center gap-2 mb-6">
+      <h3 class="font-medium"> Transfer <span class="text-dfus-orange">{{ data.tokenTransferType }}</span></h3>
+    </div>
+  
+    <div *ngIf="data.isLoading">
+      <div class="flex flex-col items-center justify-center mt-12">
+        <p class="text-center mb-4">
+          Your transfer request is being processed. Please carefully review and sign the transaction in your wallet to complete the process.
+        </p>
+        <img src="img/spinner.svg" alt="Stake result modal" class="spinner w-20 h-20 mt-5" />
+      </div>
+    </div>
+  
+    <div class="flex flex-col items-center justify-center mt-10 gap-5" *ngIf="!data.isLoading && !data.isSuccess">
+      <img src="icons/report_error.svg" alt="Stake result modal" class="w-14 h-14 mt-5" />
+  
+      <p class="text-center mb-4"> {{ data.errMessage ? data.errMessage : 'Transaction signing request was rejected.' }}</p>
+  
+      <button class="dfus-blue-btn w-[250px]" (click)="onNoClick()">Back</button>
+    </div>
+  
+    <div class="flex flex-col items-center justify-center mt-4 gap-5" *ngIf="!data.isLoading && data.isSuccess">
+      <mat-icon class="!w-14 !h-14 text-5xl mt-5" >currency_exchange</mat-icon>
+      
+      <div>
+        <div class="text-center">Transferred {{ data.tokenTransferType }} successfully</div>
+        <div class="text-center mb-4">Your balance will be updated shortly</div>
+      </div>
+  
+      <div class="flex gap-14 w-full">
+        <button class="dfus-blue-btn w-[250px] mx-auto" (click)="onNoClick()">Close</button>
+      </div>
+    </div>
+  </mat-dialog-content>
+</div>

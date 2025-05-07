@@ -45,6 +45,10 @@ import { StakeResultModalComponent } from './components/stake-result-modal/stake
 import { ReconnectInstructionDialogComponent } from './components/reconnect-instruction-dialog/reconnect-instruction-dialog.component';
 import { ResignMessageComponent } from './components/resign-message/resign-message.component';
 import { WalletButtonComponent } from './components/wallet-button/wallet-button.component';
+import { SendTokensComponent } from './components/send-tokens/send-tokens.component';
+import { MatSelectModule } from '@angular/material/select';
+import { SendTokenConfirmationDialogComponent } from './components/send-token-confirmation-dialog/send-token-confirmation-dialog.component';
+import { SendTokenResultModalComponent } from './components/send-token-result-modal/send-token-result-modal.component';
 @NgModule({
   schemas: [
     // CUSTOM_ELEMENTS_SCHEMA,
@@ -74,7 +78,10 @@ import { WalletButtonComponent } from './components/wallet-button/wallet-button.
     StakeResultModalComponent,
     ReconnectInstructionDialogComponent,
     ResignMessageComponent,
-    WalletButtonComponent
+    WalletButtonComponent,
+    SendTokensComponent,
+    SendTokenConfirmationDialogComponent,
+    SendTokenResultModalComponent,
   ],
   imports: [
     BrowserModule,
@@ -98,6 +105,7 @@ import { WalletButtonComponent } from './components/wallet-button/wallet-button.
     MatInputModule,
     MatTableModule,
     MatPaginatorModule,
+    MatSelectModule,
     ReactiveFormsModule,
     // MatStepperModule
   ],

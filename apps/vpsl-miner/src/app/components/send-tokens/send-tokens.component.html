@@ -1,0 +1,93 @@
+<div>
+  <div class="flex justify-between items-center mb-6">
+    <h3 class="font-medium">Send <span class="text-dfus-orange">Tokens</span></h3>
+    <app-wallet-button></app-wallet-button>
+  </div>
+
+ <div class="flex flex-col gap-y-6 max-w-[650px] mx-auto mt-10">
+    <div>
+      <button mat-button [matMenuTriggerFor]="menu" class="flex items-center gap-2 !px-0">
+        <span class="flex items-center gap-2 text-xl">{{ selectedToken }} <mat-icon>arrow_drop_down</mat-icon></span>
+      </button>
+      <mat-menu #menu="matMenu">
+        <button mat-menu-item (click)="selectToken(TokenTransferType.VFSN)">$VFSN</button>
+        <button mat-menu-item (click)="selectToken(TokenTransferType.VANA)">VANA</button>
+      </mat-menu>
+    </div>
+    
+    <div>
+      <h4 class="text-2xl">Available {{ selectedToken }} Balance</h4>
+      <h2 class="font-semibold text-4xl">{{ selectedToken === TokenTransferType.VFSN ? vfsnBalance : vanaBalance }}</h2>
+    </div>
+  
+    <form [formGroup]="sendForm">
+      <div class="mb-6">
+        <label for="recipientAddress" class="block font-medium text-white mb-2 text-base">Recipient Address</label>
+        <input
+          type="text"
+          id="recipientAddress"
+          formControlName="recipientAddress"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 dfus-input !h-14"
+          placeholder="Enter wallet address"
+        />
+        <mat-error
+          class="!flex items-center !text-dfus-error !text-sm !p-0 !py-1"
+          *ngIf="sendForm.get('recipientAddress')?.touched && sendForm.get('recipientAddress')?.errors?.['required']"
+        >
+          <img class="mr-2" src="icons/hint_error.svg" alt="Hint error icon" /> Recipient address is required
+        </mat-error>
+        <mat-error
+          class="!flex items-center !text-dfus-error !text-sm !p-0 !py-1"
+          *ngIf="sendForm.get('recipientAddress')?.touched && !sendForm.get('recipientAddress')?.errors?.['required'] && sendForm.get('recipientAddress')?.errors?.['pattern']"
+        >
+          <img class="mr-2" src="icons/hint_error.svg" alt="Hint error icon" /> Invalid wallet address format
+        </mat-error>
+      </div>
+  
+      <div class="mb-6">
+        <label for="tokenAmount" class="block font-medium text-white text-base mb-2">Amount</label>
+        <div class="flex gap-2">
+          <input
+            type="text"
+            id="tokenAmount"
+            formControlName="tokenAmount"
+            class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 dfus-input !h-14"
+            placeholder="0.00"
+            (input)="validateNumericInput($event)"
+          />
+          <button type="button" class="px-4 py-2 text-sm dfus-blue-btn" (click)="sendAll()">Max</button>
+        </div>
+        <mat-error
+          class="!flex items-center !text-dfus-error !text-sm !p-0 !py-1"
+          *ngIf="sendForm.get('tokenAmount')?.touched && sendForm.get('tokenAmount')?.errors?.['required']"
+        >
+          <img class="mr-2" src="icons/hint_error.svg" alt="Hint error icon" /> Amount is required
+        </mat-error>
+        <mat-error
+          class="!flex items-center !text-dfus-error !text-sm !p-0 !py-1"
+          *ngIf="sendForm.get('tokenAmount')?.touched && !sendForm.get('tokenAmount')?.errors?.['required'] && sendForm.get('tokenAmount')?.errors?.['positiveNumber']"
+        >
+          <img class="mr-2" src="icons/hint_error.svg" alt="Hint error icon" /> Amount must be greater than 0
+        </mat-error>
+        <mat-error
+          class="!flex items-center !text-dfus-error !text-sm !p-0 !py-1"
+          *ngIf="sendForm.get('tokenAmount')?.touched && !sendForm.get('tokenAmount')?.errors?.['required'] && !sendForm.get('tokenAmount')?.errors?.['positiveNumber'] && sendForm.get('tokenAmount')?.errors?.['maxBalance']"
+        >
+          <img class="mr-2" src="icons/hint_error.svg" alt="Hint error icon" /> Amount cannot exceed your balance
+        </mat-error>
+      </div>
+  
+      <button
+        type="submit"
+        class="dfus-basic-btn w-full h-14 mt-4"
+        [disabled]="sendForm.invalid || isCalculatingGas"
+        [class.cursor-not-allowed]="sendForm.invalid || isCalculatingGas"
+        [class.dfus-blue-btn]="!sendForm.invalid"
+        (click)="openConfirmationDialog()"
+      >
+        <span *ngIf="!isCalculatingGas">Continue</span>
+        <mat-icon *ngIf="isCalculatingGas" class="animate-spin">rotate_right</mat-icon>
+      </button>
+    </form>
+ </div>
+</div>

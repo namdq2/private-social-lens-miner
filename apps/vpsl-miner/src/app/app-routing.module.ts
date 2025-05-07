@@ -10,6 +10,7 @@ import { SignMessageWalletComponent } from './components/sign-message-wallet/sig
 import { StakePlaceComponent } from './components/stake-place/stake-place.component';
 import { StakeRecordsComponent } from './components/stake-records/stake-records.component';
 import { ResignMessageComponent } from './components/resign-message/resign-message.component';
+import { SendTokensComponent } from './components/send-tokens/send-tokens.component';
 
 const routes: Routes = [
   {
@@ -48,6 +49,10 @@ const routes: Routes = [
       {
         path: 'stake-records',
         component: StakeRecordsComponent,
+      },
+      {
+        path: 'send-tokens',
+        component: SendTokensComponent,
       },
     ]
   },
