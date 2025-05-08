@@ -23,6 +23,7 @@ export interface ITelegram {
 export interface IPinata {
   apiKey: string;
   jwt: string;
+  apiSecret: string;
   gatewayDomain: string;
   fileBaseUrl: string;
 }

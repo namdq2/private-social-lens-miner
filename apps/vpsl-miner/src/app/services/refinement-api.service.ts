@@ -42,7 +42,7 @@ export class RefinementApiService {
       refiner_id: this.refinerId,
       env_vars: {
         PINATA_API_KEY: this.appConfigService.pinata?.apiKey,
-        PINATA_API_SECRET: this.appConfigService.pinata?.jwt
+        PINATA_API_SECRET: this.appConfigService.pinata?.apiSecret
       }
     };
 
