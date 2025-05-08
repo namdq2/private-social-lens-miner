@@ -123,6 +123,10 @@ body {
     container-color: white,
     button-color: white,
   ));
+
+  @include mat.select-overrides((
+    panel-background-color: #1a1a1a,
+  ));
 }
 
 // ??

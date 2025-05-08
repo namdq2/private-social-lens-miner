@@ -19,10 +19,9 @@ export class SendTokensComponent {
   private vfsnTokenAddress: string | null = null;
   public vanaBalance: string = '';
   public vfsnBalance: string = '';
-  public selectedToken: TokenTransferType = TokenTransferType.VFSN;
   public sendForm: FormGroup;
   public isCalculatingGas: boolean = false;
-  public TokenTransferType = TokenTransferType; // Expose enum to template
+  public TokenTransferType = TokenTransferType;
 
   constructor(
     private fb: FormBuilder,
@@ -73,7 +72,8 @@ export class SendTokensComponent {
   maxBalanceValidator() {
     return (control: any) => {
       const value = parseFloat(control.value);
-      const maxBalance = parseFloat(this.selectedToken === TokenTransferType.VFSN ? this.vfsnBalance : this.vanaBalance);
+      const selectedToken = this.sendForm?.get('selectedToken')?.value;
+      const maxBalance = parseFloat(selectedToken === TokenTransferType.VFSN ? this.vfsnBalance : this.vanaBalance);
       if (value > maxBalance) {
         return { maxBalance: true };
       }
@@ -82,15 +82,17 @@ export class SendTokensComponent {
   }
 
   selectToken(token: TokenTransferType): void {
-    this.selectedToken = token;
     // Reset token amount when switching tokens
     const recipientAddress = this.sendForm.get('recipientAddress')?.value;
     this.sendForm.reset();
-    this.sendForm.patchValue({ recipientAddress, selectedToken: token });
+    this.sendForm.patchValue({ 
+      recipientAddress, 
+      selectedToken: token 
+    });
   }
 
   sendAll(): void {
-    this.sendForm.get('tokenAmount')?.setValue(this.selectedToken === TokenTransferType.VFSN ? this.vfsnBalance : this.vanaBalance);
+    this.sendForm.get('tokenAmount')?.setValue(this.sendForm.get('selectedToken')?.value === TokenTransferType.VFSN ? this.vfsnBalance : this.vanaBalance);
   }
 
   async openConfirmationDialog(): Promise<void> {
@@ -110,7 +112,7 @@ export class SendTokensComponent {
       data: {
         recipientAddress: this.sendForm.get('recipientAddress')?.value,
         tokenAmount: this.sendForm.get('tokenAmount')?.value,
-        tokenSymbol: this.selectedToken,
+        tokenSymbol: this.sendForm.get('selectedToken')?.value,
         estimatedGas,
         onResetForm: this.onResetForm.bind(this),
       },
@@ -135,7 +137,7 @@ export class SendTokensComponent {
       this.isCalculatingGas = true;
       const provider = new BrowserProvider(this.existingWalletService.eip155Provider);
       const gasPrice = await provider.getFeeData();
-      if (this.selectedToken === TokenTransferType.VFSN) {
+      if (this.sendForm.get('selectedToken')?.value === TokenTransferType.VFSN) {
         const amount = ethers.parseUnits(tokenAmount, 18);
         const signer = await provider.getSigner();
         const tokenContract = new ethers.Contract(this.vfsnTokenAddress, TokenABI.abi, signer);

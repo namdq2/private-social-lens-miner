@@ -19,10 +19,11 @@ import { SendTokenResultModalComponent } from '../send-token-result-modal/send-t
 export class SendTokenConfirmationDialogComponent {
     private vfsnTokenAddress: string | null = null;
     public isTransfering: boolean = false;
+    public TokenTransferType = TokenTransferType;
     
     constructor(
         private dialogRef: MatDialogRef<SendTokenConfirmationDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) public data: { recipientAddress: string, tokenAmount: string, tokenSymbol: string, estimatedGas: string, onResetForm: () => void },
+        @Inject(MAT_DIALOG_DATA) public data: { recipientAddress: string, tokenAmount: string, tokenSymbol: TokenTransferType, estimatedGas: string, onResetForm: () => void },
         private web3WalletService: Web3WalletService,
         private existingWalletService: ExistingWalletService,
         private matDialog: MatDialog
@@ -36,7 +37,7 @@ export class SendTokenConfirmationDialogComponent {
     
     async confirmSend() {
         if (!this.vfsnTokenAddress || !this.existingWalletService.eip155Provider) {
-            this.onOpenResultModal({ isSuccess: false, tokenTransferType: this.data.tokenSymbol as TokenTransferType });
+            this.onOpenResultModal({ isSuccess: false, tokenTransferType: this.data.tokenSymbol });
             return;
         }
 
@@ -44,7 +45,7 @@ export class SendTokenConfirmationDialogComponent {
             const provider = new BrowserProvider(this.existingWalletService.eip155Provider);
             const signer = await provider.getSigner();
             // Execute the transfer
-            this.onOpenResultModal({ isLoading: true, tokenTransferType: this.data.tokenSymbol as TokenTransferType });
+            this.onOpenResultModal({ isLoading: true, tokenTransferType: this.data.tokenSymbol });
             
             let tx;
             if (this.data.tokenSymbol === TokenTransferType.VANA) {
@@ -68,11 +69,11 @@ export class SendTokenConfirmationDialogComponent {
             await tx.wait();
             // Close dialog with success
             this.matDialog.closeAll();
-            this.onOpenResultModal({ isSuccess: true, tokenTransferType: this.data.tokenSymbol as TokenTransferType });
+            this.onOpenResultModal({ isSuccess: true, tokenTransferType: this.data.tokenSymbol });
         } catch (error) {
             console.error('Error sending tokens:', error);
             this.matDialog.closeAll();
-            this.onOpenResultModal({ isSuccess: false, tokenTransferType: this.data.tokenSymbol as TokenTransferType });
+            this.onOpenResultModal({ isSuccess: false, tokenTransferType: this.data.tokenSymbol });
         }
     }
 

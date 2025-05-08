@@ -8,19 +8,20 @@
       <div class="text-white text-base mb-1">Recipient Address</div>
       <div class="bg-gray-800 text-white px-3 py-2 rounded break-all">{{ data.recipientAddress }}</div>
     </div>
-    <div class="mb-4 flex justify-start gap-4 items-center">
-      <div>
-        <div class="text-white text-base mb-1">Amount</div>
-        <div class="bg-gray-800 text-white px-3 py-2 rounded">{{ data.tokenAmount }} {{ data.tokenSymbol }}</div>
+    <div class="mb-4 flex justify-start items-stretch gap-4">
+      <div class="flex flex-col items-start gap-4 w-40">
+        <div class="text-white text-base mb-1 h-10 leading-10">Amount</div>
+        <div class="text-white text-base mb-1 h-10 leading-10">Estimated Gas</div>
       </div>
-      <div>
-        <div class="text-white text-base mb-1">Estimated Gas</div>
-        <div class="bg-gray-800 text-white px-3 py-2 rounded text-right">{{ data.estimatedGas }} VANA</div>
+      <div class="inline-block items-center justify-between">
+        <div class="bg-gray-800 text-white px-3 py-2 rounded text-end w-full mb-4">{{ data.tokenAmount }} {{ data.tokenSymbol }}</div>
+        <div class="bg-gray-800 text-white px-3 py-2 rounded text-end w-full">{{ data.estimatedGas }} VANA</div>
       </div>
     </div>
-  </div>
-  <div mat-dialog-actions class="flex justify-end gap-2 mt-6">
-    <button class="dfus-basic-btn !h-12 !w-40" (click)="closeDialog()">Cancel</button>
-    <button class="dfus-blue-btn !h-12 !w-40" (click)="confirmSend()">Confirm</button>
+
+    <div mat-dialog-actions class="flex justify-end gap-2 !mt-5">
+      <button class="dfus-basic-btn !h-12 !w-40" (click)="closeDialog()">Cancel</button>
+      <button class="dfus-blue-btn !h-12 !w-40" (click)="confirmSend()">Confirm</button>
+    </div>
   </div>
 </div>

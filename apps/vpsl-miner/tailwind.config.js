@@ -34,6 +34,7 @@ module.exports = {
         'dfus-bg-blue': '#07122C',
         'dfus-bg-dark-blue': '#151a23',
         'dfus-white-transparent': '#FFFFFF75',
+        'dfus-white-smoke': '#efedf0',
       },
     },
   },
