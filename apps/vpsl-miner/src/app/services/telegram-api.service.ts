@@ -13,7 +13,6 @@ import { GelatoApiService } from './gelato-api.service';
 import { PinataApiService } from './pinata-api.service';
 import { SubmissionProcessingService } from './submission-processing.service';
 import { Web3WalletService } from './web3-wallet.service';
-import { RefinementApiService } from './refinement-api.service';
 
 declare const window: any;
 
@@ -28,7 +27,6 @@ export class TelegramApiService {
   private readonly gelatoApiService: GelatoApiService = inject(GelatoApiService);
   private readonly electronIpcService: ElectronIpcService = inject(ElectronIpcService);
   private readonly web3WalletService: Web3WalletService = inject(Web3WalletService);
-  private readonly refinementApiService: RefinementApiService = inject(RefinementApiService);
 
   private currentPhoneCodeHash: string = '';
 
@@ -419,8 +417,8 @@ export class TelegramApiService {
 
   public async doTelegramSubmission(token: string) {
     try {
-      // * 1. Get signature
-      const encryptionKey = this.web3WalletService.encryptionKey();
+      // * 1. sign message - get signature
+      const encryptionKey = this.web3WalletService.encryptionKey(); // signature from signed message
       console.log('encryptionKey', encryptionKey);
       if (!encryptionKey) {
         console.error('Signature / encryption does not exist!');
@@ -432,42 +430,22 @@ export class TelegramApiService {
       const uploadedEncryptedFileUrl = await this.encryptAndUploadFile(token, encryptionKey);
       console.log('uploadedEncryptedFileUrl', uploadedEncryptedFileUrl);
       this.submissionProcessingService.displayInfo('Data has been encrypted');
-      
       if (uploadedEncryptedFileUrl) {
-        // * Encrypt encryption key with public key
-        const encryptedEncryptionKey = await this.cryptographyService.encryptWithWalletPublicKey(
-          encryptionKey, 
-          this.appConfigService.vana!.dlpPublicKey
-        );
+        // * 5. get public key
+        // * 6. encrypt signature with public key (EEK)
+        const encryptedEncryptionKey = await this.cryptographyService.encryptWithWalletPublicKey(encryptionKey, this.appConfigService.vana!.dlpPublicKey);
         console.log('encryptedEncryptionKey', encryptedEncryptionKey);
-        
-        // * Add file with permissions to data registry
+        // * 7. addFileWithPermissions to vana dataregistry
+        // * 8. get file id
         await this.gelatoApiService.relayAddFileWithPermissions(encryptedEncryptionKey, uploadedEncryptedFileUrl);
         this.submissionProcessingService.displayInfo('Data is being added to the data registry');
-        
-        // Wait for fileId to be set (after transaction completed)
-        // Use a simple timeout polling mechanism
-        let maxAttempts = 30; // 30 seconds timeout
-        let fileId = -1;
-        
-        while (maxAttempts > 0 && fileId === -1) {
-          fileId = this.gelatoApiService.currentSubmissionFileId();
-          if (fileId !== -1) {
-            break;
-          }
-          await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
-          maxAttempts--;
-        }
-        
-        if (fileId !== -1) {
-          // File ID is set, continue with normal flow
-          this.submissionProcessingService.displayInfo('Data has been added to the data registry');
-        }
-      } else {
+      }
+      else {
         console.error('no upload file url');
         throw new Error('Failed to submit encrypted data. Please try again.');
       }
-    } catch(err: any) {
+    }
+    catch(err: any) {
       console.error('Failed to doTelegramSubmission');
       this.submissionProcessingService.displayError(err);
     }
