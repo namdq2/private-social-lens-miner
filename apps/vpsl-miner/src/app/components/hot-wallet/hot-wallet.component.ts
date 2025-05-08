@@ -4,7 +4,6 @@ import { ethers } from 'ethers';
 import { ElectronIpcService } from '../../services/electron-ipc.service';
 import { Web3WalletService } from '../../services/web3-wallet.service';
 import { ENCRYPTION_SEED } from '../../shared/constants';
-import { MatDialog } from '@angular/material/dialog';
 
 
 @Component({
@@ -18,7 +17,6 @@ export class HotWalletComponent {
   private readonly electronIpcService: ElectronIpcService = inject(ElectronIpcService);
   private readonly web3WalletService: Web3WalletService = inject(Web3WalletService);
   private readonly router: Router = inject(Router);
-  private readonly matDialog: MatDialog = inject(MatDialog);
 
   public readonly validWalletAndEncryptionKey = effect(() => {
     const validWalletAddress = this.electronIpcService.walletAddress();
@@ -93,7 +91,6 @@ export class HotWalletComponent {
         this.wallet
           .signMessage(ENCRYPTION_SEED)
           .then(async (res: string) => {
-            this.web3WalletService.wallet = new ethers.Wallet(this.privateKey);
             this.electronIpcService.setWalletAddress(this.wallet!.address);
             this.electronIpcService.setEncryptionKey(res);
           })

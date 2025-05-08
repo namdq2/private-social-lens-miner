@@ -101,7 +101,7 @@ export class StakePlaceComponent {
       );
       //approve tokens
       if (!(new BN(String(allowanceBigInt)).gte(new BN(String(amountWei))))) { 
-        const maxUint256 = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+        const maxUint256 = ethers.MaxUint256;
         const approveTx = await tokenContractWithSigner['approve'](stakingContractAddress, maxUint256);
         await approveTx.wait();
       }

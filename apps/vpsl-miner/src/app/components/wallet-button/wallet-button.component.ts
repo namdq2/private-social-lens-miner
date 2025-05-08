@@ -4,7 +4,6 @@ import { ElectronIpcService } from '../../services/electron-ipc.service';
 import { Web3WalletService } from '../../services/web3-wallet.service';
 import { WalletType } from '../../models/wallet';
 import { ExistingWalletService } from '../../services/existing-wallet.service';
-import { AppConfigService } from '../../services/app-config.service';
 
 @Component({
   selector: 'app-wallet-button',
@@ -17,12 +16,8 @@ export class WalletButtonComponent implements OnInit {
   private readonly electronIpcService = inject(ElectronIpcService);
   private readonly existingWalletService = inject(ExistingWalletService);
   private readonly router: Router = inject(Router);
-  private readonly appConfigService: AppConfigService = inject(AppConfigService);
-
   public walletAddress = signal<string>('');
   public walletType = signal<WalletType | null>(null);
-
-  public vanaTestnetExplorerUrl = signal<string>('');
 
   constructor() {
     effect(async () => {
@@ -36,7 +31,6 @@ export class WalletButtonComponent implements OnInit {
   public async ngOnInit() {
     this.walletAddress = this.web3WalletService.walletAddress;
     this.walletType = this.electronIpcService.walletType;
-    this.vanaTestnetExplorerUrl.set(this.appConfigService.vana?.vanaScanUrl + "/address/" + this.walletAddress());
     await this.web3WalletService.calculateBalance();
   }
 

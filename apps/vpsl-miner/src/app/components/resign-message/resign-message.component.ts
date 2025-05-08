@@ -22,7 +22,7 @@ export class ResignMessageComponent {
     const signature = await this.existingWalletService.signMessage(walletAddress);
     if(signature) {
       this.electronIpcService.setEncryptionKey(signature);
-      this.router.navigate(['/app/stake-place']);
+      this.router.navigate(['/app/miner']);
     } 
   }
 }
