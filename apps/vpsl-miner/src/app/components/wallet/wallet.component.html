@@ -22,6 +22,12 @@
         @else {
           <mat-icon>arrow_drop_down</mat-icon>
         }
+
+        <a [href]="vanaTestnetExplorerUrl()" target="_blank">
+          <button class="dfus-basic-btn !p-0 !border-0 !h-6">
+            <mat-icon class="text-xl hover:text-dfus-blue" aria-hidden="false" fontIcon="open_in_new" />
+          </button>
+        </a>
       </button>
       <mat-menu #menu="matMenu" xPosition="before">
           <button mat-menu-item (click)="handleDisconnectWallet()">

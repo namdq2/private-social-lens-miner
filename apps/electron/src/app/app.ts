@@ -294,7 +294,6 @@ export default class App {
     App.application.on('activate', App.onActivate); // App is activated
 
     // Listen for changes from the render/UI
-
     ipcMain.on('set-wallet-address', (event, value) => {
       App.walletAddress = value;
       store.set('walletAddress', value);

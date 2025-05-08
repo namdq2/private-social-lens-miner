@@ -48,7 +48,7 @@ export class ElectronIpcService {
     const walletType = await window.electron.getWalletType();
     console.log('init walletType', walletType);
     this.walletType.set(walletType);
-
+    
     const isUploadAllChats = await window.electron.getUploadAllChats();
     console.log('init isUploadAllChats', isUploadAllChats);
     this.isUploadAllChats.set(isUploadAllChats);

@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import * as eccrypto from '@toruslabs/eccrypto';
 import * as openpgp from 'openpgp';
-
 @Injectable({
   providedIn: 'root',
 })

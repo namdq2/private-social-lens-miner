@@ -14,6 +14,26 @@
         </li>
 
         <li>
+          <a routerLink="/app/stake-place" 
+             [routerLinkActiveOptions]="{exact: true}"
+             routerLinkActive="text-[#5B92FD]"
+             class="flex items-center p-2 rounded-lg hover:bg-gray-700 group">
+            <mat-icon aria-hidden="false" fontIcon="paid"></mat-icon>
+            <span class="flex-1 ms-3 whitespace-nowrap">Stake $VFSN</span>
+          </a>
+        </li>
+
+        <li>
+          <a routerLink="/app/stake-place" 
+             [queryParams]="{viewStakeRecords: 'true'}"
+             routerLinkActive="text-[#5B92FD]"
+             class="flex items-center p-2 rounded-lg hover:bg-gray-700 group">
+            <mat-icon aria-hidden="false" fontIcon="dataset"></mat-icon>
+            <span class="flex-1 ms-3 whitespace-nowrap">View Stakes</span>
+          </a>
+        </li>
+
+        <li>
           <a routerLink="/app/staking-rewards" routerLinkActive="text-[#5B92FD]"
             class="flex items-center p-2 rounded-lg hover:bg-gray-700 group">
             <mat-icon>info</mat-icon>
