@@ -35,7 +35,7 @@ import { PhoneInputDirective } from './directives/phone-input.directive';
 import { AppConfigService } from './services/app-config.service';
 import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
 import { SignMessageWalletComponent } from './components/sign-message-wallet/sign-message-wallet.component';
-
+import { MatTooltipModule } from '@angular/material/tooltip';
 @NgModule({
   schemas: [
     // CUSTOM_ELEMENTS_SCHEMA,
@@ -79,6 +79,7 @@ import { SignMessageWalletComponent } from './components/sign-message-wallet/sig
     MatDividerModule,
     MatSnackBarModule,
     MatSidenavModule,
+    MatTooltipModule,
     ClipboardModule,
     // MatStepperModule
   ],
