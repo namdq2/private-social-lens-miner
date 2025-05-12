@@ -1,9 +1,6 @@
-import { forwardRef, inject, Injectable, signal, WritableSignal } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { WalletType } from '../models/wallet';
 import { isElectron } from '../shared/helpers';
-import { Web3WalletService } from './web3-wallet.service';
-import { MatDialog } from '@angular/material/dialog';
-import { ConfirmWalletDialogComponent } from '../components/confirm-wallet-dialog/confirm-wallet-dialog.component';
 
 declare const window: any;
 
@@ -11,12 +8,9 @@ declare const window: any;
   providedIn: 'root',
 })
 export class ElectronIpcService {
-  private readonly web3WalletService: Web3WalletService = inject(forwardRef(() => Web3WalletService));
-  private readonly matDialog: MatDialog = inject(MatDialog);
-
-  public walletAddress: WritableSignal<string> = this.web3WalletService.walletAddress;
-  public encryptionKey: WritableSignal<string> = this.web3WalletService.encryptionKey;
-  public walletType: WritableSignal<WalletType | null> = signal<WalletType | null>(null);
+  public walletAddress = signal<string>('');
+  public encryptionKey = signal<string>('');
+  public walletType = signal<WalletType | null>(null);
 
   public isUploadAllChats = signal<boolean>(true);
   public selectedChatIdsList = signal<Array<number>>([]);
@@ -27,8 +21,9 @@ export class ElectronIpcService {
   public minimizeToTray = signal<boolean>(true);
   public backgroundTaskIntervalExists = signal<boolean>(false);
   public uploadFrequency = signal<number>(4);
-  public isConfirmDisconnectWallet = signal<boolean>(false);
   public telegramSession = signal<string>('');
+  public appVersion = signal<string>('');
+  public checkForUpdate = signal<boolean>(false);
 
   constructor() {
     if (isElectron()) {
@@ -89,7 +84,14 @@ export class ElectronIpcService {
     console.log('init telegramSession', telegramSession);
     this.telegramSession.set(telegramSession);
 
-    await this.web3WalletService.calculateBalance();
+    const version = await window.electron.getAppVersion();
+    console.log('init appVersion', version);
+    this.appVersion.set(version);
+
+    const checkForUpdate = await window.electron.getCheckForUpdate();
+    console.log('init checkForUpdates', checkForUpdate);
+    this.checkForUpdate.set(checkForUpdate);
+
   }
 
   public setWalletAddress(value: string) {
@@ -166,30 +168,17 @@ export class ElectronIpcService {
     window.electron.setTelegramSession(this.telegramSession());
   }
 
-  public switchWallet() {
-    if (this.walletType() === WalletType.HOT_WALLET) {
-      const dialogRef = this.matDialog.open(ConfirmWalletDialogComponent, {
-        data: null,
-        disableClose: true,
-      });
-
-      dialogRef.afterClosed().subscribe((result: any) => {
-        if (result) {
-          this.isConfirmDisconnectWallet.set(true);
-        }
-      });
-    }
+  public setCheckForUpdate(value: boolean) {
+    this.checkForUpdate.set(value);
+    window.electron.setCheckForUpdate(this.checkForUpdate());
   }
 
-  public async disconnectWallet() {
-    try {
-      this.setWalletAddress('');
-      this.setEncryptionKey('');
-      this.setWalletType(null);
-      this.isConfirmDisconnectWallet.set(false);
-      console.log('Ipc wallet disconnected');
-    } catch (error) {
-      console.error('Error disconnecting wallet:', error);
+  public async getAppVersion(): Promise<string> {
+    if (isElectron()) {
+      const version = await window.electron.getAppVersion();
+      this.appVersion.set(version);
+      return version;
     }
+    return '';
   }
 }

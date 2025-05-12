@@ -33,8 +33,29 @@
     "apiKey": "8mK_rHJJsaOSwQPfOvM6Qc5FdNkSs5PR_9HjlK8zKbw_"
   },
   "reownAppkit": {
-    "projectId": "b5ca679f8742229883b5fc1de5972536",
+    "projectId": "4dd96a8a1b616053cba88b6d7b528e7b",
     "domain": "https://vana.genesis.dfusion.ai",
-    "icon": "https://vana.genesis.dfusion.ai/img/dFusionLogo.png"
+    "icon": "https://cdn.prod.website-files.com/660ab3687f4b08443800247f/672240e7f55de869b96f326e_Logo%20icon.svg",
+    "network": {
+      "id": 1480,
+      "name": "Vana Mainnet",
+      "nativeCurrency": {
+        "name": "VANA",
+        "symbol": "VANA",
+        "decimals": 18
+      },
+      "rpcUrls": {
+        "default": {
+          "http": ["https://rpc.vana.org"]
+        }
+      },
+      "blockExplorers": {
+        "default": {
+          "name": "Vana Explorer",
+          "url": "https://vanascan.io",
+          "apiUrl": "https://api.vanascan.io/api"
+        }
+      }
+    }
   }
 }

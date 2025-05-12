@@ -4,6 +4,7 @@ import { ethers } from "ethers";
 import { ElectronIpcService } from '../../services/electron-ipc.service';
 import { Web3WalletService } from '../../services/web3-wallet.service';
 import { ENCRYPTION_SEED } from '../../shared/constants';
+import { WalletType } from '../../models/wallet';
 
 @Component({
   selector: 'app-hot-wallet',
@@ -16,16 +17,6 @@ export class HotWalletComponent {
   private readonly electronIpcService: ElectronIpcService = inject(ElectronIpcService);
   private readonly web3WalletService: Web3WalletService = inject(Web3WalletService);
   private readonly router: Router = inject(Router);
-
-
-  public readonly validWalletAndEncryptionKey = effect(() => {
-    const validWalletAddress = this.electronIpcService.walletAddress();
-    const validEncryptionKey = this.electronIpcService.encryptionKey();
-
-    if (validWalletAddress && validEncryptionKey) {
-      this.router.navigate(['app/miner']);
-    }
-  });
 
   public showWalletSetup = true;
   public showWalletGeneration = false;
@@ -92,6 +83,7 @@ export class HotWalletComponent {
           async (res: string) => {
             this.electronIpcService.setWalletAddress(this.wallet!.address);
             this.electronIpcService.setEncryptionKey(res);
+            this.electronIpcService.setWalletType(WalletType.HOT_WALLET);
           }
         ).catch((err: any) => console.error('Failed to create encryption key', err));
       }

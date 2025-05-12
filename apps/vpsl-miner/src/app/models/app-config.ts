@@ -1,3 +1,5 @@
+import { AppKitNetwork } from "@reown/appkit/networks";
+
 export interface IAppConfigItem {
   dFusion: IDFusion;
   telegram: ITelegram;
@@ -52,4 +54,5 @@ export interface IReownAppkit {
   projectId: string;
   domain: string;
   icon: string;
+  network: AppKitNetwork;
 }

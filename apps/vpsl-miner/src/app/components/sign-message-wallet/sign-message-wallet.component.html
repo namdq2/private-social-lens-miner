@@ -3,14 +3,41 @@
     <img [src]="'img/logo_vertical.svg'" class="w-auto h-32" alt="dFusion logo" />
 
     <div id="sign-message-container" class="w-full flex flex-col justify-start items-center gap-y-4 mt-12">
-      <div class="content">
-        <img [src]="'img/sign-message.svg'" class="w-auto h-16" alt="dFusion logo" />
-        <span>
-          To continue, approve the signature request to generate your unique encryption key. This will secure your contributions and verify your ownership of
-          your data.
-        </span>
-      </div>
-      <button class="dfus-blue-btn dfus-btn-icon-group w-full h-16" (click)="signMessage()">Sign Message <img src="icons/chevron_right.svg" alt="Right chevron icon" /></button>
+      @if (validNetwork) {
+        <div class="content">
+          <img [src]="'img/sign-message.svg'" class="w-auto h-16" alt="dFusion logo" />
+          <span>
+            To continue, approve the signature request to generate your unique encryption key. This will secure your contributions and verify your ownership of
+            your data.
+          </span>
+        </div>
+
+        <button class="dfus-blue-btn dfus-btn-icon-group w-full h-16" (click)="signMessage()">
+          Sign Message <img src="icons/chevron_right.svg" alt="Right chevron icon" />
+        </button>
+
+        @if (showHint && !showError) {
+          <p class="text-left w-full">Signature request sent. Please check your wallet to approve.</p>
+        }
+
+        @if (showError && !showHint) {
+          <p class="text-[#FF8389] text-left w-full">The request was not signed. You'll need to approve to continue.</p>
+        }
+      }
+      @else {
+        <div class="flex flex-col justify-center items-center gap-y-4">
+          <p class="w-full">Unsupported network detected. To continue, please switch to Vana and allow a moment for the update.</p>
+
+          <div class="w-full flex flex-row justify-end items-center">
+            <span class="text-[#848689] cursor-pointer underline" (click)="restartConnection()">
+              Back
+            </span>
+          </div>
+
+          <!-- <appkit-network-button></appkit-network-button> -->
+          <appkit-button></appkit-button>
+        </div>
+      }
     </div>
   </div>
 </div>

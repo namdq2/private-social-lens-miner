@@ -1,23 +1,83 @@
 {
-  "name": "@dfusion-ai/source",
-  "version": "0.5.0",
+  "name": "electron",
+  "version": "1.0.0",
   "license": "MIT",
+  "homepage": "https://www.dfusion.ai",
   "author": {
     "name": "dFusion AI",
-    "url": "https://github.com/dfusionai"
+    "url": "https://www.dfusion.ai",
+    "email": "dao@dfusion.ai"
   },
   "description": "dFusion Private Social Lens DLP miner application.",
   "scripts": {
     "postinstall": "electron-builder install-app-deps"
   },
+  "main": "dist/apps/electron/main.js",
   "build": {
     "appId": "com.electron.dfusionVpslMiner",
     "productName": "dFusion-DLP-miner",
-    "linux": {
-      "target": "AppImage",
-      "executableName": "dfusion-dlp-miner",
+    "asar": true,
+    "publish": [
+      {
+        "provider": "s3",
+        "bucket": "dfusionai-dlp-miner",
+        "path": "updates",
+        "region": "us-east-1",
+        "acl": null
+      }
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": ["dmg", "zip"],
+      "artifactName": "${productName}-${version}.${ext}",
+      "type": "distribution",
+      "hardenedRuntime": true,
+      "entitlements": "apps/electron/build/entitlements.mac.plist",
+      "entitlementsInherit": "apps/electron/build/entitlements.mac.plist",
+      "gatekeeperAssess": false,
+      "notarize": true
+    },
+    "dmg": {
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ],
       "artifactName": "${productName}-${version}.${ext}"
-    }
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "executableName": "dfusion-dlp-miner",
+      "artifactName": "${productName}-${version}.${ext}",
+      "category": "Utility",
+      "description": "dFusion Private Social Lens DLP miner application."
+    },
+    "files": [
+      "dist/apps/electron/**/*",
+      "!dist/apps/electron/dev-app-update.yml"
+    ],
+    "extraResources": [
+      {
+        "from": "apps/electron/build",
+        "to": "build",
+        "filter": ["entitlements.mac.plist"]
+      }
+    ]
   },
   "private": true,
   "dependencies": {
@@ -34,7 +94,9 @@
     "@reown/appkit-adapter-wagmi": "^1.7.2",
     "@toruslabs/eccrypto": "^6.0.2",
     "buffer": "^6.0.3",
+    "electron-log": "^5.3.3",
     "electron-store": "8.2",
+    "electron-updater": "^6.6.2",
     "ethers": "^6.13.5",
     "openpgp": "^6.1.0",
     "pinata-web3": "^0.5.4",

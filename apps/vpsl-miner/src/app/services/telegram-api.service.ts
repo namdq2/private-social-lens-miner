@@ -1,4 +1,4 @@
-import { inject, Injectable, signal } from '@angular/core';
+import { effect, inject, Injectable, signal } from '@angular/core';
 import { Api, TelegramClient } from 'telegram';
 import { NewMessage, NewMessageEvent } from 'telegram/events';
 import { TotalList } from 'telegram/Helpers';
@@ -40,7 +40,7 @@ export class TelegramApiService {
     return this.appConfigService.telegram!.apiHash;
   }
 
-  public telegramClient: TelegramClient;
+  public telegramClient: TelegramClient = new TelegramClient(this.SESSION, this.apiId, this.apiHash, { connectionRetries: 5, useWSS: true });;
 
   public isAuthorized = false;
   public userId = signal<number>(-1);
@@ -51,26 +51,29 @@ export class TelegramApiService {
   public showTelegramError = signal<boolean>(false);
 
   constructor() {
-    // Get session from local storage
-    const storedSession = this.electronIpcService.telegramSession();
-    this.SESSION = storedSession ? new StringSession(JSON.parse(storedSession)) : new StringSession('');
+    effect(() => {
+      // Get session from electron-store
+      const storedSession = this.electronIpcService.telegramSession();
+      console.log('telegram storedSession', storedSession);
+      this.SESSION = storedSession ? new StringSession(JSON.parse(storedSession)) : new StringSession('');
 
-    // Immediately create a client using your application data
-    this.telegramClient = new TelegramClient(this.SESSION, this.apiId, this.apiHash, { connectionRetries: 5, useWSS: true });
+      // Immediately create a client using your application data
+      this.telegramClient = new TelegramClient(this.SESSION, this.apiId, this.apiHash, { connectionRetries: 5, useWSS: true });
 
-    this.telegramClient.connect().then((storedSessionConnectResult: boolean) => {
-      if (storedSessionConnectResult) {
-        this.showTelegramError.set(false);
-        this.checkAuthorization();
-      }
-      else {
-        throw new Error('Failed to connect to Telegram client.');
-      }
-    }).catch((error) => {
-      this.showTelegramError.set(true);
-      console.error('TelegramClient connect error', error);
+      this.telegramClient.connect().then((storedSessionConnectResult: boolean) => {
+        console.log('telegram storedSessionConnectResult', storedSessionConnectResult);
+        if (storedSessionConnectResult) {
+          this.showTelegramError.set(false);
+          this.checkAuthorization();
+        }
+        else {
+          throw new Error('Failed to connect to Telegram client.');
+        }
+      }).catch((error) => {
+        this.showTelegramError.set(true);
+        console.error('TelegramClient connect error', error);
+      });
     });
-
 
     // Listen for messages from the main process
     if (isElectron()) {
@@ -160,6 +163,7 @@ export class TelegramApiService {
 
   private checkAuthorization() {
     this.telegramClient.checkAuthorization().then(async (isAuthorized: boolean) => {
+      console.log('telegram isAuthorized', isAuthorized);
       if (isAuthorized) {
         this.telegramClient.addEventHandler(
           this.newMessageHandler.bind(this),

@@ -1,5 +1,5 @@
-import { inject, Injectable, signal } from '@angular/core';
-import { BrowserProvider, ethers } from 'ethers';
+import { inject, Injectable, signal, WritableSignal } from '@angular/core';
+import { ethers } from 'ethers';
 import { AppConfigService } from './app-config.service';
 
 // import DLPTokenABI from '../assets/contracts/DLPTokenImplementation.json';
@@ -8,12 +8,17 @@ import DataRegistryImplementationABI from '../assets/contracts/DataRegistryImple
 import StakingABI from '../assets/contracts/StakingImplemenation.json';
 import TeePoolImplementationABI from '../assets/contracts/TeePoolImplementation.json';
 import TokenABI from '../assets/contracts/TokenImplementation.json';
+import { WalletType } from '../models/wallet';
+import { ElectronIpcService } from './electron-ipc.service';
+import { ExistingWalletService } from './existing-wallet.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class Web3WalletService {
   private readonly appConfigService: AppConfigService = inject(AppConfigService);
+  private readonly electronIpcService: ElectronIpcService = inject(ElectronIpcService);
+  private readonly existingWalletService: ExistingWalletService = inject(ExistingWalletService);
 
   public get rpcUrl() {
     return this.appConfigService.vana?.rpcUrl;
@@ -35,13 +40,12 @@ export class Web3WalletService {
   public dlpTokenAmount = signal<number | bigint | string | null>(null);
   public vanaTokenAmount = signal<number | bigint | string | null>(null);
 
-  // private walletPrivateKey = '';
-  // public wallet = new ethers.Wallet(this.walletPrivateKey);
   public rpcProvider: ethers.JsonRpcProvider = new ethers.JsonRpcProvider(this.rpcUrl);
   // public signer = this.wallet.connect(this.rpcProvider);
 
-  public walletAddress = signal<string>('');
-  public encryptionKey = signal<string>('');
+  public readonly walletAddress: WritableSignal<string> = this.electronIpcService.walletAddress;
+  public readonly encryptionKey: WritableSignal<string> = this.electronIpcService.encryptionKey;
+  public readonly walletType: WritableSignal<WalletType | null> = this.electronIpcService.walletType;
 
   public dlpContract = new ethers.Contract(this.appConfigService.vana!.dlpSmartContractAddress, DataLiquidityPoolABI.abi, this.rpcProvider);
 
@@ -98,9 +102,10 @@ export class Web3WalletService {
     }
   }
 
-  public disconnectWallet() {
-    this.walletAddress.set('');
-    this.encryptionKey.set('');
-    console.log('Hot Wallet disconnected');
+  public async disconnectWallet() {
+    await this.existingWalletService.disconnectWallet();
+    this.electronIpcService.setWalletAddress('');
+    this.electronIpcService.setEncryptionKey('');
+    this.electronIpcService.setWalletType(null);
   }
 }
