@@ -481,7 +481,6 @@ export default class App {
 
     ipcMain.on('set-check-for-update', (event, value) => {
       App.checkForUpdate = value;
-      store.set('checkForUpdate', value);
       console.log('main process: set-check-for-update:', value);
 
       if (App.checkForUpdate) {
