@@ -8,6 +8,7 @@ export interface IAppConfigItem {
   cloudFlare: ICloudFlare;
   gelato: IGelato;
   reownAppkit: IReownAppkit;
+  relayApi: IRelayApi;
 }
 
 export interface IDFusion {
@@ -55,4 +56,9 @@ export interface IReownAppkit {
   domain: string;
   icon: string;
   network: AppKitNetwork;
+}
+
+export interface IRelayApi {
+  baseUrl: string;
+  apiKey: string;
 }

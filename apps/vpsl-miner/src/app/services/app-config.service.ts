@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { map, share } from 'rxjs';
-import { IAppConfigItem, IDFusion, IGelato, IPinata, IReownAppkit, ITelegram, IVana } from '../models/app-config';
+import { IAppConfigItem, IDFusion, IGelato, IPinata, IRelayApi, IReownAppkit, ITelegram, IVana } from '../models/app-config';
 
 @Injectable({
   providedIn: 'root',
@@ -16,6 +16,7 @@ export class AppConfigService {
   // public cloudFlare: ICloudFlare | null = null;
   public gelato: IGelato | null = null;
   public reownAppkit: IReownAppkit | null = null;
+  public relayApi: IRelayApi | null = null;
 
   constructor() {}
 
@@ -29,6 +30,7 @@ export class AppConfigService {
     // this.cloudFlare = appConfigItem.cloudFlare;
     this.gelato = appConfigItem.gelato;
     this.reownAppkit = appConfigItem.reownAppkit;
+    this.relayApi = appConfigItem.relayApi;
   }
 
   private validateConfigItem(appConfigItem: IAppConfigItem) {
@@ -52,6 +54,9 @@ export class AppConfigService {
     }
     if (!appConfigItem.reownAppkit) {
         throw new Error('ReownAppkit configuration is missing.');
+    }
+    if (!appConfigItem.relayApi) {
+        throw new Error('RelayApi configuration is missing.');
     }
   }
 

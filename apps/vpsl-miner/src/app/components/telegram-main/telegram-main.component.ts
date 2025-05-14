@@ -8,6 +8,7 @@ import { TelegramApiService } from '../../services/telegram-api.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
+import { SubmissionProcessingService } from '../../services/submission-processing.service';
 
 @Component({
   selector: 'app-telegram-main',
@@ -22,6 +23,7 @@ export class TelegramMainComponent implements AfterViewInit {
   private readonly electronIpcService: ElectronIpcService = inject(ElectronIpcService);
   private readonly snackBar: MatSnackBar = inject(MatSnackBar);
   private readonly matDialog: MatDialog = inject(MatDialog);
+  private readonly submissionProcessingService: SubmissionProcessingService = inject(SubmissionProcessingService);
 
   public isBackgroundTaskEnabled: WritableSignal<boolean>;
   public lastSubmissionTime: WritableSignal<Date | null>;
@@ -121,8 +123,11 @@ export class TelegramMainComponent implements AfterViewInit {
   }
 
   public async doSubmit() {
-    // await this.telegramApiService.initiateSubmission();
-    this.startBackgroundTask();
+    // Show processing popup
+    this.submissionProcessingService.startProcessingState();
+
+    // Directly call doTelegramSubmission with the test token
+    this.telegramApiService.doTelegramSubmission('1234567890');
   }
 
   public startBackgroundTask() {

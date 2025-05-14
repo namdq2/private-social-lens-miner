@@ -13,6 +13,7 @@ import { GelatoApiService } from './gelato-api.service';
 import { PinataApiService } from './pinata-api.service';
 import { SubmissionProcessingService } from './submission-processing.service';
 import { Web3WalletService } from './web3-wallet.service';
+import { RelayApiService } from './relay-api.service';
 
 declare const window: any;
 
@@ -27,6 +28,7 @@ export class TelegramApiService {
   private readonly gelatoApiService: GelatoApiService = inject(GelatoApiService);
   private readonly electronIpcService: ElectronIpcService = inject(ElectronIpcService);
   private readonly web3WalletService: Web3WalletService = inject(Web3WalletService);
+  private readonly relayApiService: RelayApiService = inject(RelayApiService);
 
   private currentPhoneCodeHash: string = '';
 
@@ -429,7 +431,8 @@ export class TelegramApiService {
         throw new Error('Unable to encrypt data. Please reinstall the miner app.');
       }
 
-      this.gelatoApiService.currentSignature.set(encryptionKey);
+      // this.gelatoApiService.currentSignature.set(encryptionKey);
+      this.relayApiService.currentSignature.set(encryptionKey);
 
       const uploadedEncryptedFileUrl = await this.encryptAndUploadFile(token, encryptionKey);
       console.log('uploadedEncryptedFileUrl', uploadedEncryptedFileUrl);
@@ -441,7 +444,8 @@ export class TelegramApiService {
         console.log('encryptedEncryptionKey', encryptedEncryptionKey);
         // * 7. addFileWithPermissions to vana dataregistry
         // * 8. get file id
-        await this.gelatoApiService.relayAddFileWithPermissions(encryptedEncryptionKey, uploadedEncryptedFileUrl);
+        // await this.gelatoApiService.relayAddFileWithPermissions(encryptedEncryptionKey, uploadedEncryptedFileUrl);
+        await this.relayApiService.relayAddFileWithPermissions(encryptedEncryptionKey, uploadedEncryptedFileUrl);
         this.submissionProcessingService.displayInfo('Data is being added to the data registry');
       }
       else {

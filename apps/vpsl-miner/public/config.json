@@ -57,5 +57,9 @@
         }
       }
     }
+  },
+  "relayApi": {
+    "baseUrl": "http://localhost:3000",
+    "apiKey": "8mK_rHJJsaOSwQPfOvM6Qc5FdNkSs5PR_9HjlK8zKbw_"
   }
 }
