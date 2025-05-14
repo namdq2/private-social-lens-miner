@@ -18,7 +18,7 @@
   }
   @else {
     <div class="w-full flex flex-col justify-start items-center gap-y-8">
-      @if(!showAuthCodeInput || phoneNumber === '') {
+      @if(!showAuthCodeInput) {
         <h4>Enter your phone number with your country code</h4>
         <div class="w-full max-w-lg">
           <label for="phone-number-input" class="dfus-input-label">Your Phone Number:</label>
@@ -39,7 +39,7 @@
           <img src="icons/chevron_right.svg" alt="Right chevron icon" />
         </button>
       }
-      @if(showAuthCodeInput && phoneNumber !== '') {
+      @else {
         <div class="flex flex-row justify-center items-center gap-x-4">
           <h4>{{phoneNumber}}</h4>
           <button class="dfus-basic-btn" (click)="editNumberClick()">
