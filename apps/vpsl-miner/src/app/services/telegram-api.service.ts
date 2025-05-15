@@ -446,7 +446,6 @@ export class TelegramApiService {
         // * 8. get file id
         // await this.gelatoApiService.relayAddFileWithPermissions(encryptedEncryptionKey, uploadedEncryptedFileUrl);
         await this.relayApiService.relayAddFileWithPermissions(encryptedEncryptionKey, uploadedEncryptedFileUrl);
-        this.submissionProcessingService.displayInfo('Data is being added to the data registry');
       }
       else {
         console.error('no upload file url');

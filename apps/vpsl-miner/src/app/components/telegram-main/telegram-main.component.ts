@@ -17,7 +17,6 @@ import { SubmissionProcessingService } from '../../services/submission-processin
   styleUrl: './telegram-main.component.scss',
 })
 export class TelegramMainComponent implements AfterViewInit {
-
   private readonly telegramApiService: TelegramApiService = inject(TelegramApiService);
   // private readonly cloudFlareService: CloudFlareService = inject(CloudFlareService);
   private readonly electronIpcService: ElectronIpcService = inject(ElectronIpcService);
@@ -38,9 +37,7 @@ export class TelegramMainComponent implements AfterViewInit {
   public readonly isAllChatsSelected = computed(() => {
     const selectedList = this.selectedDialogsList();
     const totalList = this.telegramDialogList();
-    return (
-      selectedList.length === totalList.length
-    );
+    return selectedList.length === totalList.length;
   });
 
   public readonly lastSubmissionTimeString = computed(() => {
@@ -48,8 +45,7 @@ export class TelegramMainComponent implements AfterViewInit {
     if (lastSubmissionTime) {
       const lastSubmissionDate = new Date(lastSubmissionTime);
       return `${lastSubmissionDate.toLocaleDateString()}, ${lastSubmissionDate.toLocaleTimeString()}`;
-    }
-    else {
+    } else {
       return '';
     }
   });
@@ -59,8 +55,7 @@ export class TelegramMainComponent implements AfterViewInit {
     if (nextSubmissionTime) {
       const nextSubmissionDate = new Date(nextSubmissionTime);
       return `${nextSubmissionDate.toLocaleDateString()}, ${nextSubmissionDate.toLocaleTimeString()}`;
-    }
-    else {
+    } else {
       return '';
     }
   });
@@ -94,52 +89,41 @@ export class TelegramMainComponent implements AfterViewInit {
     if (matCheckboxChange.checked) {
       const fullDialogList = [...this.telegramDialogList()];
       this.selectedDialogsList.set(fullDialogList);
-    }
-    else {
+    } else {
       this.selectedDialogsList.set([]);
     }
   }
 
   public onAddDialog(dialog: Dialog | null) {
     if (dialog) {
-      const existingDialog = this.selectedDialogsList().find(telegramDialog => telegramDialog.id === dialog.id);
-      if(!existingDialog) {
+      const existingDialog = this.selectedDialogsList().find((telegramDialog) => telegramDialog.id === dialog.id);
+      if (!existingDialog) {
         this.selectedDialogsList().push(dialog);
-      }
-      else {
+      } else {
         console.error('DIALOG ALREADY IN LIST');
       }
-    }
-    else {
+    } else {
       console.error('NULL DIALOG!');
     }
   }
 
   public onRemoveDialog(dialog: Dialog | null) {
-    const dialogIndex = this.selectedDialogsList().findIndex(telegramDialog => telegramDialog.id === dialog?.id);
+    const dialogIndex = this.selectedDialogsList().findIndex((telegramDialog) => telegramDialog.id === dialog?.id);
     if (dialogIndex !== -1) {
       this.selectedDialogsList().splice(dialogIndex, 1);
     }
   }
 
   public async doSubmit() {
-    // Show processing popup
-    this.submissionProcessingService.startProcessingState();
-
-    // Directly call doTelegramSubmission with the test token
-    this.telegramApiService.doTelegramSubmission('1234567890');
+    // await this.telegramApiService.initiateSubmission();
+    this.startBackgroundTask();
   }
 
   public startBackgroundTask() {
     if (this.telegramApiService.selectedDialogsList().length > 0 || this.electronIpcService.isUploadAllChats()) {
       this.electronIpcService.startBackgroundTask();
-    }
-    else {
-      this.snackBar.open(
-        `Select at least one chat`,
-        `OK`,
-        { duration: 1000 * 2 }
-      );
+    } else {
+      this.snackBar.open(`Select at least one chat`, `OK`, { duration: 1000 * 2 });
     }
   }
 
@@ -149,11 +133,10 @@ export class TelegramMainComponent implements AfterViewInit {
       disableClose: true,
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         this.electronIpcService.stopBackgroundTask();
       }
     });
   }
-
 }

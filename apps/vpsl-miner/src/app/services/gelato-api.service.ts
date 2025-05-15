@@ -68,6 +68,7 @@ export class GelatoApiService {
       this.currentTaskType.set(GelatoTaskRelay.ADD_FILE_WITH_PERMISSION);
       const relayResponse = await this.gelatoRelay.sponsoredCall(sponsoredCallRequest, this.appConfigService.gelato!.apiKey);
       // console.log('relayAddFileWithPermissions response', relayResponse);
+      this.submissionProcessingService.displayInfo('Data is being added to the data registry');
     } catch (error: any) {
       console.error('gelato relayAddFileWithPermissions', error);
       this.handleGelatoRelayError(error);
@@ -99,16 +100,17 @@ export class GelatoApiService {
 
   public async relayRequestReward(proofIndex: number = 1) {
     try {
+      console.log('requesting reward', this.currentSubmissionFileId, proofIndex);
       const { data } = await this.web3WalletService.dlpContract['requestReward'].populateTransaction(this.currentSubmissionFileId, proofIndex);
       const sponsoredCallRequest: SponsoredCallRequest = {
         chainId: (await this.web3WalletService.rpcProvider.getNetwork()).chainId,
         target: this.appConfigService.vana!.dlpSmartContractAddress,
         data: data as any,
       };
-      // console.log('SponsoredCallRequest', sponsoredCallRequest);
+      console.log('SponsoredCallRequest', sponsoredCallRequest);
       this.currentTaskType.set(GelatoTaskRelay.REQUEST_REWARD);
       const relayResponse = await this.gelatoRelay.sponsoredCall(sponsoredCallRequest, this.appConfigService.gelato!.apiKey);
-      // console.log('relayRequestReward response', relayResponse);
+      console.log('relayRequestReward response', relayResponse);
     } catch (error: any) {
       console.error('gelato relayRequestReward', error);
       this.handleGelatoRelayError(error);

@@ -49,11 +49,12 @@ export class RelayApiService {
       }
 
       const proofIndex = 1;
-      const rewardResponse = await this.requestReward(fileId, proofIndex);
-      console.log('rewardResponse', rewardResponse);
-      if (rewardResponse.status !== 'success') {
-        throw new Error('Failed to request reward');
-      }
+      await this.initiateRequestReward(fileId, proofIndex);
+
+      console.log('Claim requested successfully');
+
+      await this.web3WalletService.calculateBalance();
+      this.submissionProcessingService.displaySuccess(`Your submission scored ${this.submissionProcessingService.successRewardsAmount()} VFSN`);
     } catch (err: any) {
       console.error('Error relayAddFileWithPermissions:', err);
       this.submissionProcessingService.displayError(ERROR_MSG_GENERAL);
@@ -84,7 +85,7 @@ export class RelayApiService {
 
       console.log(`Sending contribution proof request to TEE`);
       const contributionProofResponse = await this.contractService.vanaRunProof(jobDetails.teeUrl, requestBody);
-      // console.log('contributionProofResponse', contributionProofResponse);
+      console.log('contributionProofResponse', contributionProofResponse);
 
       const contributionProofData = await contributionProofResponse.json();
       const defaultFailureMsg = 'Failed to send TEE request to the node to begin the validation.';
@@ -125,8 +126,6 @@ export class RelayApiService {
         const rewards = (score * fileRewardFactorDecimal).toFixed(5);
         this.submissionProcessingService.successRewardsAmount.set(rewards);
         await this.requestReward(fileId, proofIndex);
-        await this.web3WalletService.calculateBalance();
-        this.submissionProcessingService.displaySuccess(`Your submission scored ${this.submissionProcessingService.successRewardsAmount()} VFSN`);
       } else {
         this.submissionProcessingService.displayFailure('The score for your data submission was below the acceptable limit. No rewards were awarded.');
       }
@@ -139,7 +138,12 @@ export class RelayApiService {
   private async getTransactionData(transactionHash: string) {
     // Connect to the provider and get the transaction receipt
     let txn: TransactionReceipt | null;
+    console.log('transactionHash', transactionHash);
+    console.log('web3WalletService.rpcProvider', this.web3WalletService.rpcProvider);
+
+
     if (transactionHash) {
+      console.log('getting transaction receipt');
       txn = await this.web3WalletService.rpcProvider.getTransactionReceipt(transactionHash);
       console.warn(`TXN Receipt: ${txn}`);
     } else {
@@ -157,12 +161,16 @@ export class RelayApiService {
   private getFileId(txn: TransactionReceipt) {
     const contractInterface = new ethers.Interface(DataRegistryImplementationABI.abi);
 
+    console.log('txn.logs', txn.logs);
+
     const parsedLogs = txn.logs.map((log) => {
       return contractInterface.parseLog({
         topics: log.topics,
         data: log.data,
       });
     });
+
+    console.log('parsedLogs', parsedLogs);
 
     const fileAddedLogs = parsedLogs.filter((log) => {
       return log?.name === 'FileAdded';
@@ -188,6 +196,7 @@ export class RelayApiService {
   }
 
   public async addFileWithPermissions(encryptedKey: string, uploadedEncryptedFileUrl: string) {
+    this.submissionProcessingService.displayInfo('Data is being added to the data registry');
     const url = `${this.appConfigService.relayApi?.baseUrl}/api/relay/data-registry/add-file-with-permissions`;
     const requestBody: AddFileWithPermissionsDto = {
       url: uploadedEncryptedFileUrl,
@@ -212,10 +221,11 @@ export class RelayApiService {
     }
   }
 
-  public async requestContributionProof(fileId: number, teeFee: number) {
-    const url = `${this.appConfigService.relayApi?.baseUrl}/api/relay/data-registry/request-contribution-proof`;
+  public async requestContributionProof(fileId: number, teeFee: bigint) {
+    const url = `${this.appConfigService.relayApi?.baseUrl}/api/relay/tee-pool/request-contribution-proof`;
     const requestBody: RequestProofDto = {
       fileId,
+      teeFee: teeFee.toString(),
     };
 
     const response = await this.axiosInstance.post<RelayTransactionResponse>(url, requestBody);
@@ -233,7 +243,7 @@ export class RelayApiService {
   }
 
   public async requestReward(fileId: number, proofIndex: number) {
-    const url = `${this.appConfigService.relayApi?.baseUrl}/api/relay/data-registry/request-reward`;
+    const url = `${this.appConfigService.relayApi?.baseUrl}/api/relay/dlp/request-reward`;
     const requestBody: RequestRewardDto = {
       fileId,
       proofIndex,

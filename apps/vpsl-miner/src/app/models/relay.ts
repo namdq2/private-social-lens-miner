@@ -22,6 +22,7 @@ export interface RequestRewardDto {
  */
 export interface RequestProofDto {
   fileId: number;
+  teeFee: string;
 }
 
 /**
