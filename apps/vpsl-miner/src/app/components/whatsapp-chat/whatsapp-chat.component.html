@@ -1,0 +1,8 @@
+<div class="flex flex-1 flex-col justify-start items-stretch gap-y-4 p-6 border border-[#22252B] border-solid rounded-xl cursor-pointer"
+  [ngClass]="[selectedChatId?.toString() === chat?.id?.toString() ? 'selected-chat' : '']"
+  (click)="selectChat()">
+
+    <mat-checkbox [checked]="isChatSelected()" (change)="addOrRemoveChat($event)">
+      {{chat?.name || 'Deleted Account'}}
+    </mat-checkbox>
+</div>

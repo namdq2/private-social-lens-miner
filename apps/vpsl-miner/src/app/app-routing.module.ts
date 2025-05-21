@@ -7,6 +7,7 @@ import { StakingRewardsInfoComponent } from './components/staking-rewards-info/s
 import { WalletConnectionComponent } from './components/wallet-connection/wallet-connection.component';
 import { authGuard } from './guards/auth.guard';
 import { SignMessageWalletComponent } from './components/sign-message-wallet/sign-message-wallet.component';
+import { WhatsAppContainerComponent } from './components/whatsapp-container/whatsapp-container.component';
 
 const routes: Routes = [
   {
@@ -28,15 +29,18 @@ const routes: Routes = [
     children: [
       {
         path: 'miner',
-        component: MinerMainComponent
+        component: MinerMainComponent,
       },
       {
         path: 'staking-rewards',
         component: StakingRewardsInfoComponent,
-      }
-    ]
+      },
+      {
+        path: 'whatsapp',
+        component: WhatsAppContainerComponent,
+      },
+    ],
   },
-
 ];
 
 @NgModule({

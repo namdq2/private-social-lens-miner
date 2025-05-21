@@ -10,6 +10,8 @@ import { ContractService } from './contract.service';
 import { ElectronIpcService } from './electron-ipc.service';
 
 import DataRegistryImplementationABI from '../assets/contracts/DataRegistryImplementation.json';
+import { WhatsAppService } from './whatsapp.service';
+import { WhatsAppIpcService } from './whatsapp-ipc.service';
 
 @Injectable({
   providedIn: 'root',
@@ -20,11 +22,13 @@ export class GelatoApiService {
   private readonly submissionProcessingService: SubmissionProcessingService = inject(SubmissionProcessingService);
   private readonly contractService: ContractService = inject(ContractService);
   private readonly electronIpcService: ElectronIpcService = inject(ElectronIpcService);
+  private readonly whatsappIpcService: WhatsAppIpcService = inject(WhatsAppIpcService);
 
   private gelatoRelay = new GelatoRelay();
   public currentTaskType = signal<GelatoTaskRelay>(GelatoTaskRelay.NONE);
   private currentSubmissionFileId = -1;
   public currentSignature = signal<string>('');
+  public currentSocialType = signal<string>('');
 
   constructor() {
     this.gelatoRelay.onTaskStatusUpdate(async (taskStatus: TransactionStatusResponse) => {
@@ -243,7 +247,12 @@ export class GelatoApiService {
         }
       }
 
-      this.electronIpcService.updateLastSubmissionTime();
+      if (this.currentSocialType() === 'whatsapp') {
+        this.whatsappIpcService.updateWhatsappLastSubmissionTime();
+        this.currentSocialType.set(''); // reset social type
+      } else {
+        this.electronIpcService.updateLastSubmissionTime();
+      }
 
       this.submissionProcessingService.displayInfo('Your data has been verified and attested. Claiming your reward');
 

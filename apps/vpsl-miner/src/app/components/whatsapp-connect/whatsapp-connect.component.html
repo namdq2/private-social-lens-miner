@@ -1,0 +1,48 @@
+<div class="h-full w-full flex flex-1 flex-col justify-start items-center rounded-xl bg-[#101520] border border-[#2a303a]">
+  @if (loading) {
+  <div class="loading-spinner gap-y-8 p-28">
+    <img src="img/spinner.svg" alt="Loading..." />
+    <p>Processing...</p>
+  </div>
+  } @else if (!apiAvailable) {
+  <div class="api-not-available">
+    <img src="icons/hint_error.svg" alt="Error" />
+    <p>WhatsApp API is not available. This may happen because the Electron did not load the correct preload script.</p>
+    <div class="debug-info">
+      <code>{{ debugInfo }}</code>
+    </div>
+    <button class="dfus-blue-btn dfus-btn-icon-group w-full h-16" (click)="reloadApp()">
+      <img src="icons/refresh.svg" alt="Reload" />
+      <span>Reload application</span>
+    </button>
+    <button class="dfus-blue-btn dfus-btn-icon-group w-full h-16" (click)="debugApiStatus()">
+      <span>Check API again</span>
+    </button>
+  </div>
+  } @else if (!isConnected){
+  <div class="connection-status not-connected">
+    <div class="status-text">
+      <h3>Connect your WhatsApp account</h3>
+      <p>Scan the QR code with WhatsApp on your phone to connect.</p>
+      @if (qrCode) {
+      <div class="qr-code-container">
+        <img [src]="qrCode" alt="WhatsApp QR Code" class="qr-code-image" />
+        <p class="qr-code-instruction">Open WhatsApp on your phone, go to Settings > WhatsApp Web > Link a device and scan the QR code</p>
+      </div>
+      } @else {
+      <button class="dfus-blue-btn dfus-btn-icon-group mt-6 w-full h-16" (click)="connectWhatsApp()">
+        <span>Connect WhatsApp</span>
+      </button>
+      }
+    </div>
+  </div>
+  } @if (error) {
+  <div class="error-message">
+    <img src="icons/hint_error.svg" alt="Error" />
+    <span>{{ error }}</span>
+    @if (!apiAvailable) {
+    <button class="reload-button small" (click)="reloadApp()">Reload</button>
+    }
+  </div>
+  }
+</div>

@@ -9,18 +9,23 @@
       </div>
       <ul class="space-y-2 font-medium">
         <li>
-          <a routerLink="/app/miner" routerLinkActive="text-[#5B92FD]"
-            class="flex items-center p-2 rounded-lg hover:bg-gray-700 group">
+          <a routerLink="/app/miner" routerLinkActive="text-[#5B92FD]" class="flex items-center p-2 rounded-lg hover:bg-gray-700 group">
             <mat-icon>dashboard_2</mat-icon>
             <span class="flex-1 ms-3 whitespace-nowrap">dFusion Social Truth</span>
           </a>
         </li>
 
         <li>
-          <a routerLink="/app/staking-rewards" routerLinkActive="text-[#5B92FD]"
-            class="flex items-center p-2 rounded-lg hover:bg-gray-700 group">
+          <a routerLink="/app/staking-rewards" routerLinkActive="text-[#5B92FD]" class="flex items-center p-2 rounded-lg hover:bg-gray-700 group">
             <mat-icon>info</mat-icon>
             <span class="flex-1 ms-3 whitespace-nowrap">Staking rewards</span>
+          </a>
+        </li>
+
+        <li routerLink="/app/whatsapp" routerLinkActive="text-[#5B92FD]" class="cursor-pointer">
+          <a class="flex items-center p-2 rounded-lg hover:bg-gray-700 group">
+            <mat-icon>whatsapp</mat-icon>
+            <span class="flex-1 ms-3 whitespace-nowrap">WhatsApp</span>
           </a>
         </li>
       </ul>
@@ -29,8 +34,7 @@
 
       <ul class="space-y-2 font-medium">
         <li (click)="openSettings()" class="cursor-pointer">
-          <a
-            class="flex items-center p-2 rounded-lg hover:bg-gray-700 group">
+          <a class="flex items-center p-2 rounded-lg hover:bg-gray-700 group">
             <mat-icon>settings</mat-icon>
             <span class="flex-1 ms-3 whitespace-nowrap">Settings</span>
           </a>

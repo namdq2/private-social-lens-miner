@@ -1,0 +1,61 @@
+
+<div class="flex flex-row justify-start items-center mb-4">
+  <div class="w-1/3 flex flex-row justify-start items-center gap-x-4">
+    <mat-checkbox [checked]="isAllChatsSelected()" [indeterminate]="!isAllChatsSelected()" (change)="selectAllChats($event)">
+      Chats
+    </mat-checkbox>
+  </div>
+
+  <div class="w-1/3 flex flex-row justify-start items-center gap-x-4">
+    <span>Next submission time: {{nextSubmissionTimeString()}}</span>
+  </div>
+
+  <div class="w-1/3 flex flex-row justify-end items-center gap-x-4">
+    <div>
+      <button mat-icon-button (click)="refresh()">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+
+    <div>|</div>
+
+    @if (!isBackgroundWhatsappTaskEnabled()) {
+      <!-- [disabled]="selectedDialogsList().length === 0" -->
+      <button class="dfus-orange-btn disabled:cursor-not-allowed" (click)="doSubmit()">
+        Start Auto-submission
+      </button>
+    }
+    @else {
+      <button (click)="stopBackgroundWhatsappTask()" [disabled]="!isBackgroundWhatsappTaskEnabled()" class="dfus-basic-btn disabled:cursor-not-allowed">
+        Stop Auto-submission
+      </button>
+    }
+  </div>
+</div>
+
+<div class="flex flex-row gap-x-4">
+  <div class="w-1/3 flex flex-col gap-y-4 pr-4 overflow-y-auto chats-container">
+    @for (chat of chats(); track $index) {
+      <app-whatsapp-chat
+        [chat]="chat" [selectedChatId]="selectedChat?.id"
+        [selectedChats]="selectedChats"
+        (chatSelected)="onChatSelected($event)" (addChat)="onAddChat($event)" (removeChat)="onRemoveChat($event)">
+      </app-whatsapp-chat>
+    }
+  </div>
+
+  <div class="w-2/3 flex flex-col justify-start items-stretch gap-y-8 bg-[#07122C] border border-[#22252B] border-solid rounded-xl p-4 overflow-y-auto messages-container">
+    @if (selectedChat) {
+      <div class="flex flex-row justify-start items-center gap-x-4">
+        <div class="relative inline-flex items-center justify-center w-10 h-10 overflow-hidden bg-gray-600 rounded-full">
+          <span class="font-medium text-gray-300">{{selectedChat.name}}</span>
+        </div>
+        <span>{{selectedChat.name}}</span>
+      </div>
+    }
+    @for (msg of selectedMessages; track $index) {
+      <app-whatsapp-message [message]="msg">
+      </app-whatsapp-message>
+    }
+  </div>
+</div>

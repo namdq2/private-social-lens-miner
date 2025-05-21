@@ -48,3 +48,55 @@ contextBridge.exposeInMainWorld('electron', {
   getCheckForUpdate: () => ipcRenderer.invoke('get-check-for-update'),
   onSendUpdateMessage: (callback) => ipcRenderer.on('send-update-message', callback),
 });
+
+// Add WhatsApp API
+contextBridge.exposeInMainWorld('whatsappAPI', {
+  initialize: () => ipcRenderer.invoke('whatsapp:initialize'),
+  getQRCode: () => ipcRenderer.invoke('whatsapp:getQRCode'),
+  isConnected: () => ipcRenderer.invoke('whatsapp:isConnected'),
+  getInfo: () => ipcRenderer.invoke('whatsapp:getInfo'),
+  getChats: () => ipcRenderer.invoke('whatsapp:getChats'),
+  getMessages: (chatId, limit) => ipcRenderer.invoke('whatsapp:getMessages', chatId, limit),
+  logout: () => ipcRenderer.invoke('whatsapp:logout'),
+  // Register event listeners
+  onQRCodeUpdate: (callback) => {
+    ipcRenderer.on('whatsapp:qrcode', (_event, data) => callback(data));
+    return () => ipcRenderer.removeListener('whatsapp:qrcode', callback);
+  },
+  onConnectionStatusChange: (callback) => {
+    ipcRenderer.on('whatsapp:connection', (_event, status) => callback(status));
+    return () => ipcRenderer.removeListener('whatsapp:connection', callback);
+  },
+  onError: (callback) => {
+    ipcRenderer.on('whatsapp:error', (_event, error) => callback(error));
+    return () => ipcRenderer.removeListener('whatsapp:error', callback);
+  },
+  removeAllListeners: () => {
+    ipcRenderer.removeAllListeners('whatsapp:qrcode');
+    ipcRenderer.removeAllListeners('whatsapp:connection');
+    ipcRenderer.removeAllListeners('whatsapp:error');
+  },
+
+  // Configuration
+  setUploadAllWhatsappChats: (value) => ipcRenderer.send('set-upload-all-whatsapp-chats', value),
+  getUploadAllWhatsappChats: () => ipcRenderer.invoke('get-upload-all-whatsapp-chats'),
+
+  setSelectedWhatsappChatIdsList: (value) => ipcRenderer.send('set-selected-whatsapp-chat-ids-list', value),
+  getSelectedWhatsappChatIdsList: () => ipcRenderer.invoke('get-selected-whatsapp-chat-ids-list'),
+
+  setEnableBackgroundWhatsappTask: (value) => ipcRenderer.send('set-enable-background-whatsapp-task', value),
+  getEnableBackgroundWhatsappTask: () => ipcRenderer.invoke('get-enable-background-whatsapp-task'),
+
+  onExecuteBackgroundWhatsappTaskCode: (callback) => ipcRenderer.on('execute-background-whatsapp-task-code', callback),
+
+  setLastWhatsappSubmissionTime: (value) => ipcRenderer.send('set-last-whatsapp-submission-time', value),
+  getLastWhatsappSubmissionTime: () => ipcRenderer.invoke('get-last-whatsapp-submission-time'),
+
+  setNextWhatsappSubmissionTime: (value) => ipcRenderer.send('set-next-whatsapp-submission-time', value),
+  getNextWhatsappSubmissionTime: () => ipcRenderer.invoke('get-next-whatsapp-submission-time'),
+
+  getBackgroundWhatsappTaskIntervalExists: () => ipcRenderer.invoke('get-background-whatsapp-task-interval-exists'),
+
+  setUploadWhatsappFrequency: (value) => ipcRenderer.send('set-upload-whatsapp-frequency', value),
+  getUploadWhatsappFrequency: () => ipcRenderer.invoke('get-upload-whatsapp-frequency'),
+});

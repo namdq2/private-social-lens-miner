@@ -9,6 +9,7 @@ import UpdateEvents from './events/update.events';
 // import log from 'electron-log';
 
 // log.transports.file.level = 'debug';
+import { WhatsAppService } from './api/whatsapp.service';
 
 const store = new Store() as any;
 
@@ -19,6 +20,7 @@ export default class App {
   static application: Electron.App;
   static BrowserWindow;
   static tray: Electron.Tray | null = null;
+  static forceQuit: boolean = false; // Flag to control the force quit behavior
 
   static backgroundTaskInterval: NodeJS.Timer | null = null; // Store the interval ID
 
@@ -35,6 +37,18 @@ export default class App {
   static uploadFrequency = 4;
   static telegramSession = '';
   static checkForUpdate = false; // manual check for updates
+
+  /* Whatsapp */
+  // ============================================
+  static backgroundWhatsappTaskInterval: NodeJS.Timer | null = null;
+  static whatsappService: WhatsAppService;
+  static uploadAllWhatsappChats = true;
+  static selectedWhatsappChatIdsList = [];
+  static enableBackgroundWhatsappTask = false;
+  static lastWhatsappSubmissionTime = null;
+  static nextWhatsappSubmissionTime = null;
+  static uploadWhatsappFrequency = 4;
+  // ============================================
 
   // Create server local
   static localServer: http.Server;
@@ -107,6 +121,10 @@ export default class App {
     }
     if (process.platform !== 'darwin') {
       App.application.quit();
+    } else {
+      if (App.forceQuit) {
+        App.application.quit();
+      }
     }
   }
 
@@ -143,6 +161,16 @@ export default class App {
     App.uploadFrequency = store.get('uploadFrequency') ?? 4;
     App.telegramSession = store.get('telegramSession') ?? '';
     // App.checkForUpdate // manual check init to false always
+
+    /* Whatsapp */
+    // ============================================
+    App.uploadAllWhatsappChats = store.get('uploadAllWhatsappChats') ?? true;
+    App.selectedWhatsappChatIdsList = store.get('selectedWhatsappChatIdsList') ?? [];
+    App.enableBackgroundWhatsappTask = store.get('enableBackgroundWhatsappTask') ?? false;
+    App.lastWhatsappSubmissionTime = store.get('lastWhatsappSubmissionTime') || null;
+    App.nextWhatsappSubmissionTime = store.get('nextWhatsappSubmissionTime') || null;
+    App.uploadWhatsappFrequency = store.get('uploadWhatsappFrequency') ?? 4;
+    // ============================================
 
     if (rendererAppName) {
       App.initMainWindow();
@@ -194,7 +222,7 @@ export default class App {
     });
 
     App.mainWindow.on('close', (event) => {
-      if (App.minimizeToTray) {
+      if (!App.forceQuit && App.minimizeToTray) {
         event.preventDefault();
         App.mainWindow.hide();
       }
@@ -244,6 +272,9 @@ export default class App {
         click: () => {
           App.tray?.destroy();
           App.application.quit();
+          if (App.localServer) {
+            App.localServer.close();
+          }
         },
       },
     ]);
@@ -324,6 +355,44 @@ export default class App {
     }
   }
 
+  private static startBackgroundWhatsappTask() {
+    const interval = 1000 * 60 * 10;
+
+    // Clear any existing interval
+    if (App.backgroundWhatsappTaskInterval) {
+      clearInterval(App.backgroundWhatsappTaskInterval);
+    }
+
+    // Run the task immediately
+    if (App.enableBackgroundWhatsappTask && App.mainWindow) {
+      console.log('Background task running immediately...');
+      App.sendBackgroundWhatsappTaskMessage('main process initiating background whatsapp task immediate execution');
+    }
+
+    // Start a new interval
+    App.backgroundWhatsappTaskInterval = setInterval(() => {
+      if (App.enableBackgroundWhatsappTask && App.mainWindow) {
+        console.log('Background task running...');
+        App.sendBackgroundWhatsappTaskMessage('main process initiating background whatsapp task interval execution');
+      }
+    }, interval);
+  }
+
+  private static sendBackgroundWhatsappTaskMessage(message: string) {
+    const currentDate = new Date();
+    const nextWhatsappSubmissionDate = new Date(App.nextWhatsappSubmissionTime);
+
+    console.log('currentDate', currentDate);
+    console.log('App.nextWhatsappSubmissionTime', App.nextWhatsappSubmissionTime);
+
+    if (!App.nextWhatsappSubmissionTime || currentDate > nextWhatsappSubmissionDate) {
+      // Send a message to the render/UI process to execute code
+      App.mainWindow.webContents.send('execute-background-whatsapp-task-code', message);
+    } else {
+      console.log('main process: background whatsapp task skipped, next submission time not reached');
+    }
+  }
+
   static main(app: Electron.App, browserWindow: typeof BrowserWindow) {
     // we pass the Electron.App object and the
     // Electron.BrowserWindow into this function
@@ -332,10 +401,29 @@ export default class App {
 
     App.BrowserWindow = browserWindow;
     App.application = app;
+    App.whatsappService = new WhatsAppService();
 
     App.application.on('window-all-closed', App.onWindowAllClosed); // Quit when all windows are closed.
     App.application.on('ready', App.onReady); // App is ready to load data
     App.application.on('activate', App.onActivate); // App is activated
+    App.application.on('before-quit', () => {
+      // Set the forceQuit flag to true when quitting
+      App.forceQuit = true;
+      // Clear the background task interval
+      if (App.backgroundTaskInterval) {
+        clearInterval(App.backgroundTaskInterval);
+        App.backgroundTaskInterval = null;
+      }
+      if (App.backgroundWhatsappTaskInterval) {
+        clearInterval(App.backgroundWhatsappTaskInterval);
+        App.backgroundWhatsappTaskInterval = null;
+      }
+      // Destroy the tray icon if it exists
+      if (App.tray) {
+        App.tray.destroy();
+        App.tray = null;
+      }
+    });
 
     // app.on('will-quit', () => {
     //   clearInterval(App.backgroundTaskInterval);
@@ -491,5 +579,170 @@ export default class App {
     ipcMain.handle('get-check-for-update', () => {
       return App.checkForUpdate;
     });
+
+    /* WhatsApp handlers */
+    // ============================================
+    ipcMain.handle('whatsapp:initialize', async () => {
+      try {
+        console.log('main process: initializing WhatsApp client');
+        return await App.whatsappService.initialize();
+      } catch (error) {
+        console.error('Failed to initialize WhatsApp', error);
+        return false;
+      }
+    });
+
+    ipcMain.handle('whatsapp:getQRCode', () => {
+      try {
+        return App.whatsappService.getQRCode();
+      } catch (error) {
+        console.error('Failed to get QR code', error);
+        return null;
+      }
+    });
+
+    ipcMain.handle('whatsapp:isConnected', () => {
+      try {
+        return App.whatsappService.isConnected();
+      } catch (error) {
+        console.error('Failed to check connection status', error);
+        return false;
+      }
+    });
+
+    ipcMain.handle('whatsapp:getInfo', () => {
+      try {
+        return App.whatsappService.getInfo();
+      } catch (error) {
+        console.error('Failed to get WhatsApp info', error);
+        return null;
+      }
+    });
+
+    ipcMain.handle('whatsapp:getChats', async () => {
+      try {
+        return await App.whatsappService.getChats();
+      } catch (error) {
+        console.error('Failed to get chats', error);
+        return [];
+      }
+    });
+
+    ipcMain.handle('whatsapp:getMessages', async (event, chatId, limit) => {
+      try {
+        return await App.whatsappService.getMessages(chatId, limit);
+      } catch (error) {
+        console.error(`Failed to get messages for chat ${chatId}`, error);
+        return [];
+      }
+    });
+
+    ipcMain.handle('whatsapp:logout', async () => {
+      try {
+        return await App.whatsappService.logout();
+      } catch (error) {
+        console.error('Failed to logout', error);
+        return false;
+      }
+    });
+
+    ipcMain.on('set-upload-all-whatsapp-chats', (event, value) => {
+      App.uploadAllWhatsappChats = value;
+      store.set('uploadAllWhatsappChats', value);
+      console.log('main process: set-upload-all-whatsapp-chats:', value);
+    });
+
+    ipcMain.handle('get-upload-all-whatsapp-chats', () => {
+      return App.uploadAllWhatsappChats;
+    });
+
+    ipcMain.on('set-selected-whatsapp-chat-ids-list', (event, value) => {
+      App.selectedWhatsappChatIdsList = value;
+      store.set('selectedWhatsappChatIdsList', value);
+      console.log('main process: set-selected-whatsapp-chat-ids-list:', value);
+    });
+
+    ipcMain.handle('get-selected-whatsapp-chat-ids-list', () => {
+      return App.selectedWhatsappChatIdsList;
+    });
+
+    ipcMain.on('set-enable-background-whatsapp-task', (event, value) => {
+      App.enableBackgroundWhatsappTask = value;
+      store.set('enableBackgroundWhatsappTask', value);
+      console.log('main process: set-enable-background-whatsapp-task:', value);
+
+      // Start or stop the background task based on the flag
+      if (App.enableBackgroundWhatsappTask) {
+        App.startBackgroundWhatsappTask();
+      } else if (App.backgroundWhatsappTaskInterval) {
+        clearInterval(App.backgroundWhatsappTaskInterval);
+        App.backgroundWhatsappTaskInterval = null;
+        console.log('main process: background whatsapp task disabled');
+      }
+    });
+
+    ipcMain.handle('get-enable-background-whatsapp-task', () => {
+      return App.enableBackgroundWhatsappTask;
+    });
+
+    ipcMain.on('set-last-whatsapp-submission-time', (event, value) => {
+      App.lastWhatsappSubmissionTime = value;
+      store.set('lastWhatsappSubmissionTime', value);
+      console.log('main process: set-last-whatsapp-submission-time:', value);
+    });
+
+    ipcMain.handle('get-last-whatsapp-submission-time', () => {
+      return App.lastWhatsappSubmissionTime;
+    });
+
+    ipcMain.on('set-next-whatsapp-submission-time', (event, value) => {
+      App.nextWhatsappSubmissionTime = value;
+      store.set('nextWhatsappSubmissionTime', value);
+      console.log('main process: set-next-whatsapp-submission-time:', value);
+    });
+
+    ipcMain.handle('get-next-whatsapp-submission-time', () => {
+      return App.nextWhatsappSubmissionTime;
+    });
+
+    ipcMain.handle('get-background-whatsapp-task-interval-exists', () => {
+      return !!App.backgroundWhatsappTaskInterval;
+    });
+
+    ipcMain.on('set-upload-whatsapp-frequency', (event, value) => {
+      App.uploadWhatsappFrequency = value;
+      store.set('uploadWhatsappFrequency', value);
+      console.log('main process: set-upload-whatsapp-frequency:', value);
+    });
+
+    ipcMain.handle('get-upload-whatsapp-frequency', () => {
+      return App.uploadWhatsappFrequency;
+    });
+
+    // Register events from WhatsApp Service
+    App.whatsappService.on('qrcode', (qrCodeData) => {
+      if (App.mainWindow) {
+        App.mainWindow.webContents.send('whatsapp:qrcode', qrCodeData);
+      }
+    });
+
+    App.whatsappService.on('connection', (status) => {
+      if (App.mainWindow) {
+        App.mainWindow.webContents.send('whatsapp:connection', status);
+      }
+    });
+
+    App.whatsappService.on('auth_error', (error) => {
+      if (App.mainWindow) {
+        App.mainWindow.webContents.send('whatsapp:error', error);
+      }
+    });
+
+    App.whatsappService.on('error', (error) => {
+      if (App.mainWindow) {
+        App.mainWindow.webContents.send('whatsapp:error', error);
+      }
+    });
+    // ============================================
   }
 }

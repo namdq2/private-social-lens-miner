@@ -33,6 +33,12 @@ import { TelegramSigninComponent } from './components/telegram-signin/telegram-s
 import { TelegramComponent } from './components/telegram/telegram.component';
 import { WalletConnectionComponent } from './components/wallet-connection/wallet-connection.component';
 import { WalletComponent } from './components/wallet/wallet.component';
+import { WhatsAppChatComponent } from './components/whatsapp-chat/whatsapp-chat.component';
+import { WhatsAppConnectComponent } from './components/whatsapp-connect/whatsapp-connect.component';
+import { WhatsAppContainerComponent } from './components/whatsapp-container/whatsapp-container.component';
+import { WhatsAppMainComponent } from './components/whatsapp-main/whatsapp-main.component';
+import { WhatsAppMessageComponent } from './components/whatsapp-message/whatsapp-message.component';
+import { WhatsAppComponent } from './components/whatsapp/whatsapp.component';
 import { PhoneInputDirective } from './directives/phone-input.directive';
 import { AppConfigService } from './services/app-config.service';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -62,6 +68,12 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     ConfirmWalletDialogComponent,
     SignMessageWalletComponent,
     WalletConnectionComponent,
+    WhatsAppConnectComponent,
+    WhatsAppComponent,
+    WhatsAppContainerComponent,
+    WhatsAppMainComponent,
+    WhatsAppChatComponent,
+    WhatsAppMessageComponent,
   ],
   imports: [
     BrowserModule,

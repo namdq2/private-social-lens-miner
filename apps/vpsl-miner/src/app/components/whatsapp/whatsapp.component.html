@@ -1,0 +1,37 @@
+<div class="h-full w-full flex flex-1 flex-col justify-start items-stretch gap-y-8">
+  <div class="flex flex-row justify-start items-center">
+    <div class="flex flex-1 flex-col justify-start items-start gap-y-2">
+      <span class="text-[#848689]">Upload Frequency</span>
+      <button class="dfus-basic-btn flex flex-row justify-center items-center gap-x-2" #trigger="matMenuTrigger" [matMenuTriggerFor]="menu">
+        Every {{ selectedFrequency() }} hours @if (trigger.menuOpen) {
+        <mat-icon>arrow_drop_up</mat-icon>
+        } @else {
+        <mat-icon>arrow_drop_down</mat-icon>
+        }
+      </button>
+      <mat-menu #menu="matMenu" xPosition="before">
+        @for (freqItem of uploadFrequencyList; track $index) {
+        <button mat-menu-item (click)="selectFrequency(freqItem)">Every {{ freqItem }} hours</button>
+        }
+      </mat-menu>
+    </div>
+
+    <div class="flex flex-1 flex-col gap-y-2">
+      <span class="text-[#848689]">Maximize your rewards - default to select all chats for each submission</span>
+
+      <mat-slide-toggle class="slide-toggle-label" [checked]="isUploadAllChats()" (change)="onUploadAllChatsChange($event)">
+        Always upload all chats
+      </mat-slide-toggle>
+    </div>
+  </div>
+
+  <div class="border-[#54575B] border-solid border"></div>
+
+  @if (!isConnected) {
+    <div class="flex flex-1 flex-col">
+      <app-whatsapp-connect></app-whatsapp-connect>
+    </div>
+  } @else {
+    <app-whatsapp-main></app-whatsapp-main>
+  }
+</div>
