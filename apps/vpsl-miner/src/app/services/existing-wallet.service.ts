@@ -1,18 +1,18 @@
-import { forwardRef, inject, Injectable, signal } from '@angular/core';
-import { createAppKit } from '@reown/appkit';
+import { inject, Injectable, signal } from '@angular/core';
+import { AppKit, createAppKit } from '@reown/appkit';
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
 import { AppKitNetwork } from '@reown/appkit/networks';
+import { http } from 'viem';
 import { WalletType } from '../models/wallet';
 import { ENCRYPTION_SEED } from '../shared/constants';
 import { AppConfigService } from './app-config.service';
 import { ElectronIpcService } from './electron-ipc.service';
-import { http } from 'viem';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ExistingWalletService {
-  private readonly electronIpcService: ElectronIpcService = inject(forwardRef(() => ElectronIpcService));
+  private readonly electronIpcService: ElectronIpcService = inject(ElectronIpcService);
   private readonly appConfigService: AppConfigService = inject(AppConfigService);
 
   public get projectId() {
@@ -27,15 +27,16 @@ export class ExistingWalletService {
     return this.appConfigService.reownAppkit?.icon || '';
   }
 
-  private reownAppKit: any;
-  public eip155Provider: any;
+  private reownAppKit: AppKit | null = null; // modal
+  public eip155Provider = signal<any>(null);
   public isConnected = signal<boolean>(false);
   public isOpenModal = signal<boolean>(false);
 
-  // Define Vana networks
-  public vanaMainnet: AppKitNetwork = {
+  public selectedNetworkId = signal<string>('');
+
+  public vanaNetwork: AppKitNetwork = {
     id: 1480,
-    name: 'Vana',
+    name: 'Vana Mainnet',
     nativeCurrency: {
       name: 'VANA',
       symbol: 'VANA',
@@ -55,58 +56,37 @@ export class ExistingWalletService {
     },
   };
 
-  public vanaMokshaTestnet: AppKitNetwork = {
-    id: 14800,
-    name: 'Vana Moksha Testnet',
-    nativeCurrency: {
-      name: 'VANA',
-      symbol: 'VANA',
-      decimals: 18,
-    },
-    rpcUrls: {
-      default: {
-        http: ['https://rpc.moksha.vana.org']
-      }
-    },
-    blockExplorers: {
-      default: {
-        name: 'Vana Moksha Explorer',
-        url: 'https://moksha.vanascan.io',
-        apiUrl: 'https://api.moksha.vanascan.io/api',
-      },
-    },
-    testnet: true,
-  };
-
-  public networks = [this.vanaMainnet, this.vanaMokshaTestnet];
-
-  public wagmiAdapter = new WagmiAdapter({
-    projectId: this.projectId,
-    networks: this.networks,
-    transports: {
-      [this.vanaMainnet.id]: http('https://rpc.vana.org'),
-      [this.vanaMokshaTestnet.id]: http('https://rpc.moksha.vana.org')
-    }
-  });
+  public wagmiAdapter: WagmiAdapter;
 
   constructor() {
+    this.vanaNetwork = this.appConfigService.reownAppkit!.network;
+    console.log('this.vanaNetwork', this.vanaNetwork);
+
+    this.wagmiAdapter = new WagmiAdapter({
+      projectId: this.projectId,
+      networks: [this.vanaNetwork],
+      transports: {
+        [this.vanaNetwork.id]: http(this.vanaNetwork.rpcUrls.default.http[0]),
+      }
+    });
+
     this.initializeAppKit();
   }
 
   private async initializeAppKit() {
     const metadata = {
       name: 'dfusion',
-      description: 'AppKit Example',
+      description: 'dFusion DLP Miner',
       url: this.domain,
       icons: [this.icon],
     };
 
     this.reownAppKit = await createAppKit({
       adapters: [this.wagmiAdapter],
-      networks: [this.vanaMainnet, this.vanaMokshaTestnet],
+      networks: [this.vanaNetwork],
       metadata,
       projectId: this.projectId,
-      themeMode: 'light',
+      themeMode: 'dark',
       themeVariables: {
         '--w3m-accent': '#000000',
       },
@@ -115,29 +95,78 @@ export class ExistingWalletService {
         email: false,
         socials: false,
       },
-      allWallets: 'HIDE',
+      allWallets: 'SHOW',
+      enableNetworkSwitch: false,
+      defaultNetwork: this.vanaNetwork,
     });
 
     // Subscribe events
-    this.reownAppKit.subscribeProviders((state: any) => {
-      this.eip155Provider = state['eip155'];
+    this.reownAppKit.subscribeProviders((providersState: any) => {
+      console.log('reown state', providersState);
+      this.eip155Provider.set(providersState['eip155']);
+
+      console.log('this?.reownAppKit?.getState()', this?.reownAppKit?.getState());
 
       const isConnected = this?.reownAppKit?.getIsConnectedState() || false;
       this.isConnected.set(isConnected);
-      if (isConnected) {
+
+      if (this.isConnected() && this.eip155Provider()) {
         try {
+          if (!this.reownAppKit) {
+            throw new Error('AppKit is not initialized');
+          }
+
           this.isOpenModal.set(true);
           const address = this.reownAppKit.getAddress();
+
+          if (!address) {
+            throw new Error('Wallet address does not exist');
+          }
+
           this.electronIpcService.setWalletAddress(address);
+          this.electronIpcService.setWalletType(WalletType.EXISTING_WALLET);
         } catch (error) {
           console.log('Save data connected wallet error: ', error);
         }
       }
     });
+
+    this?.reownAppKit.subscribeState((state: any) => {
+      console.log('reown state', state);
+      const stateDetails = state['selectedNetworkId'];
+      if (stateDetails) {
+        const networkStateString = stateDetails.split(':')[1];
+        this.selectedNetworkId.set(networkStateString);
+        console.log('this.selectedNetworkId()', this.selectedNetworkId());
+
+        // if (this.selectedNetworkId() !== this.vanaNetwork.id.toString()) {
+        //   this?.reownAppKit?.open({ view: 'Networks' });
+        // }
+        // else {
+        //   this?.reownAppKit?.close();
+        // }
+      }
+    });
+
+    // this?.reownAppKit.subscribeNetwork((networkState: any) => {
+    //   console.log('reown network state', networkState);
+    // });
+
+    // this?.reownAppKit.subscribeAccount((accountState: any) => {
+    //   console.log('reown account state', accountState);
+    // });
+
+    // this?.reownAppKit.subscribeEvents((eventState: any) => {
+    //   console.log('reown event state', eventState);
+    // });
+
+    // this?.reownAppKit.subscribeWalletInfo((walletInfoState: any) => {
+    //   console.log('reown wallet info state', walletInfoState);
+    // });
   }
 
-  public connectWallet(walletType: WalletType) {
-    if (walletType === WalletType.EXISTING_WALLET && !this.isOpenModal()) {
+  public connectExistingWallet() {
+    if (this.reownAppKit && !this.isOpenModal()) {
       this.reownAppKit.open();
     }
   }
@@ -147,10 +176,8 @@ export class ExistingWalletService {
       if (this.reownAppKit) {
         await this.reownAppKit.disconnect();
       }
-      this.eip155Provider = null;
       this.isConnected.set(false);
       this.isOpenModal.set(false);
-      console.log('Existing Wallet disconnected');
     } catch (error) {
       console.error('Error disconnecting wallet:', error);
     }
@@ -160,7 +187,7 @@ export class ExistingWalletService {
     if (!walletAddress) {
       throw new Error('The wallet address does not exist');
     }
-    const signature = await this.eip155Provider.request({
+    const signature = await this.eip155Provider().request({
       method: 'personal_sign',
       params: [ENCRYPTION_SEED, walletAddress],
     });

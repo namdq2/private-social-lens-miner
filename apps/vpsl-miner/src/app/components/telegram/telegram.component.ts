@@ -21,8 +21,8 @@ export class TelegramComponent {
   }
 
   public showAuthCodeInput = false;
-  public showPhoneNumberError: any = null;
-  public showCodeError: any = null;
+  public showPhoneNumberError = false;
+  public showCodeError = false;
   public readonly showTelegramError: WritableSignal<boolean> = this.telegramApiService.showTelegramError;
 
   public uploadFrequencyList = [4, 6, 8, 12, 24];
@@ -41,11 +41,6 @@ export class TelegramComponent {
   // }
 
   public async getAuthCode(phoneNumber: string) {
-    if (phoneNumber.trim() === '') {
-      this.showPhoneNumberError = true;
-      return;
-    }
-
     this.phoneNumber = phoneNumber;
     const result = await this.telegramApiService.sendCodeHandler(this.phoneNumber);
     if (result) {
@@ -59,11 +54,6 @@ export class TelegramComponent {
   }
 
   public async submitAuthCode(authCode: string) {
-    if (authCode.trim() === '') {
-      this.showCodeError = true;
-      return;
-    }
-
     this.authCode = authCode;
     const loginSuccess: boolean = await this.telegramApiService.clientStartHandler(this.phoneNumber, this.authCode);
     if (loginSuccess) {
@@ -73,10 +63,6 @@ export class TelegramComponent {
     else {
       this.showCodeError = true;
     }
-  }
-
-  public onEditNumber() {
-    this.showAuthCodeInput = false;
   }
 
   public selectFrequency(freqItem: number) {

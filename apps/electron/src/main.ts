@@ -1,15 +1,18 @@
-import SquirrelEvents from './app/events/squirrel.events';
+import { app, BrowserWindow } from 'electron';
+import log from 'electron-log';
+import App from './app/app';
 import ElectronEvents from './app/events/electron.events';
 import UpdateEvents from './app/events/update.events';
-import { app, BrowserWindow } from 'electron';
-import App from './app/app';
+
+// Initialize logging
+log.transports.file.level = 'debug';
 
 export default class Main {
   static initialize() {
-    if (SquirrelEvents.handleEvents()) {
-      // squirrel event handled (except first run event) and app will exit in 1000ms, so don't do anything else
-      app.quit();
-    }
+    // No Squirrel events needed for nsis
+    // log.info('Initializing application...');
+    // log.info('Is packaged:', app.isPackaged);
+    app.setName('dFusion-dlp-miner');
   }
 
   static bootstrapApp() {
@@ -19,16 +22,26 @@ export default class Main {
   static bootstrapAppEvents() {
     ElectronEvents.bootstrapElectronEvents();
 
-    // initialize auto updater service
+    // log.info('Application version:', app.getVersion());
+    // log.info('App path:', app.getAppPath());
+    // log.info('Develop Mode:', App.isDevelopmentMode());
+  }
+
+  static initAutoUpdater() {
     if (!App.isDevelopmentMode()) {
-      // UpdateEvents.initAutoUpdateService();
+      log.info('Starting auto-update service...');
+      UpdateEvents.initAutoUpdateService(); // Now called after App's onReady
+    } else {
+      log.info('Skipping auto-update in development mode');
     }
   }
 }
 
-// handle setup events as quickly as possible
+// Initialize and bootstrap app
 Main.initialize();
-
-// bootstrap app
 Main.bootstrapApp();
 Main.bootstrapAppEvents();
+
+app.on('ready', () => {
+  Main.initAutoUpdater();
+});

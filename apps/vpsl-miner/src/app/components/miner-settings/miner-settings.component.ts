@@ -3,6 +3,9 @@ import { TelegramApiService } from '../../services/telegram-api.service';
 import { ElectronIpcService } from '../../services/electron-ipc.service';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { isElectron } from '../../shared/helpers';
+
+declare const window: any;
 
 @Component({
   selector: 'app-miner-settings',
@@ -15,16 +18,36 @@ export class MinerSettingsComponent {
   private readonly electronIpcService: ElectronIpcService = inject(ElectronIpcService);
   private readonly snackBar: MatSnackBar = inject(MatSnackBar);
 
-  public isAutoLaunchEnabled: WritableSignal<boolean>;
-  public minimizeToTray: WritableSignal<boolean>;
+  public readonly isAutoLaunchEnabled: WritableSignal<boolean> = this.electronIpcService.isAutoLaunchEnabled;
+  public readonly minimizeToTray: WritableSignal<boolean> = this.electronIpcService.minimizeToTray;
+  public readonly checkForUpdate: WritableSignal<boolean> = this.electronIpcService.checkForUpdate;
+
+  private readonly defaultUpdateDescription: string = 'Check for updates';
+  public checkUpdateDescription: string = this.defaultUpdateDescription;
 
   public get isTelegramAuthorized(): boolean {
     return this.telegramApiService.isAuthorized;
   }
 
   constructor() {
-    this.isAutoLaunchEnabled = this.electronIpcService.isAutoLaunchEnabled;
-    this.minimizeToTray = this.electronIpcService.minimizeToTray;
+    // Listen for messages from the main process
+    if (isElectron()) {
+      window.electron.onSendUpdateMessage(async (event: any, message: any) => {
+        console.warn('Received message from main process:', message);
+
+        if (message === 'NO_NEW_UPDATE') {
+          this.snackBar.open(
+            `Your dFusion DLP Miner is running the newest version.`,
+            `OK`,
+            { duration: 1000 * 5 }
+          );
+        }
+
+        const checkForUpdate = await window.electron.getCheckForUpdate();
+        this.checkForUpdate.set(checkForUpdate);
+        this.checkUpdateDescription = this.checkForUpdate() ? message : this.defaultUpdateDescription;
+      });
+    }
   }
 
   public onAutoLaunchEnabledChange(matSlideToggleChange: MatSlideToggleChange) {
@@ -39,6 +62,9 @@ export class MinerSettingsComponent {
     if (this.isTelegramAuthorized) {
       await this.telegramApiService.logOut().then(() => {
         this.electronIpcService.stopBackgroundTask();
+        // clear session - race condition using electron-store instead of localStorage in telegramApiService
+        this.electronIpcService.setTelegramSession('');
+
         this.snackBar.open(
           `You've successfully signed out.`,
           ``,
@@ -52,5 +78,9 @@ export class MinerSettingsComponent {
         );
       });
     }
+  }
+
+  public doCheckForUpdate() {
+    this.electronIpcService.setCheckForUpdate(true);
   }
 }

@@ -12,7 +12,14 @@
         "outputPath": "dist/apps/electron",
         "main": "apps/electron/src/main.ts",
         "tsConfig": "apps/electron/tsconfig.app.json",
-        "assets": ["apps/electron/src/assets"]
+        "assets": [
+          "apps/electron/src/assets",
+          {
+            "input": "dist/apps/vpsl-miner",
+            "glob": "**/*",
+            "output": "renderer"
+          }
+        ]
       },
       "configurations": {
         "production": {

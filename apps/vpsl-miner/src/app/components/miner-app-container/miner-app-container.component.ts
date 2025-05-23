@@ -1,7 +1,6 @@
-import { Component, inject } from '@angular/core';
-import { TelegramApiService } from '../../services/telegram-api.service';
-import { Router } from '@angular/router';
+import { Component, inject, OnInit } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { ElectronIpcService } from '../../services/electron-ipc.service';
 import { MinerSettingsComponent } from '../miner-settings/miner-settings.component';
 
 @Component({
@@ -10,18 +9,23 @@ import { MinerSettingsComponent } from '../miner-settings/miner-settings.compone
   templateUrl: './miner-app-container.component.html',
   styleUrl: './miner-app-container.component.scss',
 })
-export class MinerAppContainerComponent {
-  private readonly telegramApiService: TelegramApiService = inject(TelegramApiService);
-  private readonly router: Router = inject(Router);
+export class MinerAppContainerComponent implements OnInit {
   private readonly dialog: MatDialog = inject(MatDialog);
+  private readonly electronIpcService: ElectronIpcService = inject(ElectronIpcService);
+
+  public appVersion: string = '';
 
   constructor() { }
+
+  async ngOnInit() {
+    this.appVersion = await this.electronIpcService.getAppVersion();
+  }
 
   public openSettings() {
       const matDialogConfig: MatDialogConfig = {
         disableClose: false,
-        height: '450px',
-        width: '700px'
+        height: '550px',
+        width: '800px'
       }
       this.dialog.open(
         MinerSettingsComponent,

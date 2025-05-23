@@ -1,4 +1,4 @@
-import { inject, Injectable, signal } from '@angular/core';
+import { effect, inject, Injectable, signal } from '@angular/core';
 import { Api, TelegramClient } from 'telegram';
 import { NewMessage, NewMessageEvent } from 'telegram/events';
 import { TotalList } from 'telegram/Helpers';
@@ -40,7 +40,7 @@ export class TelegramApiService {
     return this.appConfigService.telegram!.apiHash;
   }
 
-  public telegramClient: TelegramClient;
+  public telegramClient: TelegramClient = new TelegramClient(this.SESSION, this.apiId, this.apiHash, { connectionRetries: 5, useWSS: true });;
 
   public isAuthorized = false;
   public userId = signal<number>(-1);
@@ -51,26 +51,31 @@ export class TelegramApiService {
   public showTelegramError = signal<boolean>(false);
 
   constructor() {
-    // Get session from local storage
-    const storedSession = this.electronIpcService.telegramSession();
-    this.SESSION = storedSession ? new StringSession(JSON.parse(storedSession)) : new StringSession('');
+    effect(() => {
+      // Get session from electron-store
+      const storedSession = this.electronIpcService.telegramSession();
+      console.log('telegram storedSession', storedSession);
+      if (storedSession) {
+        this.SESSION = new StringSession(JSON.parse(storedSession));
 
-    // Immediately create a client using your application data
-    this.telegramClient = new TelegramClient(this.SESSION, this.apiId, this.apiHash, { connectionRetries: 5, useWSS: true });
+        // Immediately create a client using your application data
+        this.telegramClient = new TelegramClient(this.SESSION, this.apiId, this.apiHash, { connectionRetries: 5, useWSS: true });
 
-    this.telegramClient.connect().then((storedSessionConnectResult: boolean) => {
-      if (storedSessionConnectResult) {
-        this.showTelegramError.set(false);
-        this.checkAuthorization();
+        this.telegramClient.connect().then((storedSessionConnectResult: boolean) => {
+          console.log('telegram storedSessionConnectResult', storedSessionConnectResult);
+          if (storedSessionConnectResult) {
+            this.showTelegramError.set(false);
+            this.checkAuthorization();
+          }
+          else {
+            throw new Error('Failed to connect to Telegram client.');
+          }
+        }).catch((error) => {
+          this.showTelegramError.set(true);
+          console.error('TelegramClient connect error', error);
+        });
       }
-      else {
-        throw new Error('Failed to connect to Telegram client.');
-      }
-    }).catch((error) => {
-      this.showTelegramError.set(true);
-      console.error('TelegramClient connect error', error);
     });
-
 
     // Listen for messages from the main process
     if (isElectron()) {
@@ -119,10 +124,9 @@ export class TelegramApiService {
   public async clientStartHandler(
     telegramPhoneNumber: string,
     telegramPhoneCode: string,
-    // telegramPassword: string,
   ): Promise<boolean> {
     try {
-      const authResult = await this.telegramClient.start({
+      await this.telegramClient.start({
         phoneNumber: telegramPhoneNumber,
         phoneCode: this.userAuthParamCallback(telegramPhoneCode),
         // password: this.userAuthParamCallback(telegramPassword),
@@ -133,7 +137,7 @@ export class TelegramApiService {
       });
 
       // Save session
-      this.electronIpcService.setTelegramSession(JSON.stringify(this.telegramClient.session.save()))
+      this.electronIpcService.setTelegramSession(JSON.stringify(this.telegramClient.session.save()));
 
       await this.telegramClient.sendMessage('me', {
         message: `You're successfully logged in!`,
@@ -149,7 +153,7 @@ export class TelegramApiService {
     }
   }
 
-  // ??
+  // ? ref: https://gram.js.org/introduction/integration-with-react
   private userAuthParamCallback<T>(param: T): () => Promise<T> {
     return async function () {
       return await new Promise<T>((resolve) => {
@@ -160,11 +164,27 @@ export class TelegramApiService {
 
   private checkAuthorization() {
     this.telegramClient.checkAuthorization().then(async (isAuthorized: boolean) => {
+      console.log('telegram isAuthorized', isAuthorized);
+      const eventHandlers = this.telegramClient.listEventHandlers();
+
       if (isAuthorized) {
+        if (eventHandlers.length > 0) {
+          eventHandlers.forEach((handler) => {
+            this.telegramClient.removeEventHandler(
+              handler[1],
+              handler[0],
+            );
+          });
+        }
+
         this.telegramClient.addEventHandler(
           this.newMessageHandler.bind(this),
           new NewMessage({ fromUsers: [this.appConfigService.telegram!.botId] }),
         );
+
+        if (this.telegramClient.listEventHandlers().length > 1) {
+          console.error('Multiple Telegram event handlers detected.');
+        }
 
         //   this.telegramClient.addEventHandler((update: Api.TypeUpdate) => {
         //     console.log("Received new Update")

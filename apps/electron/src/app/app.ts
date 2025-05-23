@@ -1,11 +1,14 @@
-import { BrowserWindow, ipcMain, Menu, nativeImage, screen, shell, Tray } from 'electron';
+import { app, BrowserWindow, ipcMain, Menu, MenuItem, nativeImage, screen, shell, Tray } from 'electron';
 import * as Store from 'electron-store';
 import { extname, join } from 'path';
-import { format } from 'url';
 import { environment } from '../environments/environment';
 import { rendererAppName, rendererAppPort } from './constants';
 import * as http from 'http';
 import * as fs from 'fs';
+import UpdateEvents from './events/update.events';
+// import log from 'electron-log';
+
+// log.transports.file.level = 'debug';
 
 const store = new Store() as any;
 
@@ -31,18 +34,23 @@ export default class App {
   static minimizeToTray = true;
   static uploadFrequency = 4;
   static telegramSession = '';
+  static checkForUpdate = false; // manual check for updates
 
   // Create server local
   static localServer: http.Server;
 
   private static createLocalServer() {
     return new Promise<number>((resolve) => {
+      const pathToServe = join(__dirname, 'renderer');
+
       const server = http.createServer((req, res) => {
-        let filePath = join(__dirname, '..', rendererAppName, req.url || 'index.html');
+        const requestedPath = req.url && req.url !== '/' ? req.url : '/index.html';
+        let filePath = join(pathToServe, requestedPath);
 
         fs.stat(filePath, (err, stats) => {
           if (err || !stats.isFile()) {
-            filePath = join(__dirname, '..', rendererAppName, 'index.html');
+            // fallback for Angular/SPA routes
+            filePath = join(pathToServe, 'index.html');
           }
 
           fs.readFile(filePath, (err, data) => {
@@ -52,7 +60,7 @@ export default class App {
               return;
             }
 
-            const ext = extname(filePath);
+            const ext = extname(filePath).toLowerCase();
             const contentType =
               {
                 '.html': 'text/html',
@@ -61,10 +69,16 @@ export default class App {
                 '.json': 'application/json',
                 '.png': 'image/png',
                 '.jpg': 'image/jpeg',
+                '.jpeg': 'image/jpeg',
                 '.gif': 'image/gif',
                 '.svg': 'image/svg+xml',
                 '.ico': 'image/x-icon',
-              }[ext] || 'text/plain';
+                '.woff': 'font/woff',
+                '.woff2': 'font/woff2',
+                '.ttf': 'font/ttf',
+                '.eot': 'application/vnd.ms-fontobject',
+                '.otf': 'font/otf',
+              }[ext] || 'application/octet-stream';
 
             res.writeHead(200, { 'Content-Type': contentType });
             res.end(data);
@@ -80,10 +94,10 @@ export default class App {
     });
   }
 
+
   public static isDevelopmentMode() {
     const isEnvironmentSet: boolean = 'ELECTRON_IS_DEV' in process.env;
     const getFromEnvironment: boolean = parseInt(process.env.ELECTRON_IS_DEV, 10) === 1;
-
     return isEnvironmentSet ? getFromEnvironment : !environment.production;
   }
 
@@ -128,6 +142,7 @@ export default class App {
     App.minimizeToTray = store.get('minimizeToTray') ?? true;
     App.uploadFrequency = store.get('uploadFrequency') ?? 4;
     App.telegramSession = store.get('telegramSession') ?? '';
+    // App.checkForUpdate // manual check init to false always
 
     if (rendererAppName) {
       App.initMainWindow();
@@ -194,6 +209,7 @@ export default class App {
     });
 
     App.createTray();
+    // App.createMenu();
   }
 
   private static async loadMainWindow() {
@@ -241,6 +257,34 @@ export default class App {
       }
     });
   }
+
+  // private static createMenu() {
+  //   const menuItem: MenuItem = {
+  //     checked: false,
+  //     commandId: 0,
+  //     enabled: true,
+  //     id: 'menu-item',
+  //     click: () => { console.log('') },
+  //     menu: null,
+  //     registerAccelerator: true,
+  //     sharingItem: null,
+  //     type: 'normal',
+
+  //     visible: true,
+  //     toolTip: null,
+  //     userAccelerator: null,
+  //     label: app.getName(),
+
+  //     role: 'about',
+  //     submenu: null,
+  //     sublabel: null,
+  //   };
+  //   const template = [
+  //     menuItem,
+  //   ];
+  //   const menu = Menu.buildFromTemplate(template);
+  //   Menu.setApplicationMenu(menu);
+  // }
 
   private static startBackgroundTask() {
     const interval = 1000 * 60 * 10;
@@ -292,6 +336,11 @@ export default class App {
     App.application.on('window-all-closed', App.onWindowAllClosed); // Quit when all windows are closed.
     App.application.on('ready', App.onReady); // App is ready to load data
     App.application.on('activate', App.onActivate); // App is activated
+
+    // app.on('will-quit', () => {
+    //   clearInterval(App.backgroundTaskInterval);
+    //   App.backgroundTaskInterval = null;
+    // });
 
     // Listen for changes from the render/UI
 
@@ -420,11 +469,6 @@ export default class App {
       return App.uploadFrequency;
     });
 
-    // app.on('will-quit', () => {
-    // clearInterval(App.backgroundTaskInterval);
-    // App.backgroundTaskInterval = null;
-    // });
-
     ipcMain.on('set-telegram-session', (event, value) => {
       App.telegramSession = value;
       store.set('telegramSession', value);
@@ -433,6 +477,19 @@ export default class App {
 
     ipcMain.handle('get-telegram-session', () => {
       return App.telegramSession;
+    });
+
+    ipcMain.on('set-check-for-update', (event, value) => {
+      App.checkForUpdate = value;
+      console.log('main process: set-check-for-update:', value);
+
+      if (App.checkForUpdate) {
+        UpdateEvents.checkForUpdates();
+      }
+    });
+
+    ipcMain.handle('get-check-for-update', () => {
+      return App.checkForUpdate;
     });
   }
 }

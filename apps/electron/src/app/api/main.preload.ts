@@ -37,13 +37,14 @@ contextBridge.exposeInMainWorld('electron', {
   onExecuteBackgroundTaskCode: (callback) => ipcRenderer.on('execute-background-task-code', callback),
 
   getBackgroundTaskIntervalExists: () => ipcRenderer.invoke('get-background-task-interval-exists'),
-  // onBackgroundTaskFailed: (callback) => ipcRenderer.on('background-task-failed', callback),
 
   setUploadFrequency: (value) => ipcRenderer.send('set-upload-frequency', value),
   getUploadFrequency: () => ipcRenderer.invoke('get-upload-frequency'),
 
-  // setBackgroundSubmissionTaskCompletedTime: (value) => ipcRenderer.send('set-background-submission-task-completed-time', value),
-
   setTelegramSession: (value) => ipcRenderer.send('set-telegram-session', value),
   getTelegramSession: () => ipcRenderer.invoke('get-telegram-session'),
+
+  setCheckForUpdate: (value) => ipcRenderer.send('set-check-for-update', value),
+  getCheckForUpdate: () => ipcRenderer.invoke('get-check-for-update'),
+  onSendUpdateMessage: (callback) => ipcRenderer.on('send-update-message', callback),
 });

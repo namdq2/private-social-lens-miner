@@ -124,6 +124,11 @@ body {
     button-color: white,
   ));
 
+  @include mat.fab-overrides((
+    small-container-shape: 24px,
+    small-container-color: #4488f6,
+  ));
+
   @include mat.tooltip-overrides((
     container-color: #1a1a1a,
     supporting-text-color: #ffffff,
