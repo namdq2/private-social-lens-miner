@@ -281,14 +281,15 @@ export class WhatsAppService {
       this._error.next(null);
       await this.whatsappAPI.logout();
       this._isConnected.next(false);
+      this.isConnected.set(false);
       this._qrCode.next(null);
       this._chats.next([]);
       this._selectedChat.next(null);
       this._messages.next([]);
       return true;
     } catch (error) {
-      console.error('Failed to logout', error);
-      this._error.next('Không thể đăng xuất khỏi WhatsApp');
+      console.error('Failed to logout');
+      this._error.next('Cannot logout from WhatsApp');
       return false;
     } finally {
       this._loading.next(false);

@@ -58,5 +58,17 @@
       You've signed out.
       }
     </div>
+
+    <h5>Whatsapp</h5>
+    <div class="w-full flex flex-row justify-start items-center gap-x-2 cursor-pointer bg-[#0A0D14] rounded-xl p-4"
+      matRipple (click)="signOutWhatsapp()">
+      @if(isWhatsappAuthorized) {
+      <mat-icon>logout</mat-icon>
+      Sign out
+      }
+      @else {
+      You've signed out.
+      }
+    </div>
   </div>
 </div>

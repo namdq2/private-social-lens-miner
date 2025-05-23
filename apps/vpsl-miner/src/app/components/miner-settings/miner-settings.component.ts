@@ -4,6 +4,7 @@ import { ElectronIpcService } from '../../services/electron-ipc.service';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { isElectron } from '../../shared/helpers';
+import { WhatsAppService } from '../../services/whatsapp.service';
 
 declare const window: any;
 
@@ -15,6 +16,7 @@ declare const window: any;
 })
 export class MinerSettingsComponent {
   private readonly telegramApiService: TelegramApiService = inject(TelegramApiService);
+  private readonly whatsAppService: WhatsAppService = inject(WhatsAppService);
   private readonly electronIpcService: ElectronIpcService = inject(ElectronIpcService);
   private readonly snackBar: MatSnackBar = inject(MatSnackBar);
 
@@ -27,6 +29,10 @@ export class MinerSettingsComponent {
 
   public get isTelegramAuthorized(): boolean {
     return this.telegramApiService.isAuthorized;
+  }
+
+  public get isWhatsappAuthorized(): boolean {
+    return this.whatsAppService.isConnected();
   }
 
   constructor() {
@@ -82,5 +88,9 @@ export class MinerSettingsComponent {
 
   public doCheckForUpdate() {
     this.electronIpcService.setCheckForUpdate(true);
+  }
+
+  public async signOutWhatsapp() {
+    await this.whatsAppService.logout();
   }
 }
