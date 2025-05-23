@@ -58,5 +58,8 @@
       },
       "testnet": true
     }
+  },
+  "whatsapp": {
+    "botId": "15556485700@c.us"
   }
 }

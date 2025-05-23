@@ -637,6 +637,15 @@ export default class App {
       }
     });
 
+    ipcMain.handle('whatsapp:sendMessage', async (event, chatId, message) => {
+      try {
+        return await App.whatsappService.sendMessage(chatId, message);
+      } catch (error) {
+        console.error(`Failed to send message to chat ${chatId}`, error);
+        throw error;
+      }
+    });
+
     ipcMain.handle('whatsapp:logout', async () => {
       try {
         return await App.whatsappService.logout();
@@ -741,6 +750,12 @@ export default class App {
     App.whatsappService.on('error', (error) => {
       if (App.mainWindow) {
         App.mainWindow.webContents.send('whatsapp:error', error);
+      }
+    });
+
+    App.whatsappService.on('received_message', (message) => {
+      if (App.mainWindow) {
+        App.mainWindow.webContents.send('whatsapp:received_message', message);
       }
     });
     // ============================================

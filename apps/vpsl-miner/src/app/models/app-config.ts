@@ -8,6 +8,7 @@ export interface IAppConfigItem {
   cloudFlare: ICloudFlare;
   gelato: IGelato;
   reownAppkit: IReownAppkit;
+  whatsapp: IWhatsapp;
 }
 
 export interface IDFusion {
@@ -55,4 +56,8 @@ export interface IReownAppkit {
   domain: string;
   icon: string;
   network: AppKitNetwork;
+}
+
+export interface IWhatsapp {
+  botId: string;
 }

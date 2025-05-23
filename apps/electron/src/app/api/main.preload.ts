@@ -57,6 +57,7 @@ contextBridge.exposeInMainWorld('whatsappAPI', {
   getInfo: () => ipcRenderer.invoke('whatsapp:getInfo'),
   getChats: () => ipcRenderer.invoke('whatsapp:getChats'),
   getMessages: (chatId, limit) => ipcRenderer.invoke('whatsapp:getMessages', chatId, limit),
+  sendMessage: (chatId, message) => ipcRenderer.invoke('whatsapp:sendMessage', chatId, message),
   logout: () => ipcRenderer.invoke('whatsapp:logout'),
   // Register event listeners
   onQRCodeUpdate: (callback) => {
@@ -71,10 +72,15 @@ contextBridge.exposeInMainWorld('whatsappAPI', {
     ipcRenderer.on('whatsapp:error', (_event, error) => callback(error));
     return () => ipcRenderer.removeListener('whatsapp:error', callback);
   },
+  onReceivedMessage: (callback) => {
+    ipcRenderer.on('whatsapp:received_message', (_event, message) => callback(message));
+    return () => ipcRenderer.removeListener('whatsapp:received_message', callback);
+  },
   removeAllListeners: () => {
     ipcRenderer.removeAllListeners('whatsapp:qrcode');
     ipcRenderer.removeAllListeners('whatsapp:connection');
     ipcRenderer.removeAllListeners('whatsapp:error');
+    ipcRenderer.removeAllListeners('whatsapp:received_message');
   },
 
   // Configuration

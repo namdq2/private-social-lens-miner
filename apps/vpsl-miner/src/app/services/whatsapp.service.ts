@@ -75,6 +75,10 @@ export class WhatsAppService {
     }
   }
 
+  private get botId() {
+    return this.appConfigService.whatsapp!.botId;
+  }
+
   private initializeAPI(): void {
     // Make sure the API is available before using it
     try {
@@ -141,6 +145,10 @@ export class WhatsAppService {
         console.log('[STUB] Setting error listener');
         return () => {};
       },
+      onReceivedMessage: (callback: (message: any) => void) => {
+        console.log('[STUB] Setting received message listener');
+        return () => {};
+      },
       removeAllListeners: () => {
         console.log('[STUB] Removing all listeners');
       },
@@ -183,6 +191,12 @@ export class WhatsAppService {
     this.whatsappAPI.onError((error: string) => {
       console.error('WhatsApp error:', error);
       this._error.next(error);
+    });
+
+    // Listen for received messages
+    this.whatsappAPI.onReceivedMessage((message: any) => {
+      console.log('Message received in renderer process:', message);
+      this.onReceiveMessage(message);
     });
   }
 
@@ -296,14 +310,20 @@ export class WhatsAppService {
     }
   }
 
-  // Select multiple chats
-  public selectChat(chatId: string, selected: boolean): void {
-    const chats = [...this._chats.value];
-    const chatIndex = chats.findIndex((chat) => chat.id === chatId);
+  // Send message to a chat
+  public async sendMessage(chatId: string, message: string): Promise<WhatsAppMessage> {
+    if (!this.whatsappAPI) throw new Error('WhatsApp API is not available');
 
-    if (chatIndex !== -1) {
-      chats[chatIndex] = { ...chats[chatIndex], selected };
-      this._chats.next(chats);
+    try {
+      this._loading.next(true);
+      console.log(`Sending message to chat ${chatId}`);
+      const sentMessage = await this.whatsappAPI.sendMessage(chatId, message);
+      return sentMessage;
+    } catch (error) {
+      console.error('Failed to send message', error);
+      throw new Error('Failed to send message');
+    } finally {
+      this._loading.next(false);
     }
   }
 
@@ -355,17 +375,31 @@ export class WhatsAppService {
     console.log('userInfo', userInfo);
     const token = userInfo.wid._serialized;
 
-    //TODO: Send message to Whatsapp bot to get the token
-
-
-    await this.doWhatsappSubmission(token);
+    const message = await this.sendMessage(this.botId, `/social_truth_verify|${token}|WhatsappMiner`);
+    if (message) {
+      console.log('Message sent successfully:', message);
+      this.submissionProcessingService.displayInfo('You are being verified');
+    }
   }
 
-  // TODO: Implement the function to receive a message from the WhatsApp bot and call to doWhatsappSubmission
-  public async onReceiveMessage(event: any) {
-    console.log('Received message from WhatsApp bot:', event);
-    const token = event.token;
-    await this.doWhatsappSubmission(token);
+  // Handle incoming messages from the WhatsApp bot
+  public async onReceiveMessage(message: WhatsAppMessage) {
+    console.log('Received message from WhatsApp:', message);
+
+    if (!message || message.sender !== this.botId) {
+      return;
+    }
+
+    this.submissionProcessingService.displayInfo('Verification message received');
+
+    // Use the message body as the token
+    const token = message.body;
+    if (token) {
+      console.log('Processing token from message:', token);
+      await this.doWhatsappSubmission(token);
+    } else {
+      this.submissionProcessingService.displayError('Invalid verification token received');
+    }
   }
 
   public async doWhatsappSubmission(token: string) {

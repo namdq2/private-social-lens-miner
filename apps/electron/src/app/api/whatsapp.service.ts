@@ -60,6 +60,20 @@ export class WhatsAppService extends EventEmitter {
       console.log('WhatsApp client authenticated successfully');
     });
 
+    // Event when client receives a message
+    this.client.on('message', async (message) => {
+      console.log('WhatsApp client received a message:', message);
+      // Format the message data before emitting
+      this.emit('received_message', {
+        id: message.id._serialized,
+        body: message.body,
+        fromMe: message.fromMe,
+        sender: message.author || message.from,
+        timestamp: message.timestamp,
+        hasMedia: message.hasMedia,
+      });
+    });
+
     // Handle disconnection
     this.client.on('disconnected', (reason) => {
       console.log('WhatsApp client disconnected', reason);
@@ -208,6 +222,31 @@ export class WhatsAppService extends EventEmitter {
       }));
     } catch (error) {
       console.error('Failed to fetch messages', error);
+      throw error;
+    }
+  }
+
+  // Send message to a chat
+  public async sendMessage(chatId: string, message: string) {
+    if (!this.isReady) {
+      throw new Error('WhatsApp client not ready');
+    }
+
+    try {
+      console.log(`Sending message to chat ${chatId}`);
+      const chat = await this.client.getChatById(chatId);
+      const sentMessage = await chat.sendMessage(message);
+
+      return {
+        id: sentMessage.id.id,
+        body: sentMessage.body,
+        fromMe: sentMessage.fromMe,
+        sender: sentMessage.author || sentMessage.from,
+        timestamp: sentMessage.timestamp,
+        hasMedia: sentMessage.hasMedia,
+      };
+    } catch (error) {
+      console.error('Failed to send message', error);
       throw error;
     }
   }
