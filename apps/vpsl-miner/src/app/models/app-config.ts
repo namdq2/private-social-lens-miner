@@ -4,6 +4,7 @@ export interface IAppConfigItem {
   dFusion: IDFusion;
   telegram: ITelegram;
   pinata: IPinata;
+  walrus: IWalrus;
   vana: IVana;
   cloudFlare: ICloudFlare;
   gelato: IGelato;
@@ -55,4 +56,10 @@ export interface IReownAppkit {
   domain: string;
   icon: string;
   network: AppKitNetwork;
+}
+
+export interface IWalrus {
+  publisherUrl: string;
+  aggregatorUrl: string;
+  epochs?: number;
 }

@@ -57,5 +57,9 @@
         }
       }
     }
+  },
+  "walrus": {
+    "publisherUrl": "https://publisher.walrus-testnet.walrus.space",
+    "aggregatorUrl": "https://aggregator.walrus-testnet.walrus.space"
   }
 }

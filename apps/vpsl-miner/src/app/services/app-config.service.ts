@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { map, share } from 'rxjs';
-import { IAppConfigItem, IDFusion, IGelato, IPinata, IReownAppkit, ITelegram, IVana } from '../models/app-config';
+import { IAppConfigItem, IDFusion, IGelato, IPinata, IReownAppkit, ITelegram, IVana, IWalrus } from '../models/app-config';
 
 @Injectable({
   providedIn: 'root',
@@ -12,6 +12,7 @@ export class AppConfigService {
   public dFusion: IDFusion | null = null;
   public telegram: ITelegram | null = null;
   public pinata: IPinata | null = null;
+  public walrus: IWalrus | null = null;
   public vana: IVana | null = null;
   // public cloudFlare: ICloudFlare | null = null;
   public gelato: IGelato | null = null;
@@ -25,6 +26,7 @@ export class AppConfigService {
     this.dFusion = appConfigItem.dFusion;
     this.telegram = appConfigItem.telegram;
     this.pinata = appConfigItem.pinata;
+    this.walrus = appConfigItem.walrus;
     this.vana = appConfigItem.vana;
     // this.cloudFlare = appConfigItem.cloudFlare;
     this.gelato = appConfigItem.gelato;
@@ -38,8 +40,8 @@ export class AppConfigService {
     if (!appConfigItem.telegram) {
         throw new Error('Telegram configuration is missing.');
     }
-    if (!appConfigItem.pinata) {
-        throw new Error('Pinata configuration is missing.');
+    if (!appConfigItem.pinata && !appConfigItem.walrus) {
+        throw new Error('Either Pinata or Walrus configuration is required.');
     }
     if (!appConfigItem.vana) {
         throw new Error('Vana configuration is missing.');

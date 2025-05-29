@@ -13,6 +13,7 @@ import { GelatoApiService } from './gelato-api.service';
 import { PinataApiService } from './pinata-api.service';
 import { SubmissionProcessingService } from './submission-processing.service';
 import { Web3WalletService } from './web3-wallet.service';
+import { StorageService } from './storage.service';
 
 declare const window: any;
 
@@ -23,7 +24,7 @@ export class TelegramApiService {
   private readonly appConfigService: AppConfigService = inject(AppConfigService);
   private readonly submissionProcessingService: SubmissionProcessingService = inject(SubmissionProcessingService);
   private readonly cryptographyService: CryptographyService = inject(CryptographyService);
-  private readonly pinataApiService: PinataApiService = inject(PinataApiService);
+  private readonly storageService: StorageService = inject(StorageService);
   private readonly gelatoApiService: GelatoApiService = inject(GelatoApiService);
   private readonly electronIpcService: ElectronIpcService = inject(ElectronIpcService);
   private readonly web3WalletService: Web3WalletService = inject(Web3WalletService);
@@ -481,7 +482,7 @@ export class TelegramApiService {
       const encryptedData = await this.cryptographyService.clientSideEncrypt(file, signature); // user symmetric encryption key - can encrypt and decrypt using the same key, itself
       // * 3. upload file to pinata ipfs
       // * 4. get pinata file url
-      return await this.pinataApiService.uploadFileToPinata(encryptedData);
+      return await this.storageService.uploadFile(encryptedData);
     }
     catch(err) {
       console.error('encryptAndUploadFile failed', err);
