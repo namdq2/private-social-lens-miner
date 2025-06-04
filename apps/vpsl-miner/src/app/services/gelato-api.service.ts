@@ -8,6 +8,7 @@ import { ethers, TransactionReceipt } from 'ethers';
 import { SubmissionProcessingService } from './submission-processing.service';
 import { ContractService } from './contract.service';
 import { ElectronIpcService } from './electron-ipc.service';
+import { RefinementApiService } from './refinement-api.service';
 
 import DataRegistryImplementationABI from '../assets/contracts/DataRegistryImplementation.json';
 
@@ -20,10 +21,11 @@ export class GelatoApiService {
   private readonly submissionProcessingService: SubmissionProcessingService = inject(SubmissionProcessingService);
   private readonly contractService: ContractService = inject(ContractService);
   private readonly electronIpcService: ElectronIpcService = inject(ElectronIpcService);
+  private readonly refinementApiService: RefinementApiService = inject(RefinementApiService);
 
   private gelatoRelay = new GelatoRelay();
   public currentTaskType = signal<GelatoTaskRelay>(GelatoTaskRelay.NONE);
-  private currentSubmissionFileId = -1;
+  public currentSubmissionFileId = signal<number>(-1);
   public currentSignature = signal<string>('');
 
   constructor() {
@@ -77,7 +79,7 @@ export class GelatoApiService {
 
   public async relayRequestContributionProof(teeFee: any) {
     try {
-      const { data } = await this.web3WalletService.teePoolContract['requestContributionProof'].populateTransaction(this.currentSubmissionFileId, {
+      const { data } = await this.web3WalletService.teePoolContract['requestContributionProof'].populateTransaction(this.currentSubmissionFileId(), {
         value: teeFee,
       });
 
@@ -99,7 +101,7 @@ export class GelatoApiService {
 
   public async relayRequestReward(proofIndex: number = 1) {
     try {
-      const { data } = await this.web3WalletService.dlpContract['requestReward'].populateTransaction(this.currentSubmissionFileId, proofIndex);
+      const { data } = await this.web3WalletService.dlpContract['requestReward'].populateTransaction(this.currentSubmissionFileId(), proofIndex);
       const sponsoredCallRequest: SponsoredCallRequest = {
         chainId: (await this.web3WalletService.rpcProvider.getNetwork()).chainId,
         target: this.appConfigService.vana!.dlpSmartContractAddress,
@@ -178,27 +180,28 @@ export class GelatoApiService {
       // Check if the event is `FileAdded`
       if (parsedLog?.name === 'FileAdded') {
         // Extract fileId from the event arguments
-        this.currentSubmissionFileId = Number(parsedLog.args['fileId']); // Or `parsedLog.args[0]`
-        console.log('Uploaded File ID:', this.currentSubmissionFileId);
+        const fileId = Number(parsedLog.args['fileId']); // Or `parsedLog.args[0]`
+        console.log('Uploaded File ID:', fileId);
 
-        if (this.currentSubmissionFileId) {
-          this.submissionProcessingService.displayInfo('Data has been added to the data registry');
+        // Set the fileId signal
+        this.currentSubmissionFileId.set(fileId);
+
+        if (fileId) {
           const teeFee = (await this.web3WalletService.teePoolContract['teeFee']()) as number;
           await this.relayRequestContributionProof(teeFee);
           this.submissionProcessingService.displayInfo(`Contribution proof job has been requested. Your data is being validated`);
         }
       }
-    }
-    catch(err: any) {
+    } catch (err: any) {
       throw new Error(err);
     }
   }
 
   private async initiateRequestReward() {
     try {
-      const jobIds = await this.contractService.fileJobIds(this.currentSubmissionFileId);
+      const jobIds = await this.contractService.fileJobIds(this.currentSubmissionFileId());
       const latestJobId = jobIds[jobIds.length - 1] as number;
-      console.log(`Latest JobID for FileID ${this.currentSubmissionFileId}: ${latestJobId}`);
+      console.log(`Latest JobID for FileID ${this.currentSubmissionFileId()}: ${latestJobId}`);
 
       const jobDetails = await this.contractService.getTeeDetails(latestJobId);
       console.log(`Job details retrieved for JobID ${latestJobId}`);
@@ -209,7 +212,7 @@ export class GelatoApiService {
       const proofInstruction = await this.web3WalletService.dlpContract['proofInstruction']();
 
       const requestBody: any = {
-        file_id: this.currentSubmissionFileId,
+        file_id: this.currentSubmissionFileId(),
         job_id: latestJobId,
         encryption_key: this.currentSignature(),
         encryption_seed: ENCRYPTION_SEED,
@@ -245,13 +248,24 @@ export class GelatoApiService {
 
       this.electronIpcService.updateLastSubmissionTime();
 
+      // Call refinement service after successful RunProof
+      try {
+        this.submissionProcessingService.displayInfo('Starting data refinement process');
+        const refinementResult = await this.refinementApiService.callRefinementService(this.currentSubmissionFileId(), this.currentSignature());
+        this.submissionProcessingService.displayInfo(`Data refinement complete. Transaction hash: ${refinementResult.add_refinement_tx_hash}`);
+      } catch (refinementError) {
+        console.error('Failed to refine data:', refinementError);
+        // Continue with the normal flow, don't fail the submission
+        this.submissionProcessingService.displayInfo('Data refinement failed, but submission process continues');
+      }
+
       this.submissionProcessingService.displayInfo('Your data has been verified and attested. Claiming your reward');
 
       console.log('Contribution proof response:', contributionProofData);
       console.log(`Contribution proof response received from TEE. Requesting a reward...`);
 
       const fileProof = await this.web3WalletService.dataRegistryContract['fileProofs'](
-        this.currentSubmissionFileId,
+        this.currentSubmissionFileId(),
         1, // proofIndex
       );
       const score = Number(ethers.formatEther(fileProof[1][0].toString())); // formatEther - 18 arg
@@ -263,10 +277,9 @@ export class GelatoApiService {
         this.submissionProcessingService.successRewardsAmount.set(rewards);
         await this.relayRequestReward(); // proof index always 1
       } else {
-        this.submissionProcessingService.displayFailure('The score for your data submission was below the acceptable limit. No rewards were awarded.')
+        this.submissionProcessingService.displayFailure('The score for your data submission was below the acceptable limit. No rewards were awarded.');
       }
-    }
-    catch(err: any) {
+    } catch (err: any) {
       this.submissionProcessingService.displayError(err);
       throw new Error(err);
     }
