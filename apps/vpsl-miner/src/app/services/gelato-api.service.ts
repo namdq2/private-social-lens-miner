@@ -250,13 +250,12 @@ export class GelatoApiService {
 
       // Call refinement service after successful RunProof
       try {
-        this.submissionProcessingService.displayInfo('Starting data refinement process');
+        console.log('Starting data refinement process');
         const refinementResult = await this.refinementApiService.callRefinementService(this.currentSubmissionFileId(), this.currentSignature());
-        this.submissionProcessingService.displayInfo(`Data refinement complete. Transaction hash: ${refinementResult.add_refinement_tx_hash}`);
+        console.log(`Data refinement complete. Transaction hash: ${refinementResult.add_refinement_tx_hash}`);
       } catch (refinementError) {
-        console.error('Failed to refine data:', refinementError);
         // Continue with the normal flow, don't fail the submission
-        this.submissionProcessingService.displayInfo('Data refinement failed, but submission process continues');
+        console.error('Failed to refine data:', refinementError);
       }
 
       this.submissionProcessingService.displayInfo('Your data has been verified and attested. Claiming your reward');
