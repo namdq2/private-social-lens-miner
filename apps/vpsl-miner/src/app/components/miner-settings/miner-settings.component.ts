@@ -62,6 +62,9 @@ export class MinerSettingsComponent {
     if (this.isTelegramAuthorized) {
       await this.telegramApiService.logOut().then(() => {
         this.electronIpcService.stopBackgroundTask();
+        // clear session - race condition using electron-store instead of localStorage in telegramApiService
+        this.electronIpcService.setTelegramSession('');
+
         this.snackBar.open(
           `You've successfully signed out.`,
           ``,

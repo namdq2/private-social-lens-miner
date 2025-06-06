@@ -1,5 +1,4 @@
-import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
-import { TelegramApiService } from '../../services/telegram-api.service';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
   selector: 'app-telegram-signin',
@@ -12,12 +11,10 @@ export class TelegramSigninComponent {
   public showConnectTelegramButton = true;
 
   public phoneNumber = '';
-  // public password = '';
   public authCode = '';
 
   @Output() sendPhoneNumber: EventEmitter<string> = new EventEmitter<string>();
   @Output() sendAuthCode: EventEmitter<string> = new EventEmitter<string>();
-  @Output() editNumber: EventEmitter<void> = new EventEmitter<void>();
 
   @Input() showAuthCodeInput = false;
   @Input() showPhoneNumberError: boolean = false;
@@ -25,14 +22,24 @@ export class TelegramSigninComponent {
   @Input() showTelegramError: boolean = false;
 
   public submitPhoneNumber() {
-    this.sendPhoneNumber.emit(this.phoneNumber);
+    if (this.phoneNumber.trim() === '') {
+      this.showPhoneNumberError = true;
+    }
+    else {
+      this.sendPhoneNumber.emit(this.phoneNumber);
+    }
   }
 
   public submitAuthCode() {
-    this.sendAuthCode.emit(this.authCode);
+    if (this.authCode.trim() === '') {
+      this.showCodeError = true;
+    }
+    else {
+      this.sendAuthCode.emit(this.authCode);
+    }
   }
 
   public editNumberClick() {
-    this.editNumber.emit();
+    this.showAuthCodeInput = false;
   }
 }

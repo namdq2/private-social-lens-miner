@@ -26,6 +26,7 @@ export interface ITelegram {
 export interface IPinata {
   apiKey: string;
   jwt: string;
+  apiSecret: string;
   gatewayDomain: string;
   fileBaseUrl: string;
 }
@@ -41,6 +42,8 @@ export interface IVana {
   stakingSmartContractAddress: string;
   vanaScanUrl: string;
   rpcUrl: string;
+  refinementServiceUrl?: string;
+  refinerId?: number;
 }
 
 export interface ICloudFlare {
