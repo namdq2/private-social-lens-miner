@@ -98,7 +98,6 @@
     "@reown/appkit": "^1.7.2",
     "@reown/appkit-adapter-wagmi": "^1.7.2",
     "@toruslabs/eccrypto": "^6.0.2",
-    "axios": "^1.9.0",
     "buffer": "^6.0.3",
     "electron-log": "^5.3.3",
     "electron-store": "8.2",

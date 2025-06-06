@@ -1,15 +1,15 @@
-import axios from 'axios';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
-import { AppConfigService } from './app-config.service';
-import { AddFileWithPermissionsDto, RelayTransactionResponse, RequestProofDto, RequestRewardDto } from '../models/relay';
-import { Web3WalletService } from './web3-wallet.service';
-import { ContractService } from './contract.service';
 import { ethers, TransactionReceipt } from 'ethers';
-import { SubmissionProcessingService } from './submission-processing.service';
-import { ElectronIpcService } from './electron-ipc.service';
-
+import { lastValueFrom } from 'rxjs';
 import DataRegistryImplementationABI from '../assets/contracts/DataRegistryImplementation.json';
+import { AddFileWithPermissionsDto, RelayTransactionResponse, RequestProofDto, RequestRewardDto } from '../models/relay';
 import { ENCRYPTION_SEED, ERROR_MSG_GENERAL } from '../shared/constants';
+import { AppConfigService } from './app-config.service';
+import { ContractService } from './contract.service';
+import { ElectronIpcService } from './electron-ipc.service';
+import { SubmissionProcessingService } from './submission-processing.service';
+import { Web3WalletService } from './web3-wallet.service';
 
 @Injectable({
   providedIn: 'root',
@@ -20,18 +20,14 @@ export class RelayApiService {
   private readonly contractService: ContractService = inject(ContractService);
   private readonly submissionProcessingService: SubmissionProcessingService = inject(SubmissionProcessingService);
   private readonly electronIpcService: ElectronIpcService = inject(ElectronIpcService);
+  private readonly httpClient: HttpClient = inject(HttpClient);
 
   public currentSignature = signal<string>('');
 
-  private readonly axiosInstance = axios.create({
-    baseURL: this.appConfigService.relayApi?.baseUrl,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
 
   public async relayAddFileWithPermissions(encryptedKey: string, uploadedEncryptedFileUrl: string) {
     try {
+      this.submissionProcessingService.displayInfo('Data is being added to the data registry');
       const addFileWithPermissionsResponse = await this.addFileWithPermissions(encryptedKey, uploadedEncryptedFileUrl);
       console.log('addFileWithPermissions response', addFileWithPermissionsResponse);
       if (addFileWithPermissionsResponse?.status !== 'success') {
@@ -42,6 +38,7 @@ export class RelayApiService {
       const fileId = this.getFileId(transactionReceipt);
       const teeFee = await this.web3WalletService.teePoolContract['teeFee']();
 
+      this.submissionProcessingService.displayInfo('Contribution proof job has been requested. Your data is being validated');
       const contributionProofResponse = await this.requestContributionProof(fileId, teeFee);
       console.log('contributionProofResponse', contributionProofResponse);
       if (contributionProofResponse.status !== 'success') {
@@ -195,8 +192,7 @@ export class RelayApiService {
     return fileId;
   }
 
-  public async addFileWithPermissions(encryptedKey: string, uploadedEncryptedFileUrl: string) {
-    this.submissionProcessingService.displayInfo('Data is being added to the data registry');
+  public async addFileWithPermissions(encryptedKey: string, uploadedEncryptedFileUrl: string): Promise<RelayTransactionResponse> {
     const url = `${this.appConfigService.relayApi?.baseUrl}/api/relay/data-registry/add-file-with-permissions`;
     const requestBody: AddFileWithPermissionsDto = {
       url: uploadedEncryptedFileUrl,
@@ -208,56 +204,98 @@ export class RelayApiService {
         },
       ],
     };
-    const response = await this.axiosInstance.post<RelayTransactionResponse>(url, requestBody);
 
-    if (response.status === 201) {
-      if (response.data.status === 'success') {
-        return response.data;
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'x-api-key': `${this.appConfigService.relayApi?.apiKey}`,
+    });
+
+    try {
+      const response = await lastValueFrom(
+        this.httpClient.post<RelayTransactionResponse>(url, requestBody, { headers: headers, observe: 'response' })
+      );
+
+      if (response.status === 201) {
+        if (response.body?.status === 'success') {
+          return response.body;
+        } else {
+          throw new Error('Failed to add file with permissions: API status not success');
+        }
       } else {
-        throw new Error('Failed to add file with permissions');
+        throw new Error(`Failed to add file with permissions: HTTP Status ${response.status}`);
       }
-    } else {
-      throw new Error('Failed to add file with permissions');
+    } catch (error: any) {
+      console.error('Error adding file with permissions:', error);
+      throw error;
     }
   }
 
-  public async requestContributionProof(fileId: number, teeFee: bigint) {
+  public async requestContributionProof(fileId: number, teeFee: bigint): Promise<RelayTransactionResponse> {
     const url = `${this.appConfigService.relayApi?.baseUrl}/api/relay/tee-pool/request-contribution-proof`;
+
     const requestBody: RequestProofDto = {
       fileId,
       teeFee: teeFee.toString(),
     };
 
-    const response = await this.axiosInstance.post<RelayTransactionResponse>(url, requestBody);
-    this.submissionProcessingService.displayInfo(`Contribution proof job has been requested. Your data is being validated`);
+    // Define headers for the request
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'accept': 'application/json',
+      'x-api-key': `${this.appConfigService.relayApi?.apiKey}`,
+    });
 
-    if (response.status === 201) {
-      if (response.data.status === 'success') {
-        return response.data;
+    try {
+      const response = await lastValueFrom(
+        this.httpClient.post<RelayTransactionResponse>(url, requestBody, { headers: headers, observe: 'response' })
+      );
+
+      if (response.status === 201) {
+        if (response.body?.status === 'success') {
+          return response.body;
+        } else {
+          throw new Error(`Failed to request contribution proof: API status was '${response.body?.status}'`);
+        }
       } else {
-        throw new Error('Failed to request contribution proof');
+        throw new Error(`Failed to request contribution proof: HTTP Status ${response.status}`);
       }
-    } else {
-      throw new Error('Failed to request contribution proof');
+    } catch (error: any) {
+      console.error('Error requesting contribution proof:', error);
+      throw error;
     }
   }
 
-  public async requestReward(fileId: number, proofIndex: number) {
+
+  public async requestReward(fileId: number, proofIndex: number): Promise<RelayTransactionResponse> {
     const url = `${this.appConfigService.relayApi?.baseUrl}/api/relay/dlp/request-reward`;
     const requestBody: RequestRewardDto = {
       fileId,
       proofIndex,
     };
-    const response = await axios.post<RelayTransactionResponse>(url, requestBody);
 
-    if (response.status === 201) {
-      if (response.data.status === 'success') {
-        return response.data;
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'accept': 'application/json',
+      'x-api-key': `${this.appConfigService.relayApi?.apiKey}`,
+    });
+
+    try {
+      const response = await lastValueFrom(
+        this.httpClient.post<RelayTransactionResponse>(url, requestBody, { headers: headers, observe: 'response' })
+      );
+
+      if (response.status === 201) {
+        if (response.body?.status === 'success') {
+          return response.body; // Return the data from the response body
+        } else {
+          throw new Error(`Failed to request reward: API status was '${response.body?.status}'`);
+        }
       } else {
-        throw new Error('Failed to request reward');
+        throw new Error(`Failed to request reward: HTTP Status ${response.status}`);
       }
-    } else {
-      throw new Error('Failed to request reward');
+    } catch (error: any) {
+      console.error('Error requesting reward:', error);
+      throw error;
     }
   }
 }
