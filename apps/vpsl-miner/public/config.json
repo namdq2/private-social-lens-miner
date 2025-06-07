@@ -26,7 +26,7 @@
     "vanaScanUrl": "https://vanascan.io",
     "rpcUrl": "https://rpc.vana.org",
     "refinementServiceUrl": "https://592387e3ed196d95ce8df7af54dab6ebca21a3c8-8000.dstack-prod5.phala.network/refine",
-    "refinerId": 13
+    "refinerId": 15
   },
   "cloudFlare": {
     "siteKey": "0x4AAAAAAA2Kz8YigmJDTyyc"
