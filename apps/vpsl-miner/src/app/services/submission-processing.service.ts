@@ -70,7 +70,7 @@ export class SubmissionProcessingService {
   public startProcessingState() {
     const matDialogConfig: MatDialogConfig = {
       disableClose: true,
-      height: '600px',
+      height: '500px',
       width: '700px'
     }
     this.dialog.open(

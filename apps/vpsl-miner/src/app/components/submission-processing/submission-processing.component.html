@@ -58,12 +58,6 @@
       <img class="h-20 w-20" src="icons/verified.svg" alt="Verified icon" />
       <h2>You've successfully contributed to the dFusion Social Truth DLP!</h2>
       <h5>{{showSuccessMessage()}}</h5>
-      @if(gelatoTaskType() === gelatoTaskTypeRequestReward) {
-      <p>Your tokens are on the way and will appear in your balance shortly.</p>
-      }
-      @if(gelatoTaskType() === gelatoTaskTypeNone) {
-      <p>Your rewards are still being processed. They will be awarded to you shortly.</p>
-      }
     </div>
     }
     @else if (showFailure()) {

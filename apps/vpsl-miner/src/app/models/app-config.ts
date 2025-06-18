@@ -9,8 +9,15 @@ export interface IAppConfigItem {
   cloudFlare: ICloudFlare;
   gelato: IGelato;
   reownAppkit: IReownAppkit;
+  suiPoc: ISuiPoc;
 }
 
+export interface ISuiPoc {
+  secretKey: string;
+  packageId: string;
+  nautilusUrl: string;
+  threshold: number;
+}
 export interface IDFusion {
   validatorBackendUrl: string;
 }

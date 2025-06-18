@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { map, share } from 'rxjs';
-import { IAppConfigItem, IDFusion, IGelato, IPinata, IReownAppkit, ITelegram, IVana, IWalrus } from '../models/app-config';
+import { IAppConfigItem, IDFusion, IGelato, IPinata, IReownAppkit, ISuiPoc, ITelegram, IVana, IWalrus } from '../models/app-config';
 
 @Injectable({
   providedIn: 'root',
@@ -17,6 +17,7 @@ export class AppConfigService {
   // public cloudFlare: ICloudFlare | null = null;
   public gelato: IGelato | null = null;
   public reownAppkit: IReownAppkit | null = null;
+  public suiPoc: ISuiPoc | null = null;
 
   constructor() {}
 
@@ -31,6 +32,7 @@ export class AppConfigService {
     // this.cloudFlare = appConfigItem.cloudFlare;
     this.gelato = appConfigItem.gelato;
     this.reownAppkit = appConfigItem.reownAppkit;
+    this.suiPoc = appConfigItem.suiPoc;
   }
 
   private validateConfigItem(appConfigItem: IAppConfigItem) {
@@ -38,22 +40,26 @@ export class AppConfigService {
       throw new Error('dFusion configuration is missing.');
     }
     if (!appConfigItem.telegram) {
-        throw new Error('Telegram configuration is missing.');
+      throw new Error('Telegram configuration is missing.');
     }
     if (!appConfigItem.pinata && !appConfigItem.walrus) {
-        throw new Error('Either Pinata or Walrus configuration is required.');
+      throw new Error('Either Pinata or Walrus configuration is required.');
     }
     if (!appConfigItem.vana) {
-        throw new Error('Vana configuration is missing.');
+      throw new Error('Vana configuration is missing.');
     }
     // if (!appConfigItem.cloudFlare) {
     //     throw new Error('CloudFlare configuration is missing.');
     // }
     if (!appConfigItem.gelato) {
-        throw new Error('Gelato configuration is missing.');
+      throw new Error('Gelato configuration is missing.');
     }
     if (!appConfigItem.reownAppkit) {
-        throw new Error('ReownAppkit configuration is missing.');
+      throw new Error('ReownAppkit configuration is missing.');
+    }
+
+    if (!appConfigItem.suiPoc) {
+      throw new Error('SuiPoc configuration is missing.');
     }
   }
 
