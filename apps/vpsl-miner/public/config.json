@@ -61,7 +61,7 @@
     }
   },
   "relayApi": {
-    "baseUrl": "http://localhost:3000",
-    "apiKey": "8mK_rHJJsaOSwQPfOvM6Qc5FdNkSs5PR_9HjlK8zKbw_"
+    "baseUrl": "https://relay.vana.genesis.dfusion.ai",
+    "apiKey": "cfb3d321_EWyeJtLLLjioy5TBmVF88Es6yN4G7m4h0rYQjtQ"
   }
 }
