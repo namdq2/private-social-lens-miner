@@ -59,5 +59,9 @@
         }
       }
     }
+  },
+  "relayApi": {
+    "baseUrl": "https://relay.vana.genesis.dfusion.ai",
+    "apiKey": "cfb3d321_EWyeJtLLLjioy5TBmVF88Es6yN4G7m4h0rYQjtQ"
   }
 }
