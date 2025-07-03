@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { map, share } from 'rxjs';
-import { IAppConfigItem, IDFusion, IGelato, IPinata, IReownAppkit, ISuiPoc, ITelegram, IVana, IWalrus } from '../models/app-config';
+import { IAppConfigItem, IDFusion, IGelato, IPinata, IRelayApi, IReownAppkit, ISuiPoc, ITelegram, IVana, IWalrus } from '../models/app-config';
 
 @Injectable({
   providedIn: 'root',
@@ -17,6 +17,7 @@ export class AppConfigService {
   // public cloudFlare: ICloudFlare | null = null;
   public gelato: IGelato | null = null;
   public reownAppkit: IReownAppkit | null = null;
+  public relayApi: IRelayApi | null = null;
   public suiPoc: ISuiPoc | null = null;
 
   constructor() {}
@@ -32,6 +33,7 @@ export class AppConfigService {
     // this.cloudFlare = appConfigItem.cloudFlare;
     this.gelato = appConfigItem.gelato;
     this.reownAppkit = appConfigItem.reownAppkit;
+    this.relayApi = appConfigItem.relayApi;
     this.suiPoc = appConfigItem.suiPoc;
   }
 
@@ -60,6 +62,9 @@ export class AppConfigService {
 
     if (!appConfigItem.suiPoc) {
       throw new Error('SuiPoc configuration is missing.');
+    }
+    if (!appConfigItem.relayApi) {
+        throw new Error('RelayApi configuration is missing.');
     }
   }
 

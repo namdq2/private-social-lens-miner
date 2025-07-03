@@ -29,7 +29,7 @@ export class SubmissionProcessingComponent {
   public get gelatoTaskType() {
     return this.gelatoApiService.currentTaskType;
   }
-
+  
   public readonly gelatoTaskTypeRequestReward = GelatoTaskRelay.REQUEST_REWARD;
   public readonly gelatoTaskTypeNone = GelatoTaskRelay.NONE;
 

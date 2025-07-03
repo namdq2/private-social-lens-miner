@@ -9,6 +9,7 @@ export interface IAppConfigItem {
   cloudFlare: ICloudFlare;
   gelato: IGelato;
   reownAppkit: IReownAppkit;
+  relayApi: IRelayApi;
   suiPoc: ISuiPoc;
 }
 
@@ -33,6 +34,7 @@ export interface ITelegram {
 export interface IPinata {
   apiKey: string;
   jwt: string;
+  apiSecret: string;
   gatewayDomain: string;
   fileBaseUrl: string;
 }
@@ -48,6 +50,8 @@ export interface IVana {
   stakingSmartContractAddress: string;
   vanaScanUrl: string;
   rpcUrl: string;
+  refinementServiceUrl?: string;
+  refinerId?: number;
 }
 
 export interface ICloudFlare {
@@ -63,6 +67,11 @@ export interface IReownAppkit {
   domain: string;
   icon: string;
   network: AppKitNetwork;
+}
+
+export interface IRelayApi {
+  baseUrl: string;
+  apiKey: string;
 }
 
 export interface IWalrus {
