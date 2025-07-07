@@ -1,0 +1,34 @@
+<div class="conversation-item cursor-pointer p-3 rounded-lg transition-colors duration-200 border"
+     [class.bg-[#2a2d33]]="isSelected"
+     [class.border-[#4488f6]]="isSelected"
+     [class.bg-[#1a1d23]]="!isSelected"
+     [class.border-[#22252B]]="!isSelected"
+     [class.hover:bg-[#25282e]]="!isSelected"
+     (click)="onSelect()">
+  
+  <div class="flex justify-between items-start">
+    <div class="flex-1 min-w-0 mr-2">
+      <!-- Conversation title -->
+      <h4 class="text-sm font-medium text-white truncate mb-1">
+        {{conversation.title}}
+      </h4>
+      
+      <!-- Last message preview -->
+      <p class="text-xs text-gray-400 truncate">
+        {{getLastMessagePreview()}}
+      </p>
+      
+      <!-- Date -->
+      <span class="text-xs text-gray-500 mt-1 block">
+        {{formatDate(conversation.updatedAt)}}
+      </span>
+    </div>
+    
+    <!-- Delete button -->
+    <button class="delete-btn opacity-0 transition-opacity p-1 hover:bg-red-600 rounded"
+            (click)="onDelete($event)"
+            [attr.aria-label]="'Delete conversation: ' + conversation.title">
+      <mat-icon class="text-gray-400 hover:text-white text-sm">delete</mat-icon>
+    </button>
+  </div>
+</div> 

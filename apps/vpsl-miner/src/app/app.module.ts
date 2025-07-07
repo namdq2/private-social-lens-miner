@@ -33,6 +33,9 @@ import { TelegramSigninComponent } from './components/telegram-signin/telegram-s
 import { TelegramComponent } from './components/telegram/telegram.component';
 import { WalletConnectionComponent } from './components/wallet-connection/wallet-connection.component';
 import { WalletComponent } from './components/wallet/wallet.component';
+import { AiChatMainComponent } from './components/ai-chat-main/ai-chat-main.component';
+import { AiConversationComponent } from './components/ai-conversation/ai-conversation.component';
+import { AiMessageComponent } from './components/ai-message/ai-message.component';
 import { PhoneInputDirective } from './directives/phone-input.directive';
 import { AppConfigService } from './services/app-config.service';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -62,6 +65,9 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     ConfirmWalletDialogComponent,
     SignMessageWalletComponent,
     WalletConnectionComponent,
+    AiChatMainComponent,
+    AiConversationComponent,
+    AiMessageComponent,
   ],
   imports: [
     BrowserModule,

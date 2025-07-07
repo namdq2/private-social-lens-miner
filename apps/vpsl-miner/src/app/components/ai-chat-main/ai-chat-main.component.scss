@@ -1,0 +1,47 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.conversations-container {
+  max-height: 100%;
+  scrollbar-width: thin;
+  scrollbar-color: #8691a7 #2b3445;
+  
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #2b3445;
+    border-radius: 3px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #8691a7;
+    border-radius: 3px;
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+textarea {
+  &:focus {
+    box-shadow: 0 0 0 2px rgba(68, 136, 246, 0.2);
+  }
+}
+
+button:disabled {
+  @apply opacity-50 cursor-not-allowed;
+} 
