@@ -61,7 +61,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     // StakingComponent,
     SubmissionProcessingComponent,
     MinerSettingsComponent,
-    ConfirmDialogComponent,
     ConfirmWalletDialogComponent,
     SignMessageWalletComponent,
     WalletConnectionComponent,
@@ -76,6 +75,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     FormsModule,
     NgOptimizedImage,
     HttpClientModule,
+    ConfirmDialogComponent,
 
     MatDialogModule,
     MatButtonModule,

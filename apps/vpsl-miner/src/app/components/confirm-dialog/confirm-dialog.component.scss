@@ -1,0 +1,34 @@
+:host {
+  display: block;
+}
+
+::ng-deep .mat-mdc-dialog-container {
+  --mdc-dialog-container-color: #151a23;
+  
+  .mdc-dialog__surface {
+    background-color: #151a23;
+    border: 1px solid #272C35;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  }
+  
+  .mdc-dialog__content {
+    padding: 0;
+  }
+}
+
+.dfus-basic-btn {
+  @apply border border-[#272C35] rounded-xl px-4 py-2;
+}
+
+.dfus-orange-btn {
+  text-align: center;
+  background-image: linear-gradient(#342207, #795114);
+  border-radius: 0.75rem;
+  border: 1px solid #FB9C2D;
+  padding: .5rem 1rem;
+  font-weight: 400;
+  transition: opacity .2s;
+  box-shadow: inset 0 13.33px 40px #cb841a59;
+  font-size: 1rem;
+}

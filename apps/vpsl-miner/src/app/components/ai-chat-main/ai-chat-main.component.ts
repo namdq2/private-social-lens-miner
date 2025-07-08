@@ -1,6 +1,8 @@
 import { Component, ElementRef, ViewChild, AfterViewChecked, inject } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { AiChatService } from '../../services/ai-chat.service';
 import { AiConversation } from '../../models/ai-chat';
+import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-ai-chat-main',
@@ -12,6 +14,7 @@ export class AiChatMainComponent implements AfterViewChecked {
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
   
   private readonly aiChatService = inject(AiChatService);
+  private readonly dialog = inject(MatDialog);
   
   public newMessage = '';
   public isLoading = false;
@@ -32,8 +35,23 @@ export class AiChatMainComponent implements AfterViewChecked {
     this.shouldScrollToBottom = true;
   }
 
-  public onConversationDeleted(conversationId: string): void {
-    if (confirm('Are you sure you want to delete this conversation?')) {
+  public async onConversationDeleted(conversationId: string): Promise<void> {
+    const conversation = this.conversations().find(c => c.id === conversationId);
+    if (!conversation) return;
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Delete Conversation',
+        message: `Are you sure you want to delete "${conversation.title}"? This action cannot be undone.`,
+        confirmText: 'Delete',
+        confirmButtonClass: 'dfus-orange-btn',
+        icon: 'delete'
+      }
+    });
+
+    const result = await dialogRef.afterClosed().toPromise();
+    if (result) {
       this.aiChatService.deleteConversation(conversationId);
     }
   }
