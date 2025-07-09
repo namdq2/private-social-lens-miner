@@ -23,6 +23,8 @@ export class AiChatMainComponent implements AfterViewChecked {
   public readonly conversations = this.aiChatService.conversationsList;
   public readonly activeConversation = this.aiChatService.activeConversation;
 
+  public isSidebarCollapsed = false;
+
   public ngAfterViewChecked(): void {
     if (this.shouldScrollToBottom) {
       this.scrollToBottom();
