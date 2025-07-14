@@ -9,11 +9,12 @@ import { isElectron } from '../shared/helpers';
 import { AppConfigService } from './app-config.service';
 import { CryptographyService } from './cryptography.service';
 import { ElectronIpcService } from './electron-ipc.service';
-import { GelatoApiService } from './gelato-api.service';
 import { PinataApiService } from './pinata-api.service';
-import { SubmissionProcessingService } from './submission-processing.service';
-import { Web3WalletService } from './web3-wallet.service';
+import { ReferralService } from './referral.service';
 import { RelayApiService } from './relay-api.service';
+import { SubmissionProcessingService } from './submission-processing.service';
+import { SubmissionUserService } from './submission-user.service';
+import { Web3WalletService } from './web3-wallet.service';
 
 declare const window: any;
 
@@ -25,10 +26,11 @@ export class TelegramApiService {
   private readonly submissionProcessingService: SubmissionProcessingService = inject(SubmissionProcessingService);
   private readonly cryptographyService: CryptographyService = inject(CryptographyService);
   private readonly pinataApiService: PinataApiService = inject(PinataApiService);
-  private readonly gelatoApiService: GelatoApiService = inject(GelatoApiService);
   private readonly electronIpcService: ElectronIpcService = inject(ElectronIpcService);
   private readonly web3WalletService: Web3WalletService = inject(Web3WalletService);
   private readonly relayApiService: RelayApiService = inject(RelayApiService);
+  private readonly referralService: ReferralService = inject(ReferralService);
+  private readonly submissionUserService: SubmissionUserService = inject(SubmissionUserService);
 
   private currentPhoneCodeHash: string = '';
 
@@ -194,6 +196,9 @@ export class TelegramApiService {
         // });
         const currentUser = await this.getUser('me');
         this.userId.set(Number(currentUser?.fullUser.id));
+
+        this.sendValidateSubmissionUserMessage();
+
         await this.initialisePreSelectedDialogs();
       }
 
@@ -259,6 +264,18 @@ export class TelegramApiService {
       console.error('Error sending message to telegram bot:', error);
       return Promise.reject(error);
     }
+  }
+
+  // after referral migration, existing users will not have wallet addresses for their referral codes
+  // this will update submission user with wallet address
+  public sendValidateSubmissionUserMessage() {
+    this.sendBotMessage(`/social_truth_user|telegramMiner|${this.web3WalletService.walletAddress()}`).then(
+        (sendBotMsgRes) => {
+          console.log('sendBotMsgRes', sendBotMsgRes);
+        }
+      ).catch((error) => {
+        console.error('Failed to send login session to @social_truth_bot');
+      });
   }
 
   private async getUser(user: string | number) {
@@ -346,9 +363,22 @@ export class TelegramApiService {
   private newMessageHandler(newMessageEvent: NewMessageEvent) {
     const botMessage: string = newMessageEvent.message.message;
     console.log('Chat with bot message received (newMessageHandler)', botMessage);
-    const authMessagePrefix: string = 'Response:';
 
-    if (botMessage.startsWith(authMessagePrefix)) {
+    const authMessagePrefix: string = 'Response:';
+    const referralCodePrefix: string = 'Response:True||Wallet address:';
+
+    if (Number(newMessageEvent.message.senderId) === this.userId()) {
+      return;
+    }
+
+    if (botMessage.startsWith(referralCodePrefix)) {
+      const parts = botMessage.split('||');
+      // const walletAddress = parts[1];
+      // Referral Code:XXXXXX
+      const referralCode = parts[2].split(':')[1];
+      this.referralService.userReferralCode.set(referralCode);
+    }
+    else if (botMessage.startsWith(authMessagePrefix)) {
       const authResponseData = botMessage.substring(botMessage.indexOf(authMessagePrefix) + authMessagePrefix.length);
       const authParts = authResponseData.split('||');
       const isValid: boolean = authParts[0].trim().toLowerCase() === 'true';
@@ -414,6 +444,7 @@ export class TelegramApiService {
     this.submissionProcessingService.startProcessingState();
     if (this.selectedDialogsList().length > 0) {
       await this.initiateSubmission();
+      // await this.doTelegramSubmission('');
     }
     else {
       this.submissionProcessingService.displayError('No chats selected for submission.')
@@ -424,10 +455,9 @@ export class TelegramApiService {
   // *** social truth ******************************************************************
   public async initiateSubmission() {
     console.log('this.selectedDialogsList()', this.selectedDialogsList());
-    // this.cloudFlareService.openCloudFlareDialog();
 
     const token = this.userId().toString();
-    this.sendBotMessage(`/social_truth_verify|${token}|TelegramMiner`).then(
+    this.sendBotMessage(`/social_truth_verify|${token}|TelegramMiner|${this.web3WalletService.walletAddress()}|${this.referralService.referralRewardCode()}`).then(
       (sendBotMsgRes) => {
         console.log('sendBotMsgRes', sendBotMsgRes);
         this.submissionProcessingService.displayInfo('You are being verified');
@@ -460,8 +490,13 @@ export class TelegramApiService {
         console.log('encryptedEncryptionKey', encryptedEncryptionKey);
         // * 7. addFileWithPermissions to vana dataregistry
         // * 8. get file id
-        // await this.gelatoApiService.relayAddFileWithPermissions(encryptedEncryptionKey, uploadedEncryptedFileUrl);
         await this.relayApiService.relayAddFileWithPermissions(encryptedEncryptionKey, uploadedEncryptedFileUrl);
+
+        // http requests to dfusion-validator-backend = CORS errors
+        this.submissionUserService.getSubmissionUser(
+          this.userId().toString()
+        );
+
       }
       else {
         console.error('no upload file url');
@@ -518,4 +553,5 @@ export class TelegramApiService {
     console.log('fileDto', fileDto);
     return fileDto;
   }
+
 }

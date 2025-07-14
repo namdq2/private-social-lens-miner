@@ -1,0 +1,46 @@
+<div class="h-full w-full flex flex-col justify-start items-stretch gap-y-4 p-10">
+  <div class="flex flex-row justify-between items-start">
+    <h3>
+      Refer Friends and <span class="text-[#FB9C2D]">Both Earn Rewards</span>
+    </h3>
+    <button mat-icon-button mat-dialog-close>
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="flex flex-col justify-start items-stretch gap-y-4">
+    <div class="flex flex-col justify-start items-stretch gap-y-4 text-lg text-[#C6C6C6]">
+      <p>Unlock rewards by inviting your friends to join our platform!</p>
+      <p class="underline text-white">How It Works:</p>
+      <p>Share your unique referral code with friends.</p>
+      <p>
+        When your friend submits your code and <span class="text-[#1A56CB]">completes their first contribution</span>,
+        both your referred friend and you will receive <span class="text-[#FB9C2D]">10 $VFSN!</span>
+      </p>
+    </div>
+
+    <div class="flex flex-row justify-start items-center gap-x-4 cursor-pointer" (click)="copyReferralCode()">
+      <span>
+        Your Referral Code: <strong class="hover:text-[#1A56CB]">{{referralCode || "Not Available"}}</strong>
+      </span>
+
+      @if(referralCode) {
+        <button mat-icon-button>
+          <mat-icon>content_copy</mat-icon>
+        </button>
+      }
+    </div>
+
+    <div class="flex flex-row justify-start items-center gap-x-4 cursor-pointer" (click)="copyReferralLink()">
+      <span>
+        Your Referral Link: <strong class="hover:text-[#1A56CB]">{{referralLink || "Not Available"}}</strong>
+      </span>
+
+      @if(referralCode) {
+        <button mat-icon-button>
+          <mat-icon>content_copy</mat-icon>
+        </button>
+      }
+    </div>
+  </div>
+</div>

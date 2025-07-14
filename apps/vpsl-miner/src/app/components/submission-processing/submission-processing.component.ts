@@ -11,7 +11,6 @@ import { SubmissionProcessingService } from '../../services/submission-processin
 })
 export class SubmissionProcessingComponent {
   private readonly submissionProcessingService: SubmissionProcessingService = inject(SubmissionProcessingService);
-  // private readonly cloudFlareService: CloudFlareService = inject(CloudFlareService);
   private readonly gelatoApiService: GelatoApiService = inject(GelatoApiService);
 
   public showCloudFlare = this.submissionProcessingService.showCloudFlare;
@@ -29,15 +28,9 @@ export class SubmissionProcessingComponent {
   public get gelatoTaskType() {
     return this.gelatoApiService.currentTaskType;
   }
-  
+
   public readonly gelatoTaskTypeRequestReward = GelatoTaskRelay.REQUEST_REWARD;
   public readonly gelatoTaskTypeNone = GelatoTaskRelay.NONE;
-
-  // public ngAfterViewInit(): void {
-  //   if (this.submissionProcessingService.showCloudFlare()) {
-  //     this.cloudFlareService.renderTurnstile();
-  //   }
-  // }
 
   public endSubmissionFlow() {
     this.submissionProcessingService.resetState();

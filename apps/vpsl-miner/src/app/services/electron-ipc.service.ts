@@ -1,6 +1,8 @@
 import { Injectable, signal } from '@angular/core';
 import { WalletType } from '../models/wallet';
 import { isElectron } from '../shared/helpers';
+import { IReferralLeaderboardDto } from '../models/referral';
+import { ISubmissionUserDto } from '../models/submission-user';
 
 declare const window: any;
 
@@ -24,6 +26,7 @@ export class ElectronIpcService {
   public telegramSession = signal<string>('');
   public appVersion = signal<string>('');
   public checkForUpdate = signal<boolean>(false);
+  public referralLeaderboardList = signal<Array<IReferralLeaderboardDto>>([]);
 
   constructor() {
     if (isElectron()) {
@@ -91,7 +94,6 @@ export class ElectronIpcService {
     const checkForUpdate = await window.electron.getCheckForUpdate();
     console.log('init checkForUpdates', checkForUpdate);
     this.checkForUpdate.set(checkForUpdate);
-
   }
 
   public setWalletAddress(value: string) {
@@ -145,6 +147,8 @@ export class ElectronIpcService {
 
       this.nextSubmissionTime.set(nextDate);
       window.electron.setNextSubmissionTime(nextDate);
+      // this.nextSubmissionTime.set(null);
+      // window.electron.setNextSubmissionTime(null);
     }
   }
 
@@ -180,5 +184,15 @@ export class ElectronIpcService {
       return version;
     }
     return '';
+  }
+
+  public async getSubmissionUser(sourceId: string): Promise<ISubmissionUserDto> {
+    const submissionUser = await window.electron.getSubmissionUser(sourceId);
+    return submissionUser;
+  }
+
+  public async getTopNReferrals(): Promise<Array<IReferralLeaderboardDto>> {
+    const referralLeaderboardList = await window.electron.getTopNReferrals();
+    return referralLeaderboardList;
   }
 }
