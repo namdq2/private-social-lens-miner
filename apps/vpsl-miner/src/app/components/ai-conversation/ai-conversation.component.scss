@@ -1,0 +1,19 @@
+:host {
+  display: block;
+}
+
+.conversation-item {
+  &:hover {
+    .delete-btn {
+      opacity: 1;
+    }
+  }
+}
+
+.delete-btn {
+  transition: all 0.2s ease-in-out;
+  
+  &:hover {
+    transform: scale(1.1);
+  }
+} 
