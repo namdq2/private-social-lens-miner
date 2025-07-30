@@ -208,7 +208,10 @@ export class TelegramApiService {
   public async loginAiAgent(): Promise<void> {
     try {
       const storedSession = this.electronIpcService.telegramSession();
-      const response = await firstValueFrom(this.httpService.post<ITelegramLoginResponse>('auth/telegram/login', { sessionString: JSON.parse(storedSession) }));
+      const response = await firstValueFrom(this.httpService.post<ITelegramLoginResponse>('auth/telegram/login', { 
+        sessionString: JSON.parse(storedSession),
+        telegramId: this.userId().toString(),
+      }));
 
       if (response?.token) {
         this.electronIpcService.setAiAgentAccessToken(response.token);
