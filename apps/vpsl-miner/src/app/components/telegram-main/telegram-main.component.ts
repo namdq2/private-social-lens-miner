@@ -10,6 +10,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { SubmissionProcessingService } from '../../services/submission-processing.service';
 import { SuiPocService } from '../../services/sui-poc.service';
+import { SuiPrivateKeyDialogComponent } from '../sui-private-key-dialog/sui-private-key-dialog.component';
 
 @Component({
   selector: 'app-telegram-main',
@@ -19,7 +20,6 @@ import { SuiPocService } from '../../services/sui-poc.service';
 })
 export class TelegramMainComponent implements AfterViewInit {
   private readonly telegramApiService: TelegramApiService = inject(TelegramApiService);
-  // private readonly cloudFlareService: CloudFlareService = inject(CloudFlareService);
   private readonly electronIpcService: ElectronIpcService = inject(ElectronIpcService);
   private readonly submissionProcessingService: SubmissionProcessingService = inject(SubmissionProcessingService);
   private readonly snackBar: MatSnackBar = inject(MatSnackBar);
@@ -119,11 +119,18 @@ export class TelegramMainComponent implements AfterViewInit {
   public async doSubmit() {
     // await this.telegramApiService.initiateSubmission();
     // this.startBackgroundTask();
-    this.submissionProcessingService.startProcessingState();
-    this.suiPocService.doSuiPoc();
     // this.submissionProcessingService.resetState();
     // this.submissionProcessingService.startProcessingState();
     // this.telegramApiService.doTelegramSubmission('123');
+    // const suiPrivateKey = this.suiPocService.getSuiPrivateKey()
+
+    this.submissionProcessingService.startProcessingState();
+    this.suiPocService.doSuiPoc();
+    // return;
+    // if (suiPrivateKey) {
+    // }
+
+    // this.openSuiKeyImport()
   }
 
   public startBackgroundTask() {
@@ -145,5 +152,11 @@ export class TelegramMainComponent implements AfterViewInit {
         this.electronIpcService.stopBackgroundTask();
       }
     });
+  }
+
+  public openSuiKeyImport() {
+    // const dialogRef = this.matDialog.open(SuiPrivateKeyDialogComponent, {
+    //   disableClose: true,
+    // });
   }
 }

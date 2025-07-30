@@ -71,8 +71,12 @@
   },
   "suiPoc": {
     "secretKey": "suiprivkey1qqd6sesfpyc7e9nds3aattvt073muxdchpcz7ad4064t0mgnfnna5ee977f",
+    "dlpWalletAddress": "0x4cc4a51dfefcb859872c7fa45d3a6598dea97668d1c69d7b9cfa6206892f3669",
     "packageId": "0xf2433262bd55b30c1cddbae940a2355086cfe2850bd62583bdfcad7c57b17956",
     "nautilusUrl": "http://localhost:3000",
     "threshold": 2
+  },
+  "aiAgent": {
+    "aiAgentUrl": "http://localhost:3000/api/v1"
   }
 }

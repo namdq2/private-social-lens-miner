@@ -1,4 +1,4 @@
-import { AppKitNetwork } from "@reown/appkit/networks";
+import { AppKitNetwork } from '@reown/appkit/networks';
 
 export interface IAppConfigItem {
   dFusion: IDFusion;
@@ -11,13 +11,20 @@ export interface IAppConfigItem {
   reownAppkit: IReownAppkit;
   relayApi: IRelayApi;
   suiPoc: ISuiPoc;
+  aiAgent: IAiAgent;
+}
+
+export interface IAiAgent {
+  aiAgentUrl: string;
 }
 
 export interface ISuiPoc {
   secretKey: string;
+  dlpWalletAddress: string;
   packageId: string;
   nautilusUrl: string;
   threshold: number;
+  suiScanUrl: string;
 }
 export interface IDFusion {
   validatorBackendUrl: string;
@@ -45,7 +52,7 @@ export interface IVana {
   teePoolSmartContractAddress: string;
   tokenSmartContractAddress: string;
   tokenSymbolSmartContractAddress: string;
-  tokenDecimalsSmartContractAddress: string;
+  tokenDecimalsSmartContractAddress: number;
   dlpPublicKey: string;
   stakingSmartContractAddress: string;
   vanaScanUrl: string;

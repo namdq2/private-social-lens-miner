@@ -55,9 +55,9 @@ export class WalrusService {
 
       const publisherUrl = this.appConfigService.walrus.publisherUrl;
       const epochs = this.appConfigService.walrus.epochs || 5;
-      
+
       // Prepare the upload URL with epochs parameter
-      const uploadUrl = `${publisherUrl}/v1/blobs?epochs=${epochs}`;
+      const uploadUrl = `${publisherUrl}/blobs?epochs=${epochs}`;
 
       // Prepare headers
       const headers = new HttpHeaders({
@@ -65,11 +65,7 @@ export class WalrusService {
       });
 
       // Upload the file using HTTP PUT
-      const response = await this.httpClient.put<WalrusUploadResponse>(
-        uploadUrl,
-        encryptedData,
-        { headers }
-      ).toPromise();
+      const response = await this.httpClient.put<WalrusUploadResponse>(uploadUrl, encryptedData, { headers }).toPromise();
 
       if (!response) {
         throw new Error('No response received from Walrus');
@@ -87,13 +83,10 @@ export class WalrusService {
 
       // Return the URL to access the blob
       const aggregatorUrl = this.appConfigService.walrus.aggregatorUrl;
-      return `${aggregatorUrl}/v1/blobs/${blobId}`;
-
+      return `${aggregatorUrl}/blobs/${blobId}`;
     } catch (error) {
       console.error('Walrus upload failed', error);
-      throw new Error(
-        'Failed to upload encrypted data to Walrus storage. Please try again.'
-      );
+      throw new Error('Failed to upload encrypted data to Walrus storage. Please try again.');
     }
   }
 
@@ -109,23 +102,22 @@ export class WalrusService {
       }
 
       const aggregatorUrl = this.appConfigService.walrus.aggregatorUrl;
-      const downloadUrl = `${aggregatorUrl}/v1/blobs/${blobId}`;
+      const downloadUrl = `${aggregatorUrl}/blobs/${blobId}`;
 
-      const response = await this.httpClient.get(downloadUrl, {
-        responseType: 'blob'
-      }).toPromise();
+      const response = await this.httpClient
+        .get(downloadUrl, {
+          responseType: 'blob',
+        })
+        .toPromise();
 
       if (!response) {
         throw new Error('No response received from Walrus');
       }
 
       return response;
-
     } catch (error) {
       console.error('Walrus download failed', error);
-      throw new Error(
-        'Failed to download data from Walrus storage. Please try again.'
-      );
+      throw new Error('Failed to download data from Walrus storage. Please try again.');
     }
   }
 
@@ -141,17 +133,14 @@ export class WalrusService {
       }
 
       const aggregatorUrl = this.appConfigService.walrus.aggregatorUrl;
-      const infoUrl = `${aggregatorUrl}/v1/blobs/${blobId}/info`;
+      const infoUrl = `${aggregatorUrl}/blobs/${blobId}/info`;
 
       const response = await this.httpClient.get(infoUrl).toPromise();
 
       return response;
-
     } catch (error) {
       console.error('Walrus blob info failed', error);
-      throw new Error(
-        'Failed to get blob info from Walrus storage. Please try again.'
-      );
+      throw new Error('Failed to get blob info from Walrus storage. Please try again.');
     }
   }
 
@@ -162,4 +151,4 @@ export class WalrusService {
   public isWalrusAvailable(): boolean {
     return !!(this.appConfigService.walrus?.publisherUrl && this.appConfigService.walrus?.aggregatorUrl);
   }
-} 
+}

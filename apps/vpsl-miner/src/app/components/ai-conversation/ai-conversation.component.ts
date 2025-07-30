@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { AiConversation } from '../../models/ai-chat';
+import { IConversation } from '../../models/ai-chat';
 
 @Component({
   selector: 'app-ai-conversation',
@@ -8,14 +8,18 @@ import { AiConversation } from '../../models/ai-chat';
   styleUrl: './ai-conversation.component.scss',
 })
 export class AiConversationComponent {
-  @Input() conversation!: AiConversation;
+  @Input() conversation!: IConversation;
   @Input() isSelected: boolean = false;
-  
+  @Input() disabled: boolean = false;
+  @Input() isDeleting: boolean = false;
+
   @Output() conversationSelected = new EventEmitter<string>();
   @Output() conversationDeleted = new EventEmitter<string>();
 
   public onSelect(): void {
-    this.conversationSelected.emit(this.conversation.id);
+    if (!this.disabled) {
+      this.conversationSelected.emit(this.conversation.id);
+    }
   }
 
   public onDelete(event: Event): void {
@@ -24,25 +28,23 @@ export class AiConversationComponent {
   }
 
   public getLastMessagePreview(): string {
-    const lastMessage = this.conversation.messages[this.conversation.messages.length - 1];
-    if (!lastMessage) return 'New conversation';
-    
-    const content = lastMessage.content;
-    return content.length > 50 ? content.substring(0, 50) + '...' : content;
+    // Since IConversation doesn't have messages property, we'll return a default message
+    // In a real implementation, you might want to fetch messages separately or modify the API response
+    return 'New conversation';
   }
 
-  public formatDate(date: Date): string {
+  public formatDate(date: Date | string): string {
     const now = new Date();
-    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffTime = Math.abs(now.getTime() - new Date(date).getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
+
     if (diffDays === 1) return 'Today';
     if (diffDays === 2) return 'Yesterday';
     if (diffDays <= 7) return `${diffDays} days ago`;
-    
-    return date.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric' 
+
+    return new Date(date).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
     });
   }
-} 
+}

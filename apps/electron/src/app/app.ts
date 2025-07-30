@@ -35,6 +35,8 @@ export default class App {
   static uploadFrequency = 4;
   static telegramSession = '';
   static checkForUpdate = false; // manual check for updates
+  static aiAgentAccessToken = '';
+  static aiAgentRefreshToken = '';
 
   // Create server local
   static localServer: http.Server;
@@ -94,7 +96,6 @@ export default class App {
     });
   }
 
-
   public static isDevelopmentMode() {
     const isEnvironmentSet: boolean = 'ELECTRON_IS_DEV' in process.env;
     const getFromEnvironment: boolean = parseInt(process.env.ELECTRON_IS_DEV, 10) === 1;
@@ -142,6 +143,8 @@ export default class App {
     App.minimizeToTray = store.get('minimizeToTray') ?? true;
     App.uploadFrequency = store.get('uploadFrequency') ?? 4;
     App.telegramSession = store.get('telegramSession') ?? '';
+    App.aiAgentAccessToken = store.get('aiAgentAccessToken') ?? '';
+    App.aiAgentRefreshToken = store.get('aiAgentRefreshToken') ?? '';
     // App.checkForUpdate // manual check init to false always
 
     if (rendererAppName) {
@@ -490,6 +493,27 @@ export default class App {
 
     ipcMain.handle('get-check-for-update', () => {
       return App.checkForUpdate;
+    });
+
+    // AI Agent Token Handlers
+    ipcMain.on('set-ai-agent-access-token', (event, value) => {
+      App.aiAgentAccessToken = value;
+      store.set('aiAgentAccessToken', value);
+      console.log('main process: set-ai-agent-access-token:', value);
+    });
+
+    ipcMain.handle('get-ai-agent-access-token', () => {
+      return App.aiAgentAccessToken;
+    });
+
+    ipcMain.on('set-ai-agent-refresh-token', (event, value) => {
+      App.aiAgentRefreshToken = value;
+      store.set('aiAgentRefreshToken', value);
+      console.log('main process: set-ai-agent-refresh-token:', value);
+    });
+
+    ipcMain.handle('get-ai-agent-refresh-token', () => {
+      return App.aiAgentRefreshToken;
     });
   }
 }

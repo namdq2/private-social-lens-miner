@@ -7,6 +7,12 @@ contextBridge.exposeInMainWorld('electron', {
   setWalletAddress: (value) => ipcRenderer.send('set-wallet-address', value),
   getWalletAddress: () => ipcRenderer.invoke('get-wallet-address'),
 
+  setAiAgentAccessToken: (value) => ipcRenderer.send('set-ai-agent-access-token', value),
+  getAiAgentAccessToken: () => ipcRenderer.invoke('get-ai-agent-access-token'),
+
+  setAiAgentRefreshToken: (value) => ipcRenderer.send('set-ai-agent-refresh-token', value),
+  getAiAgentRefreshToken: () => ipcRenderer.invoke('get-ai-agent-refresh-token'),
+
   setEncryptionKey: (value) => ipcRenderer.send('set-encryption-key', value),
   getEncryptionKey: () => ipcRenderer.invoke('get-encryption-key'),
 

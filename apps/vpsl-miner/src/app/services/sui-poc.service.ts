@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { TelegramApiService } from './telegram-api.service';
 import { fileDto, IFileMetadata, IProcessDataRes } from '../models/social-truth';
 import * as bech32 from 'bech32';
@@ -12,7 +12,7 @@ import { WalrusService } from './walrus.service';
 import { HttpClient } from '@angular/common/http';
 import { AppConfigService } from './app-config.service';
 import { SubmissionProcessingService } from './submission-processing.service';
-import { ISuiPoc } from '../models/app-config';
+import { ISuiPoc, IWalrus } from '../models/app-config';
 
 @Injectable({
   providedIn: 'root',
@@ -20,9 +20,11 @@ import { ISuiPoc } from '../models/app-config';
 export class SuiPocService {
   private readonly keypair: Ed25519Keypair;
   private readonly httpClient: HttpClient = inject(HttpClient);
+  private suiPrivateKey = signal<string>('');
   private suiClient: SuiClient;
   private sealClient: SealClient;
   private pocConfig: ISuiPoc | null;
+  private walrusConfig: IWalrus | null;
   private suiAddress: string;
 
   constructor(
@@ -32,8 +34,9 @@ export class SuiPocService {
     private readonly submissionProcessingService: SubmissionProcessingService,
   ) {
     this.pocConfig = this.appConfigService.suiPoc;
+    this.walrusConfig = this.appConfigService.walrus;
     // Initialize keypair from secret key
-    const decoded = bech32.bech32.decode(this.pocConfig?.secretKey || '');
+    const decoded = bech32.bech32.decode(this.suiPrivateKey());
     if (!decoded) {
       throw new Error('Invalid bech32 private key format');
     }
@@ -53,6 +56,7 @@ export class SuiPocService {
     });
   }
 
+
   public async createPolicy(): Promise<string> {
     try {
       this.submissionProcessingService.displayInfo('Creating policy');
@@ -61,7 +65,7 @@ export class SuiPocService {
 
       tx.moveCall({
         target: `${this.pocConfig?.packageId}::seal_manager::create_access_policy`,
-        arguments: [tx.pure.vector('address', [this.suiAddress || ''])],
+        arguments: [tx.pure.vector('address', [this.suiAddress || '', this.pocConfig?.dlpWalletAddress || ''])],
       });
 
       const result = await this.suiClient.signAndExecuteTransaction({
@@ -141,7 +145,7 @@ export class SuiPocService {
       const processParams = {
         payload: {
           timeout_secs: 120,
-          args: [this.suiAddress, blobId, onChainFileObjId, policyObjectId, String(threshold)],
+          args: [blobId, onChainFileObjId, policyObjectId, String(threshold)],
         },
       };
 
@@ -152,6 +156,14 @@ export class SuiPocService {
       }
 
       this.submissionProcessingService.displaySuccess('Processed done');
+      this.submissionProcessingService.setProcessedData({
+        walrusUrl: `${this.walrusConfig?.aggregatorUrl}/blobs/${response.data.blobId}`,
+        unprocessedWalrusUrl: `${this.walrusConfig?.aggregatorUrl}/blobs/${blobId}`,
+        unprocessedOnChainFileUrl: `${this.pocConfig?.suiScanUrl}/${onChainFileObjId}`,
+        attestationUrl: `${this.pocConfig?.suiScanUrl}/${response.data.attestationObjId}`,
+        onChainFileUrl: `${this.pocConfig?.suiScanUrl}/${response.data.onChainFileObjId}`,
+        policyObjectUrl: `${this.pocConfig?.suiScanUrl}/${policyObjectId}`,
+      });
 
       return response;
     } catch (err) {
@@ -208,5 +220,13 @@ export class SuiPocService {
 
     const processDataRes = await this.processDataWithNautilus(blobId, onChainFileObjId, policyObjId, this.pocConfig?.threshold || 2);
     console.log('🚀 ~ Nautilus Processed data:', processDataRes?.data);
+  }
+
+  public setSuiPrivateKey(suiPrivateKey: string) {
+    this.suiPrivateKey.set(suiPrivateKey);
+  }
+
+  public getSuiPrivateKey(): string {
+    return this.suiPrivateKey();
   }
 }

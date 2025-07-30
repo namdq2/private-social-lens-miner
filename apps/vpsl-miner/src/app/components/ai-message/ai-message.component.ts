@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { AiMessage } from '../../models/ai-chat';
+import { IMessage } from '../../models/ai-chat';
 
 @Component({
   selector: 'app-ai-message',
@@ -8,21 +8,26 @@ import { AiMessage } from '../../models/ai-chat';
   styleUrl: './ai-message.component.scss',
 })
 export class AiMessageComponent {
-  @Input() message!: AiMessage;
+  @Input() message!: IMessage;
+  @Input() isStreaming: boolean = false;
 
-  public formatTime(date: Date): string {
-    return date.toLocaleTimeString('en-US', { 
-      hour: '2-digit', 
+  public formatTime(date: Date | string): string {
+    const dateObj = new Date(date);
+    return dateObj.toLocaleTimeString('en-US', {
+      hour: '2-digit',
       minute: '2-digit',
-      hour12: false 
+      hour12: false,
+      timeZone: 'Asia/Bangkok',
     });
   }
 
-  public formatDate(date: Date): string {
-    return date.toLocaleDateString('en-US', {
+  public formatDate(date: Date | string): string {
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    return dateObj.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
-      year: 'numeric'
+      year: 'numeric',
+      timeZone: 'Asia/Bangkok',
     });
   }
-} 
+}
