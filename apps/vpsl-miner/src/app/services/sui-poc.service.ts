@@ -86,6 +86,7 @@ export class SuiPocService {
           showEffects: true,
         },
       });
+      console.log('🚀 ~ SuiPocService ~ createPolicy ~ result:', result);
 
       const policyObjId = result?.effects?.created?.[0]?.reference?.objectId || '';
 
@@ -232,6 +233,7 @@ export class SuiPocService {
 
     console.log('🚀 ~ Encrypted data:', { blobId, onChainFileObjId, policyObjId, walrusUrl: walrusUploadRes });
 
+    console.log('🚀 ~ SuiPocService ~ doSuiPoc ~ blobId, onChainFileObjId, policyObjId:', blobId, onChainFileObjId, policyObjId);
     const processDataRes = await this.processDataWithNautilus(blobId, onChainFileObjId, policyObjId, this.pocConfig?.threshold || 2);
     console.log('🚀 ~ Nautilus Processed data:', processDataRes?.data);
   }

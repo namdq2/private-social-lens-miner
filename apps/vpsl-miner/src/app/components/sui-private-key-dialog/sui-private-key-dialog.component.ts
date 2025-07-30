@@ -58,6 +58,7 @@ export class SuiPrivateKeyDialogComponent {
   public handleConfirm(): void {
     if (this.onConfirm()) {
       this.suiPocService.setSuiPrivateKey(this.privateKey.trim());
+      this.suiPocService.generateKeyPair()
       this.dialogRef.close(true);
     }
   }
