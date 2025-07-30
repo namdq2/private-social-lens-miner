@@ -18,14 +18,14 @@ import { ISuiPoc, IWalrus } from '../models/app-config';
   providedIn: 'root',
 })
 export class SuiPocService {
-  private readonly keypair: Ed25519Keypair;
   private readonly httpClient: HttpClient = inject(HttpClient);
+  private keypair: Ed25519Keypair | null = null;
   private suiPrivateKey = signal<string>('');
   private suiClient: SuiClient;
   private sealClient: SealClient;
   private pocConfig: ISuiPoc | null;
   private walrusConfig: IWalrus | null;
-  private suiAddress: string;
+  private suiAddress: string = '';
 
   constructor(
     private readonly telegramApiService: TelegramApiService,
@@ -36,15 +36,6 @@ export class SuiPocService {
     this.pocConfig = this.appConfigService.suiPoc;
     this.walrusConfig = this.appConfigService.walrus;
     // Initialize keypair from secret key
-    const decoded = bech32.bech32.decode(this.suiPrivateKey());
-    if (!decoded) {
-      throw new Error('Invalid bech32 private key format');
-    }
-    const privateKeyBytes = bech32.bech32.fromWords(decoded.words);
-    // Remove the first byte (flag), use only the last 32 bytes
-    const rawSecretKey = Buffer.from(privateKeyBytes).slice(1);
-    this.keypair = Ed25519Keypair.fromSecretKey(rawSecretKey);
-    this.suiAddress = this.keypair.getPublicKey().toSuiAddress();
     // set up SUI client
     this.suiClient = new SuiClient({ url: getFullnodeUrl('testnet') });
     // set up Seal client
@@ -56,8 +47,27 @@ export class SuiPocService {
     });
   }
 
+  public generateKeyPair() {
+    const privateKey = this.suiPrivateKey();
+
+    if (!privateKey) return;
+
+    const decoded = bech32.bech32.decode(privateKey);
+    if (!decoded) {
+      throw new Error('Invalid bech32 private key format');
+    }
+    const privateKeyBytes = bech32.bech32.fromWords(decoded.words);
+    // Remove the first byte (flag), use only the last 32 bytes
+    const rawSecretKey = Buffer.from(privateKeyBytes).slice(1);
+    this.keypair = Ed25519Keypair.fromSecretKey(rawSecretKey);
+    this.suiAddress = this.keypair.getPublicKey().toSuiAddress();
+  }
 
   public async createPolicy(): Promise<string> {
+    if (!this.keypair) {
+      return '';
+    }
+
     try {
       this.submissionProcessingService.displayInfo('Creating policy');
       const tx = new Transaction();
@@ -104,6 +114,10 @@ export class SuiPocService {
   }
 
   public async saveEncryptedFileOnchain(fileId: string, policyObjId: string, metadata: IFileMetadata): Promise<string> {
+    if (!this.keypair) {
+      return '';
+    }
+
     try {
       this.submissionProcessingService.displayInfo('Saving encrypted file');
       const tx = new Transaction();

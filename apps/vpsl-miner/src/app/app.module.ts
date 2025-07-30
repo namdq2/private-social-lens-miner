@@ -39,6 +39,7 @@ import { AiMessageComponent } from './components/ai-message/ai-message.component
 import { PhoneInputDirective } from './directives/phone-input.directive';
 import { AppConfigService } from './services/app-config.service';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { SuiPrivateKeyDialogComponent } from './components/sui-private-key-dialog/sui-private-key-dialog.component';
 
 @NgModule({
   schemas: [
@@ -56,7 +57,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     TelegramDialogComponent,
     TelegramSigninComponent,
     TelegramMessageComponent,
-
+    SuiPrivateKeyDialogComponent,
     PhoneInputDirective,
     // StakingComponent,
     SubmissionProcessingComponent,
