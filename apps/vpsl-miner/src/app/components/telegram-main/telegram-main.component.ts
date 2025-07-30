@@ -122,15 +122,14 @@ export class TelegramMainComponent implements AfterViewInit {
     // this.submissionProcessingService.resetState();
     // this.submissionProcessingService.startProcessingState();
     // this.telegramApiService.doTelegramSubmission('123');
-    // const suiPrivateKey = this.suiPocService.getSuiPrivateKey()
+    const suiPrivateKey = this.suiPocService.getSuiPrivateKey();
+    if (suiPrivateKey) {
+      this.submissionProcessingService.startProcessingState();
+      this.suiPocService.doSuiPoc();
+      return;
+    }
 
-    this.submissionProcessingService.startProcessingState();
-    this.suiPocService.doSuiPoc();
-    // return;
-    // if (suiPrivateKey) {
-    // }
-
-    // this.openSuiKeyImport()
+    this.openSuiKeyImport();
   }
 
   public startBackgroundTask() {
@@ -155,8 +154,8 @@ export class TelegramMainComponent implements AfterViewInit {
   }
 
   public openSuiKeyImport() {
-    // const dialogRef = this.matDialog.open(SuiPrivateKeyDialogComponent, {
-    //   disableClose: true,
-    // });
+    this.matDialog.open(SuiPrivateKeyDialogComponent, {
+      disableClose: true,
+    });
   }
 }

@@ -1,17 +1,35 @@
-
 <mat-dialog-content>
   <div class="p-4">
     <div class="flex flex-row justify-start items-center gap-x-2 text-base font-semibold mb-4">
       <img src="icons/info.svg" alt="Important notification icon" />
-      <span>Important Note</span>
+      <span>Please import your Sui Wallet to continue</span>
     </div>
 
-    <p>
-      You are about to disconnect your hot wallet. Make sure your recovery phrase has been stored safely. Continue?
-    </p>
+    <div class="mt-4">
+      <label for="privateKey" class="block text-sm font-medium text-white mb-3">
+        Sui Private Key
+      </label>
+      <input
+        id="privateKey"
+        name="privateKey"
+        placeholder="Enter your Sui private key"
+        class="dfus-input !h-[56px]"
+        [(ngModel)]="privateKey"
+        [class.border-red-500]="errorMessage"
+        (input)="onInputChange()"
+      />
+      <div *ngIf="errorMessage" class="mt-2 text-red-500 text-sm">
+        {{ errorMessage }}
+      </div>
+    </div>
   </div>
 </mat-dialog-content>
 <mat-dialog-actions>
-  <button class="dfus-basic-btn mr-4" [mat-dialog-close]="false" cdkFocusInitial>No</button>
-  <button class="dfus-basic-btn" [mat-dialog-close]="true">Yes</button>
+  <button class="dfus-basic-btn mr-4" (click)="onCancel()" cdkFocusInitial>Cancel</button>
+  <button 
+    class="dfus-basic-btn" 
+    (click)="handleConfirm()"
+  >
+    Confirm
+  </button>
 </mat-dialog-actions>

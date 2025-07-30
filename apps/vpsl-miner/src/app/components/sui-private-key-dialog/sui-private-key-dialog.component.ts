@@ -1,48 +1,72 @@
-import { Component, Inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatFormFieldModule } from '@angular/material/form-field';
+import { Component } from '@angular/core';
+import { MatDialogRef } from '@angular/material/dialog';
 import { SuiPocService } from '../../services/sui-poc.service';
-
-export interface SuiPrivateKeyDialogData {
-  title?: string;
-  message?: string;
-  confirmText?: string;
-  cancelText?: string;
-}
 
 @Component({
   selector: 'app-sui-private-key-dialog',
+  standalone: false,
   templateUrl: './sui-private-key-dialog.component.html',
   styleUrls: ['./sui-private-key-dialog.component.scss'],
-  standalone: true,
-  imports: [CommonModule, FormsModule, MatDialogModule, MatButtonModule, MatIconModule, MatInputModule, MatFormFieldModule],
 })
 export class SuiPrivateKeyDialogComponent {
   public privateKey: string = '';
+  public errorMessage: string = '';
 
-  constructor(
-    private suiPocService: SuiPocService,
-    public dialogRef: MatDialogRef<SuiPrivateKeyDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: SuiPrivateKeyDialogData,
-  ) {}
+  constructor(private dialogRef: MatDialogRef<SuiPrivateKeyDialogComponent>, private suiPocService: SuiPocService) {}
 
-  onConfirm(): void {
-    if (this.privateKey.trim()) {
-      this.dialogRef.close();
+  //on confirm
+  public onConfirm(): boolean {
+    this.errorMessage = '';
+
+    // Check if private key is empty
+    if (!this.privateKey || this.privateKey.trim() === '') {
+      this.errorMessage = 'Private key is required';
+      return false;
+    }
+
+    // Basic validation for Sui private key format
+    // Sui private keys start with "suiprivkey" followed by alphanumeric characters
+    const trimmedKey = this.privateKey.trim();
+
+    // Check if it starts with "suiprivkey"
+    if (!trimmedKey.startsWith('suiprivkey')) {
+      this.errorMessage = 'Private key must start with "suiprivkey"';
+      return false;
+    }
+
+    // Check if it contains only valid characters (alphanumeric)
+    if (!/^[a-zA-Z0-9]+$/.test(trimmedKey)) {
+      this.errorMessage = 'Private key must contain only alphanumeric characters';
+      return false;
+    }
+
+    // Check minimum length (suiprivkey + some characters)
+    if (trimmedKey.length < 20) {
+      this.errorMessage = 'Private key appears to be too short';
+      return false;
+    }
+
+    return true;
+  }
+
+  public onCancel(): void {
+    this.privateKey = '';
+    this.errorMessage = '';
+    this.dialogRef.close(false);
+  }
+
+  public handleConfirm(): void {
+    if (this.onConfirm()) {
       this.suiPocService.setSuiPrivateKey(this.privateKey.trim());
+      this.dialogRef.close(true);
     }
   }
 
-  onCancel(): void {
-    this.dialogRef.close(null);
+  public onInputChange(): void {
+    // Clear error message when user starts typing
+    if (this.errorMessage) {
+      this.errorMessage = '';
+    }
   }
+}
 
-  isFormValid(): boolean {
-    return this.privateKey.trim().length > 0;
-  }
-} 
