@@ -19,7 +19,6 @@ export interface IAiAgent {
 }
 
 export interface ISuiPoc {
-  secretKey: string;
   dlpWalletAddress: string;
   packageId: string;
   nautilusUrl: string;

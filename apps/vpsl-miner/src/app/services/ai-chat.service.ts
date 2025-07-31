@@ -48,7 +48,9 @@ export class AiChatService {
         return;
       }
 
-      this.selectConversation(conversations[0].id);
+      if(!this.isStreaming()) {
+        this.selectConversation(conversations[0].id);
+      }
     } catch (error) {
       console.error('Failed to load conversations from API:', error);
     } finally {
