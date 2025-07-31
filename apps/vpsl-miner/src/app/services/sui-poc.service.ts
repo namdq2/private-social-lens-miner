@@ -13,6 +13,8 @@ import { HttpClient } from '@angular/common/http';
 import { AppConfigService } from './app-config.service';
 import { SubmissionProcessingService } from './submission-processing.service';
 import { ISuiPoc, IWalrus } from '../models/app-config';
+import { timeout, catchError, throwError } from 'rxjs';
+import { TIMEOUT_MS } from '../shared/constants';
 
 @Injectable({
   providedIn: 'root',
@@ -86,7 +88,6 @@ export class SuiPocService {
           showEffects: true,
         },
       });
-      console.log('🚀 ~ SuiPocService ~ createPolicy ~ result:', result);
 
       const policyObjId = result?.effects?.created?.[0]?.reference?.objectId || '';
 
@@ -159,12 +160,25 @@ export class SuiPocService {
       this.submissionProcessingService.displayInfo('Processing data');
       const processParams = {
         payload: {
-          timeout_secs: 120,
+          timeout_secs: 300,
           args: [blobId, onChainFileObjId, policyObjectId, String(threshold)],
         },
       };
 
-      const response = await this.httpClient.post<IProcessDataRes>(`${this.pocConfig?.nautilusUrl}/process_data`, processParams).toPromise();
+      const response = await this.httpClient
+        .post<IProcessDataRes>(`${this.pocConfig?.nautilusUrl}/process_data`, processParams)
+        .pipe(
+          timeout(TIMEOUT_MS.THREE_MINUTES),
+          catchError((error) => {
+            if (error.name === 'TimeoutError') {
+              console.error('Request timed out after 45 seconds');
+              this.submissionProcessingService.displayError('Request timed out. Please try again.');
+              return throwError(() => new Error('Request timed out. Please try again.'));
+            }
+            return throwError(() => error);
+          }),
+        )
+        .toPromise();
 
       if (!response) {
         throw new Error('No response received from Nautilus');
@@ -231,9 +245,6 @@ export class SuiPocService {
     const encryptedObject = EncryptedObject.parse(encryptedData);
     const onChainFileObjId = await this.saveEncryptedFileOnchain(encryptedObject.id, policyObjId, metadata);
 
-    console.log('🚀 ~ Encrypted data:', { blobId, onChainFileObjId, policyObjId, walrusUrl: walrusUploadRes });
-
-    console.log('🚀 ~ SuiPocService ~ doSuiPoc ~ blobId, onChainFileObjId, policyObjId:', blobId, onChainFileObjId, policyObjId);
     const processDataRes = await this.processDataWithNautilus(blobId, onChainFileObjId, policyObjId, this.pocConfig?.threshold || 2);
     console.log('🚀 ~ Nautilus Processed data:', processDataRes?.data);
   }

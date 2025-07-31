@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError, BehaviorSubject, firstValueFrom } from 'rxjs';
-import { catchError, filter, take } from 'rxjs/operators';
+import { catchError, filter, take, timeout } from 'rxjs/operators';
 import { AppConfigService } from './app-config.service';
 import { ElectronIpcService } from './electron-ipc.service';
+import { TIMEOUT_MS } from '../shared/constants';
 
 @Injectable({
   providedIn: 'root',
@@ -227,6 +228,7 @@ export class HttpService {
     const requestOptions = { ...options, headers };
 
     return this.http.request<T>(method, `${this.apiUrl}/${endpoint}`, { ...requestOptions, body }).pipe(
+      timeout(TIMEOUT_MS.THREE_MINUTES),
       catchError((error: HttpErrorResponse) => {
         if (error.status === 401 && !this.refreshTokenInProgress) {
           return this.handle401Error<T>(method, endpoint, body, requestOptions);

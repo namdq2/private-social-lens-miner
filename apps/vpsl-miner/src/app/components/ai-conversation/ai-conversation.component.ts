@@ -1,5 +1,7 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { IConversation } from '../../models/ai-chat';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-ai-conversation',
@@ -8,6 +10,8 @@ import { IConversation } from '../../models/ai-chat';
   styleUrl: './ai-conversation.component.scss',
 })
 export class AiConversationComponent {
+  private readonly matDialog: MatDialog = inject(MatDialog);
+
   @Input() conversation!: IConversation;
   @Input() isSelected: boolean = false;
   @Input() disabled: boolean = false;
@@ -22,9 +26,26 @@ export class AiConversationComponent {
     }
   }
 
-  public onDelete(event: Event): void {
-    event.stopPropagation();
-    this.conversationDeleted.emit(this.conversation.id);
+  public openConfirmDialog() {
+    this.matDialog
+      .open(ConfirmDialogComponent, {
+        data: {
+          title: 'Delete conversation',
+          message: 'Are you sure you want to delete this conversation?',
+          confirmText: 'Delete',
+          confirmButtonClass: 'dfus-orange-btn',
+          icon: 'warning',
+          disabledConfirm: this.disabled,
+        },
+        width: '400px',
+        disableClose: true,
+      })
+      .afterClosed()
+      .subscribe((result: boolean) => {
+        if (result) {
+          this.conversationDeleted.emit(this.conversation.id);
+        }
+      });
   }
 
   public getLastMessagePreview(): string {

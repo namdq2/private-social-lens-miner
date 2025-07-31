@@ -156,6 +156,7 @@ export class TelegramMainComponent implements AfterViewInit {
   public openSuiKeyImport() {
     this.matDialog.open(SuiPrivateKeyDialogComponent, {
       disableClose: true,
+      width: '600px'
     });
   }
 }

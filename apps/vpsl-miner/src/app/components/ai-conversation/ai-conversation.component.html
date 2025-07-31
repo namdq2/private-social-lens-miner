@@ -34,7 +34,7 @@
       [class.cursor-pointer]="!disabled && !isDeleting"
       [class.cursor-not-allowed]="disabled || isDeleting"
       [class.hover:bg-red-600]="!disabled && !isDeleting"
-      (click)="!disabled && !isDeleting && onDelete($event)"
+      (click)="!disabled && !isDeleting && openConfirmDialog()"
       [attr.aria-label]="'Delete conversation: ' + conversation.title"
       [disabled]="disabled || isDeleting"
     >
