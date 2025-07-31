@@ -4,6 +4,8 @@ import { ElectronIpcService } from '../../services/electron-ipc.service';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { isElectron } from '../../shared/helpers';
+import { HttpService } from '../../services/http.service';
+import { AiChatService } from '../../services/ai-chat.service';
 
 declare const window: any;
 
@@ -15,6 +17,8 @@ declare const window: any;
 })
 export class MinerSettingsComponent {
   private readonly telegramApiService: TelegramApiService = inject(TelegramApiService);
+  private readonly httpService: HttpService = inject(HttpService);
+  private readonly aiChatService: AiChatService = inject(AiChatService);
   private readonly electronIpcService: ElectronIpcService = inject(ElectronIpcService);
   private readonly snackBar: MatSnackBar = inject(MatSnackBar);
 
@@ -40,8 +44,8 @@ export class MinerSettingsComponent {
             `Your dFusion DLP Miner is running the newest version.`,
             `OK`,
             { duration: 1000 * 5 }
-          );
-        }
+          );      
+          }
 
         const checkForUpdate = await window.electron.getCheckForUpdate();
         this.checkForUpdate.set(checkForUpdate);
@@ -60,23 +64,30 @@ export class MinerSettingsComponent {
 
   public async signOut() {
     if (this.isTelegramAuthorized) {
-      await this.telegramApiService.logOut().then(() => {
-        this.electronIpcService.stopBackgroundTask();
-        // clear session - race condition using electron-store instead of localStorage in telegramApiService
-        this.electronIpcService.setTelegramSession('');
+      await this.telegramApiService
+        .logOut()
+        .then(() => {
+          this.electronIpcService.stopBackgroundTask();
+          // clear session - race condition using electron-store instead of localStorage in telegramApiService
+          this.electronIpcService.setTelegramSession('');
+          // log out of ai agent
+          this.httpService.logoutAiAgent();
+          // reset all chat info
+          this.aiChatService.resetAllChatInfo();
 
-        this.snackBar.open(
+          this.snackBar.open(
           `You've successfully signed out.`,
           ``,
           { duration: 1000 * 3 }
         );
-      }).catch(() => {
-        this.snackBar.open(
-          `Failed to sign out of Telegram. Try again.`,
-          `Close`,
-          { duration: 1000 * 5 }
-        );
-      });
+        })
+        .catch(() => {
+          this.snackBar.open(
+            `Failed to sign out of Telegram. Try again.`,
+            `Close`,
+            { duration: 1000 * 5 }
+          );     
+        });
     }
   }
 

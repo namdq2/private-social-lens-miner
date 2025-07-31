@@ -31,10 +31,6 @@ export class AiChatService {
   public readonly isCreateConversationLoading = computed(() => this.isCreateNewLoading());
   public readonly deletedConversationId = computed(() => this.deletedConversation());
 
-  constructor() {
-    this.loadConversationsFromApi();
-  }
-
   public async loadConversationsFromApi(): Promise<void> {
     try {
       this.isConversationLoading.set(true);
@@ -56,6 +52,18 @@ export class AiChatService {
     } finally {
       this.isConversationLoading.set(false);
     }
+  }
+
+  public resetAllChatInfo() {
+    this.conversations.set([]);
+    this.messages.set([]);
+    this.activeConversationId.set(null);
+    this.isStreaming.set(false);
+    this.streamingMessage.set('');
+    this.streamingError.set(null);
+    this.isConversationLoading.set(false);
+    this.isMessagesLoading.set(false);
+    this.isCreateNewLoading.set(false);
   }
 
   public async createNewConversation(): Promise<void> {

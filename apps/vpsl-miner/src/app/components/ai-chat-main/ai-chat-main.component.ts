@@ -1,5 +1,9 @@
 import { Component, ElementRef, ViewChild, AfterViewChecked, inject, effect } from '@angular/core';
 import { AiChatService } from '../../services/ai-chat.service';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
+import { Router } from '@angular/router';
+import { TelegramApiService } from '../../services/telegram-api.service';
 
 @Component({
   selector: 'app-ai-chat-main',
@@ -11,6 +15,9 @@ export class AiChatMainComponent implements AfterViewChecked {
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
 
   private readonly aiChatService = inject(AiChatService);
+  private readonly telegramApiService: TelegramApiService = inject(TelegramApiService);
+  private readonly matDialog: MatDialog = inject(MatDialog);
+  private readonly router: Router = inject(Router);
   public newMessageText = '';
   private shouldScrollToBottom = false;
 
@@ -27,6 +34,8 @@ export class AiChatMainComponent implements AfterViewChecked {
 
   constructor() {
     // Auto-scroll to bottom when messages change or streaming occurs
+    this.aiChatService.loadConversationsFromApi();
+
     effect(() => {
       const messages = this.messages();
       const isStreaming = this.isStreaming();
@@ -57,6 +66,13 @@ export class AiChatMainComponent implements AfterViewChecked {
   }
 
   public createNewConversation(): void {
+    const isTelegramAuthorized = this.telegramApiService.isAuthorized;
+
+    if (!isTelegramAuthorized) {
+      this.openLoginNotification();
+      return;
+    }
+
     this.aiChatService.createNewConversation();
     this.shouldScrollToBottom = true;
   }
@@ -124,5 +140,25 @@ export class AiChatMainComponent implements AfterViewChecked {
 
   public getWelcomeMessage(): string {
     return "Hello! I'm your AI assistant. I'm here to help you with questions about the dFusion DLP miner, blockchain technology, and anything else you'd like to know. How can I assist you today?";
+  }
+
+  public openLoginNotification() {
+    this.matDialog
+      .open(ConfirmDialogComponent, {
+        data: {
+          title: 'Login to AI Assistant',
+          message: 'Please login to the AI Assistant with Telegram to continue.',
+          confirmText: 'Login',
+          confirmButtonClass: 'dfus-blue-btn',
+          icon: 'login',
+        },
+      })
+      .afterClosed()
+      .subscribe((result) => {
+        if (result) {
+          //go to miner path
+          this.router.navigate(['/app/miner']);
+        }
+      });
   }
 }

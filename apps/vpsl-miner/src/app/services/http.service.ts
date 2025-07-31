@@ -58,7 +58,7 @@ export class HttpService {
   ): Observable<void> {
     return new Observable<void>((observer) => {
       const url = `${this.apiUrl}/${endpoint}`;
-      const token = this.getAccessToken();
+      const token = this.getAiAccessToken();
 
       // Use fetch instead of EventSource to support custom headers
       const headers: Record<string, string> = {
@@ -168,7 +168,7 @@ export class HttpService {
     this.refreshTokenInProgress = true;
     this.refreshTokenSubject.next(null);
 
-    this.refreshAccessToken()
+    this.refreshAiAccessToken()
       .then((newToken: string) => {
         this.refreshTokenInProgress = false;
         this.refreshTokenSubject.next(newToken);
@@ -187,7 +187,7 @@ export class HttpService {
       .catch((err: any) => {
         this.refreshTokenInProgress = false;
         this.refreshTokenSubject.next(null);
-        this.logout();
+        this.logoutAiAgent();
 
         // Reject all queued requests
         this.rejectQueuedRequests(err);
@@ -240,7 +240,7 @@ export class HttpService {
 
   // Set Authorization header with token
   private setAuthHeaders(headers: HttpHeaders = new HttpHeaders()): HttpHeaders {
-    const token = this.getAccessToken();
+    const token = this.getAiAccessToken();
     if (token) {
       return headers.set('Authorization', `Bearer ${token}`);
     }
@@ -267,7 +267,7 @@ export class HttpService {
     this.refreshTokenSubject.next(null);
 
     return new Observable<T>((observer) => {
-      this.refreshAccessToken()
+      this.refreshAiAccessToken()
         .then((newToken: string) => {
           this.refreshTokenInProgress = false;
           this.refreshTokenSubject.next(newToken);
@@ -284,7 +284,7 @@ export class HttpService {
         .catch((err: any) => {
           this.refreshTokenInProgress = false;
           this.refreshTokenSubject.next(null);
-          this.logout();
+          this.logoutAiAgent();
 
           // Reject all queued requests
           this.rejectQueuedRequests(err);
@@ -295,18 +295,25 @@ export class HttpService {
   }
 
   // Refresh access token
-  private async refreshAccessToken(): Promise<string> {
-    const refreshToken = this.getRefreshToken();
+  private async refreshAiAccessToken(): Promise<string> {
+    const refreshToken = this.getAiRefreshToken();
     if (!refreshToken) {
-      this.logout();
+      this.logoutAiAgent();
       throw new Error('No refresh token available');
     }
 
     try {
-      const response = await firstValueFrom(this.http.post<{ accessToken: string }>(`${this.apiUrl}/auth/refresh`, { refreshToken }));
+      const response = await firstValueFrom(
+        this.http.post<{ token: string; refreshToken: string }>(`${this.apiUrl}/auth/refresh`, null, {
+          headers: {
+            Authorization: `Bearer ${refreshToken}`,
+          },
+        }),
+      );
 
-      this.setAccessToken(response.accessToken);
-      return response.accessToken;
+      this.setAiAccessToken(response.token);
+      this.setAiRefreshToken(response.refreshToken);
+      return response.token;
     } catch (error) {
       console.error('Token refresh failed:', error);
       throw error;
@@ -314,19 +321,24 @@ export class HttpService {
   }
 
   // Token storage methods (using localStorage as example)
-  private getAccessToken(): string | null {
+  private getAiAccessToken(): string | null {
     return this.electronIpcService.aiAgentAccessToken();
   }
 
-  private setAccessToken(token: string): void {
+  private setAiAccessToken(token: string): void {
     this.electronIpcService.setAiAgentAccessToken(token);
   }
 
-  private getRefreshToken(): string | null {
+  private getAiRefreshToken(): string | null {
     return this.electronIpcService.aiAgentRefreshToken();
   }
+
+  private setAiRefreshToken(token: string): void {
+    this.electronIpcService.setAiAgentRefreshToken(token);
+  }
+
   // Logout method
-  logout(): void {
+  logoutAiAgent(): void {
     this.electronIpcService.setAiAgentAccessToken('');
     this.electronIpcService.setAiAgentRefreshToken('');
   }
