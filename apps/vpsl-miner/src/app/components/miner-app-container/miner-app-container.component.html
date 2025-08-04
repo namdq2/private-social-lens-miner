@@ -25,11 +25,10 @@
         </li>
 
         <li>
-          <a routerLink="/app/ai-chat" routerLinkActive="text-[#5B92FD]"
-            class="flex items-center p-2 rounded-lg hover:bg-gray-700 group">
+          <button (click)="checkChatPermission()" class="w-full flex justify-start p-2 rounded-lg hover:bg-gray-700">
             <mat-icon>smart_toy</mat-icon>
-            <span class="flex-1 ms-3 whitespace-nowrap">AI Assistant</span>
-          </a>
+            <span class="ms-3 whitespace-nowrap">AI Assistant</span>
+          </button>
         </li>
       </ul>
 
