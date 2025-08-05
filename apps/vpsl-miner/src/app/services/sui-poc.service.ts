@@ -1,4 +1,4 @@
-import { inject, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import { TelegramApiService } from './telegram-api.service';
 import { fileDto, IFileMetadata, IProcessDataRes } from '../models/social-truth';
 import * as bech32 from 'bech32';
@@ -27,7 +27,9 @@ export class SuiPocService {
   private sealClient: SealClient;
   private pocConfig: ISuiPoc | null;
   private walrusConfig: IWalrus | null;
-  private suiAddress: string = '';
+  private suiAddress = signal<string>('');
+
+  public suiPublicKey = computed(() => this.suiAddress());
 
   constructor(
     private readonly telegramApiService: TelegramApiService,
@@ -62,7 +64,7 @@ export class SuiPocService {
     // Remove the first byte (flag), use only the last 32 bytes
     const rawSecretKey = Buffer.from(privateKeyBytes).slice(1);
     this.keypair = Ed25519Keypair.fromSecretKey(rawSecretKey);
-    this.suiAddress = this.keypair.getPublicKey().toSuiAddress();
+    this.suiAddress.set(this.keypair.getPublicKey().toSuiAddress());
   }
 
   public async createPolicy(): Promise<string> {
@@ -77,7 +79,7 @@ export class SuiPocService {
 
       tx.moveCall({
         target: `${this.pocConfig?.packageId}::seal_manager::create_access_policy`,
-        arguments: [tx.pure.vector('address', [this.suiAddress || '', this.pocConfig?.dlpWalletAddress || ''])],
+        arguments: [tx.pure.vector('address', [this.suiAddress() || '', this.pocConfig?.dlpWalletAddress || ''])],
       });
 
       const result = await this.suiClient.signAndExecuteTransaction({

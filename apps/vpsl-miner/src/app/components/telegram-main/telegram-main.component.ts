@@ -25,6 +25,7 @@ export class TelegramMainComponent implements AfterViewInit {
   private readonly snackBar: MatSnackBar = inject(MatSnackBar);
   private readonly matDialog: MatDialog = inject(MatDialog);
   private readonly suiPocService: SuiPocService = inject(SuiPocService);
+  public suiAddress = this.suiPocService.suiPublicKey;
 
   public isBackgroundTaskEnabled: WritableSignal<boolean>;
   public lastSubmissionTime: WritableSignal<Date | null>;
@@ -156,7 +157,7 @@ export class TelegramMainComponent implements AfterViewInit {
   public openSuiKeyImport() {
     this.matDialog.open(SuiPrivateKeyDialogComponent, {
       disableClose: true,
-      width: '600px'
+      width: '600px',
     });
   }
 }

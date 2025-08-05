@@ -1,8 +1,8 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { v4 as uuidv4 } from 'uuid';
-import { IChatStreamParams, AiModelOptions, AiProviderOptions, IConversation, IMessage, IMessagesDataRes, IConversationsData } from '../models/ai-chat';
-import { HttpService } from './http.service';
 import { firstValueFrom } from 'rxjs';
+import { v4 as uuidv4 } from 'uuid';
+import { IChatStreamParams, IConversation, IConversationsData, IMessage, IMessagesDataRes, ITokenGatingConfig } from '../models/ai-chat';
+import { HttpService } from './http.service';
 
 @Injectable({
   providedIn: 'root',
@@ -44,7 +44,7 @@ export class AiChatService {
         return;
       }
 
-      if(!this.isStreaming()) {
+      if (!this.isStreaming()) {
         this.selectConversation(conversations[0].id);
       }
     } catch (error) {
@@ -226,5 +226,14 @@ export class AiChatService {
   private clearStreamingState(): void {
     this.isStreaming.set(false);
     this.streamingMessage.set('');
+  }
+
+  public async getTokenGatingConfig() {
+    const response = await firstValueFrom(this.httpService.get<ITokenGatingConfig>('token-gating-configs/latest'));
+    
+    return {
+      stakeThreshold: Number(response.stakeThreshold || 0),
+      balanceThreshold: Number(response.balanceThreshold || 0)
+    };
   }
 }

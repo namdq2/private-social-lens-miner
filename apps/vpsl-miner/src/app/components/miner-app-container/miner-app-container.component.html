@@ -25,7 +25,7 @@
         </li>
 
         <li>
-          <button (click)="checkChatPermission()" class="w-full flex justify-start p-2 rounded-lg hover:bg-gray-700">
+          <button (click)="checkChatPermission()" class="w-full flex justify-start p-2 rounded-lg hover:bg-gray-700" [class.text-[#5B92FD]]="isAiChat">
             <mat-icon>smart_toy</mat-icon>
             <span class="ms-3 whitespace-nowrap">AI Assistant</span>
           </button>

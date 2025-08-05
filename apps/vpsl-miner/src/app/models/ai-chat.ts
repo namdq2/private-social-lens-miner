@@ -136,3 +136,11 @@ export interface ITelegramUserStatus {
   name: string;
   __entity: string;
 }
+
+export interface ITokenGatingConfig {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  stakeThreshold: string;
+  balanceThreshold: string;
+}
