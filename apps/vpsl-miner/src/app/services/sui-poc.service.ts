@@ -10,6 +10,7 @@ import { EncryptedObject, SealClient } from '@mysten/seal';
 import { getAllowlistedKeyServers } from '@mysten/seal';
 import { WalrusService } from './walrus.service';
 import { HttpClient } from '@angular/common/http';
+import { HttpService } from './http.service';
 import { AppConfigService } from './app-config.service';
 import { SubmissionProcessingService } from './submission-processing.service';
 import { ISuiPoc, IWalrus } from '../models/app-config';
@@ -21,6 +22,7 @@ import { TIMEOUT_MS } from '../shared/constants';
 })
 export class SuiPocService {
   private readonly httpClient: HttpClient = inject(HttpClient);
+  private readonly httpService: HttpService = inject(HttpService);
   private keypair: Ed25519Keypair | null = null;
   private suiPrivateKey = signal<string>('');
   private suiClient: SuiClient;
@@ -202,6 +204,54 @@ export class SuiPocService {
     }
   }
 
+  public async processDataWithWorker(blobId: string, onChainFileObjId: string, policyObjectId: string, threshold: number) {
+    try {
+      this.submissionProcessingService.displayInfo('Processing data');
+      const processParams = {
+        blobId: blobId,
+        onchainFileId: onChainFileObjId,
+        policyId: policyObjectId,
+        jobType: 'both',
+        priority: 5
+      };
+
+      const response = await this.httpService
+        .post<IProcessDataRes>('jobs/data-processing', processParams)
+        .pipe(
+          timeout(TIMEOUT_MS.THREE_MINUTES),
+          catchError((error) => {
+            if (error.name === 'TimeoutError') {
+              console.error('Request timed out after 3 minutes');
+              this.submissionProcessingService.displayError('Request timed out. Please try again.');
+              return throwError(() => new Error('Request timed out. Please try again.'));
+            }
+            return throwError(() => error);
+          }),
+        )
+        .toPromise();
+
+      if (!response) {
+        throw new Error('No response received from worker');
+      }
+
+      this.submissionProcessingService.displaySuccess('Your file has been submitted for processing. It’ll be ready in a few minutes!');
+      this.submissionProcessingService.setProcessedData({
+        walrusUrl: `${this.walrusConfig?.aggregatorUrl}/blobs/${blobId}`,
+        unprocessedWalrusUrl: `${this.walrusConfig?.aggregatorUrl}/blobs/${blobId}`,
+        unprocessedOnChainFileUrl: `${this.pocConfig?.suiScanUrl}/${onChainFileObjId}`,
+        attestationUrl: `${this.pocConfig?.suiScanUrl}/${onChainFileObjId}`,
+        onChainFileUrl: `${this.pocConfig?.suiScanUrl}/${onChainFileObjId}`,
+        policyObjectUrl: `${this.pocConfig?.suiScanUrl}/${policyObjectId}`,
+      });
+
+      return response;
+    } catch (err) {
+      this.submissionProcessingService.displayError('Oops! We couldn’t start processing your file. Please try again.');
+      console.error('Failed to process data with worker', err);
+      throw new Error('Failed to process data with worker. Please try again.');
+    }
+  }
+
   public async encryptData(policyObjId: string, teleChat: string) {
     try {
       this.submissionProcessingService.displayInfo('Encrypting data');
@@ -245,7 +295,7 @@ export class SuiPocService {
     const encryptedObject = EncryptedObject.parse(encryptedData);
     const onChainFileObjId = await this.saveEncryptedFileOnchain(encryptedObject.id, policyObjId, metadata);
 
-    const processDataRes = await this.processDataWithNautilus(blobId, onChainFileObjId, policyObjId, this.pocConfig?.threshold || 2);
+    const processDataRes = await this.processDataWithWorker(blobId, onChainFileObjId, policyObjId, this.pocConfig?.threshold || 2);
     console.log('🚀 ~ Nautilus Processed data:', processDataRes?.data);
   }
 
@@ -254,6 +304,6 @@ export class SuiPocService {
   }
 
   public getSuiPrivateKey(): string {
-    return this.suiPrivateKey();
+    return this.suiPrivateKey();  
   }
 }
