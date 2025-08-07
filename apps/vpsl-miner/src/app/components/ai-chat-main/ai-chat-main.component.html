@@ -2,7 +2,7 @@
   <!-- Header -->
   <div class="flex flex-row justify-between items-center">
     <div class="flex flex-row justify-start items-center gap-x-4">
-      <h3 class="text-xl font-semibold text-white">AI Assistant</h3>
+      <h3 class="text-xl font-semibold text-white">Private Lens AI</h3>
       <button
         class="dfus-blue-btn flex items-center"
         (click)="createNewConversation()"
@@ -18,8 +18,7 @@
       </button>
     </div>
     <div class="flex items-center text-sm text-gray-400">
-      <mat-icon class="mr-1 text-lg !flex items-center">info</mat-icon>
-      <span>AI Assistant powered by dFusion</span>
+      <span>Latest completed at: {{ latestCompletedAt() }}</span>
     </div>
   </div>
 
@@ -63,7 +62,7 @@
           <div class="w-16 h-16 rounded-full bg-[#4488f6] flex items-center justify-center mb-4">
             <mat-icon class="text-white text-2xl !flex items-center justify-center">smart_toy</mat-icon>
           </div>
-          <h4 class="text-lg font-medium text-white mb-2">Welcome to AI Assistant</h4>
+          <h4 class="text-lg font-medium text-white mb-2">Welcome to Private Lens AI</h4>
           <p class="text-gray-400 max-w-md">{{ getWelcomeMessage() }}</p>
         </div>
         } @else { @for (message of messages(); track message.id) {
@@ -120,7 +119,7 @@
           <mat-icon class="text-gray-400 text-2xl !flex items-center justify-center">chat</mat-icon>
         </div>
         <h4 class="text-xl font-medium text-white mb-2">Start a conversation</h4>
-        <p class="text-gray-400 mb-6 max-w-md">Select an existing conversation or create a new one to start chatting with the AI assistant.</p>
+        <p class="text-gray-400 mb-6 max-w-md">Select an existing conversation or create a new one to start chatting with the Private Lens AI.</p>
         <button
           class="dfus-blue-btn flex items-center"
           (click)="createNewConversation()"

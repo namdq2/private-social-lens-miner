@@ -27,7 +27,7 @@
       </div>
 
       <!-- AI Timestamp -->
-      <div class="text-xs text-gray-400 mt-1 px-1 text-left">{{ formatDate(message.createdAt) }} at {{ formatTime(message.createdAt) }}</div>
+      <div class="text-xs text-gray-400 mt-1 px-1 text-left">{{ formatDayTime(message.createdAt) }}</div>
     </div>
   </div>
   } @else {
@@ -40,7 +40,7 @@
       </div>
 
       <!-- User Timestamp -->
-      <div class="text-xs text-gray-400 mt-1 px-1 text-right">{{ formatDate(message.createdAt) }} at {{ formatTime(message.createdAt) }}</div>
+      <div class="text-xs text-gray-400 mt-1 px-1 text-right">{{ formatDayTime(message.createdAt) }}</div>
     </div>
 
     <!-- User Avatar -->

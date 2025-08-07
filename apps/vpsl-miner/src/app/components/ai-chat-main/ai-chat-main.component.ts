@@ -1,5 +1,6 @@
-import { Component, ElementRef, ViewChild, AfterViewChecked, inject, effect } from '@angular/core';
+import { Component, ElementRef, ViewChild, AfterViewChecked, inject, effect, signal } from '@angular/core';
 import { AiChatService } from '../../services/ai-chat.service';
+import { formatDate, formatTime } from '../../shared/helpers';
 
 @Component({
   selector: 'app-ai-chat-main',
@@ -22,12 +23,20 @@ export class AiChatMainComponent implements AfterViewChecked {
   public readonly streamingFailed = this.aiChatService.streamingFailed;
   public readonly isChatLoading = this.aiChatService.isChatLoading;
   public readonly isCreateConversationLoading = this.aiChatService.isCreateConversationLoading;
+  public latestCompletedAt = signal<string | null>(null);
   public deletedConversationId = this.aiChatService.deletedConversationId;
   public isSidebarCollapsed = false;
 
   constructor() {
     // Auto-scroll to bottom when messages change or streaming occurs
     this.aiChatService.loadConversationsFromApi();
+    this.aiChatService.getLatestCompletedJob().then((latestCompletedAt) => {
+      if (!latestCompletedAt) {
+        this.latestCompletedAt.set('Nothing is completed yet')
+        return;
+      }
+      this.latestCompletedAt.set(this.formatDayTime(latestCompletedAt));
+    });
 
     effect(() => {
       const messages = this.messages();
@@ -59,7 +68,6 @@ export class AiChatMainComponent implements AfterViewChecked {
   }
 
   public createNewConversation(): void {
-
     this.aiChatService.createNewConversation();
     this.shouldScrollToBottom = true;
   }
@@ -126,6 +134,10 @@ export class AiChatMainComponent implements AfterViewChecked {
   }
 
   public getWelcomeMessage(): string {
-    return "Hello! I'm your AI assistant. I'm here to help you with questions about the dFusion DLP miner, blockchain technology, and anything else you'd like to know. How can I assist you today?";
+    return "Hello! I'm your Private Lens AI. I'm here to help you with questions about the dFusion DLP miner, blockchain technology, and anything else you'd like to know. How can I assist you today?";
+  }
+
+  public formatDayTime(date: Date | string): string {
+    return `${formatDate(date)} at ${formatTime(date)}`;
   }
 }
