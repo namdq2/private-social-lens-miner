@@ -5,31 +5,28 @@
         <a href="https://www.dfusion.ai/socialtruthdlp/" target="_blank" class="flex items-center">
           <img src="img/logo.svg" class="h-6 sm:h-7" alt="dFusion logo" />
         </a>
-        <span class="ml-2 text-xs text-[#ffffff]">v{{appVersion}}</span>
+        <span class="ml-2 text-xs text-[#ffffff]">v{{ appVersion }}</span>
       </div>
       <ul class="space-y-2 font-medium">
         <li>
-          <a routerLink="/app/miner" routerLinkActive="text-[#5B92FD]"
-            class="flex items-center p-2 rounded-lg hover:bg-gray-700 group">
+          <a routerLink="/app/miner" routerLinkActive="text-[#5B92FD]" class="flex items-center p-2 rounded-lg hover:bg-gray-700 group">
             <mat-icon>dashboard_2</mat-icon>
             <span class="flex-1 ms-3 whitespace-nowrap">dFusion Social Truth</span>
           </a>
         </li>
 
         <li>
-          <a routerLink="/app/staking-rewards" routerLinkActive="text-[#5B92FD]"
-            class="flex items-center p-2 rounded-lg hover:bg-gray-700 group">
+          <a routerLink="/app/staking-rewards" routerLinkActive="text-[#5B92FD]" class="flex items-center p-2 rounded-lg hover:bg-gray-700 group">
             <mat-icon>info</mat-icon>
             <span class="flex-1 ms-3 whitespace-nowrap">Staking rewards</span>
           </a>
         </li>
 
         <li>
-          <a routerLink="/app/ai-chat" routerLinkActive="text-[#5B92FD]"
-            class="flex items-center p-2 rounded-lg hover:bg-gray-700 group">
+          <button (click)="checkChatPermission()" class="w-full flex justify-start p-2 rounded-lg hover:bg-gray-700" [class.text-[#5B92FD]]="isAiChat">
             <mat-icon>smart_toy</mat-icon>
-            <span class="flex-1 ms-3 whitespace-nowrap">AI Assistant</span>
-          </a>
+            <span class="ms-3 whitespace-nowrap">Private Lens AI</span>
+          </button>
         </li>
       </ul>
 
@@ -37,8 +34,7 @@
 
       <ul class="space-y-2 font-medium">
         <li (click)="openSettings()" class="cursor-pointer">
-          <a
-            class="flex items-center p-2 rounded-lg hover:bg-gray-700 group">
+          <a class="flex items-center p-2 rounded-lg hover:bg-gray-700 group">
             <mat-icon>settings</mat-icon>
             <span class="flex-1 ms-3 whitespace-nowrap">Settings</span>
           </a>

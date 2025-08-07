@@ -1,17 +1,25 @@
-<div class="h-full w-full flex flex-col gap-y-4">
+<div class="h-full w-full flex flex-col gap-y-4 main-content">
   <!-- Header -->
   <div class="flex flex-row justify-between items-center">
     <div class="flex flex-row justify-start items-center gap-x-4">
-      <h3 class="text-xl font-semibold text-white">AI Assistant</h3>
-      <button class="dfus-blue-btn flex items-center" (click)="createNewConversation()">
+      <h3 class="text-xl font-semibold text-white">Private Lens AI</h3>
+      <button
+        class="dfus-blue-btn flex items-center"
+        (click)="createNewConversation()"
+        [disabled]="isCreateConversationLoading()"
+        [class.disabled:opacity-50]="isCreateConversationLoading()"
+        [class.disabled:cursor-not-allowed]="isCreateConversationLoading()"
+      >
+        @if (isCreateConversationLoading()) {
+        <mat-icon class="mr-2 animate-spin">hourglass_empty</mat-icon>
+        } @else {
         <mat-icon class="mr-2">add</mat-icon>
-        New Chat
+        } New Chat
       </button>
     </div>
     <div class="flex items-center text-sm text-gray-400">
-      <mat-icon class="mr-1 text-lg !flex items-center">info</mat-icon>
-      <span>AI Assistant powered by dFusion</span>
-    </div>  
+      <span>Latest completed at: {{ latestCompletedAt() }}</span>
+    </div>
   </div>
 
   <!-- Main content -->
@@ -23,83 +31,110 @@
       </button>
       <div class="text-sm text-gray-400" *ngIf="!isSidebarCollapsed">
         @if (conversations().length === 0) {
-          <span>No conversations yet. Start a new chat!</span>
+        <span>No conversations yet. Start a new chat!</span>
         } @else {
-          <span>{{conversations().length}} conversation{{conversations().length > 1 ? 's' : ''}}</span>
+        <span>{{ conversations().length }} conversation{{ conversations().length > 1 ? 's' : '' }}</span>
         }
       </div>
       <ng-container *ngIf="!isSidebarCollapsed">
         @for (conversation of conversations(); track conversation.id) {
-          <app-ai-conversation
-            [conversation]="conversation"
-            [isSelected]="activeConversation()?.id === conversation.id"
-            (conversationSelected)="onConversationSelected($event)"
-            (conversationDeleted)="onConversationDeleted($event)">
-          </app-ai-conversation>
+        <app-ai-conversation
+          [conversation]="conversation"
+          [isSelected]="activeConversation() === conversation.id"
+          [disabled]="isStreaming() || isChatLoading()"
+          [isDeleting]="deletedConversationId() === conversation.id"
+          (conversationSelected)="onConversationSelected($event)"
+          (conversationDeleted)="onConversationDeleted($event)"
+        >
+        </app-ai-conversation>
         }
       </ng-container>
     </div>
 
     <!-- Chat area -->
-    <div class="w-full flex flex-col bg-[#07122C] border border-[#22252B] border-solid rounded-xl overflow-hidden">
+    <div class="w-full flex flex-col bg-[#07122C] border border-[#22252B] border-solid rounded-xl overflow-hidden chat-area">
       @if (activeConversation()) {
-        <!-- Messages container -->
-        <div class="flex-1 p-4 overflow-y-auto" #messagesContainer>
-          @if (activeConversation()!.messages.length === 0) {
-            <!-- Welcome message -->
-            <div class="flex flex-col items-center justify-center h-full text-center">
-              <div class="w-16 h-16 rounded-full bg-[#4488f6] flex items-center justify-center mb-4">
-                <mat-icon class="text-white text-2xl !flex items-center justify-center">smart_toy</mat-icon>
-              </div>
-              <h4 class="text-lg font-medium text-white mb-2">Welcome to AI Assistant</h4>
-              <p class="text-gray-400 max-w-md">{{getWelcomeMessage()}}</p>
-            </div>
-          } @else {
-            @for (message of activeConversation()!.messages; track message.id) {
-              <app-ai-message [message]="message"></app-ai-message>
-            }
-          }
+      <!-- Messages container -->
+      <div class="flex-1 p-4 overflow-y-auto messages-container" #messagesContainer>
+        @if (messages().length === 0) {
+        <!-- Welcome message -->
+        <div class="flex flex-col items-center justify-center h-full text-center welcome-message">
+          <div class="w-16 h-16 rounded-full bg-[#4488f6] flex items-center justify-center mb-4">
+            <mat-icon class="text-white text-2xl !flex items-center justify-center">smart_toy</mat-icon>
+          </div>
+          <h4 class="text-lg font-medium text-white mb-2">Welcome to Private Lens AI</h4>
+          <p class="text-gray-400 max-w-md">{{ getWelcomeMessage() }}</p>
         </div>
+        } @else { @for (message of messages(); track message.id) {
+        <app-ai-message [message]="message"> </app-ai-message>
+        } } @if (isStreaming() && !streamingMessage()) {
+        <app-ai-message [message]="getStreamingMessage()" [isStreaming]="true"> </app-ai-message>
+        } @if (streamingMessage()) {
+        <app-ai-message [message]="getStreamingMessage()"> </app-ai-message>
+        } @if (streamingFailed()) {
+        <div class="flex items-start gap-x-4 justify-start">
+          <div class="flex-shrink-0 message-avatar">
+            <div class="w-10 h-10 rounded-full bg-[#4488f6] flex items-center justify-center">
+              <mat-icon class="text-white text-lg !flex items-center justify-center">smart_toy</mat-icon>
+            </div>
+          </div>
+          <div class="rounded-lg p-3 break-words bg-[#2a2d33] text-gray-100 message-bubble">
+            <div class="whitespace-pre-wrap content-text text-red-500">Dfusion AI response failed, please try again!</div>
+          </div>
+        </div>
+        }
+      </div>
 
-        <!-- Input area -->
-        <div class="border-t border-[#22252B] p-4">
-          <div class="flex items-end gap-x-3">
-            <div class="flex flex-1">
-              <textarea
-                [(ngModel)]="newMessage"
-                (keydown)="onKeyDown($event)"
-                [disabled]="isLoading"
-                placeholder="Type your message here... (Press Enter to send, Shift+Enter for new line)"
-                rows="3"
-                class="w-full bg-[#1a1d23] border border-[#22252B] rounded-lg p-3 text-white placeholder-gray-400 resize-none focus:outline-none focus:border-[#4488f6] transition-colors">
-              </textarea>
-            </div>
-            <button
-              (click)="sendMessage()"
-              [disabled]="!newMessage.trim() || isLoading"
-              class="dfus-blue-btn h-12 px-4 disabled:opacity-50 disabled:cursor-not-allowed flex items-center">
-              @if (isLoading) {
-                <mat-icon class="animate-spin">hourglass_empty</mat-icon>
-              } @else {
-                <mat-icon>send</mat-icon>
-              }
-            </button>
+      <!-- Input area -->
+      <div class="border-t border-[#22252B] p-4">
+        <div class="flex items-end gap-x-3">
+          <div class="flex flex-1">
+            <textarea
+              [(ngModel)]="newMessageText"
+              (keydown)="onKeyDown($event)"
+              [disabled]="this.isStreaming()"
+              placeholder="Type your message here... (Press Enter to send, Shift+Enter for new line)"
+              rows="3"
+              class="w-full bg-[#1a1d23] border border-[#22252B] rounded-lg p-3 text-white placeholder-gray-400 resize-none focus:outline-none focus:border-[#4488f6] transition-colors"
+            >
+            </textarea>
           </div>
-        </div>
-      } @else {
-        <!-- No conversation selected -->
-        <div class="flex-1 flex flex-col items-center justify-center text-center p-8">
-          <div class="w-16 h-16 rounded-full bg-[#2a2d33] flex items-center justify-center mb-6">
-            <mat-icon class="text-gray-400 text-2xl !flex items-center justify-center">chat</mat-icon>
-          </div>
-          <h4 class="text-xl font-medium text-white mb-2">Start a conversation</h4>
-          <p class="text-gray-400 mb-6 max-w-md">Select an existing conversation or create a new one to start chatting with the AI assistant.</p>
-          <button class="dfus-blue-btn flex items-center" (click)="createNewConversation()">
-            <mat-icon class="mr-2">add</mat-icon>
-            New Chat
+          <button
+            (click)="sendMessage()"
+            [disabled]="!newMessageText.trim() || this.isStreaming() || isChatLoading()"
+            class="dfus-blue-btn h-12 px-4 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+          >
+            @if (isStreaming()) {
+            <mat-icon class="animate-spin">hourglass_empty</mat-icon>
+            } @else {
+            <mat-icon>send</mat-icon>
+            }
           </button>
         </div>
+      </div>
+      } @else {
+      <!-- No conversation selected -->
+      <div class="flex-1 flex flex-col items-center justify-center text-center p-8 welcome-message">
+        <div class="w-16 h-16 rounded-full bg-[#2a2d33] flex items-center justify-center mb-6">
+          <mat-icon class="text-gray-400 text-2xl !flex items-center justify-center">chat</mat-icon>
+        </div>
+        <h4 class="text-xl font-medium text-white mb-2">Start a conversation</h4>
+        <p class="text-gray-400 mb-6 max-w-md">Select an existing conversation or create a new one to start chatting with the Private Lens AI.</p>
+        <button
+          class="dfus-blue-btn flex items-center"
+          (click)="createNewConversation()"
+          [disabled]="isCreateConversationLoading()"
+          [class.disabled:opacity-50]="isCreateConversationLoading()"
+          [class.disabled:cursor-not-allowed]="isCreateConversationLoading()"
+        >
+          @if (isCreateConversationLoading()) {
+          <mat-icon class="mr-2 animate-spin">hourglass_empty</mat-icon>
+          } @else {
+          <mat-icon class="mr-2">add</mat-icon>
+          } New Chat
+        </button>
+      </div>
       }
     </div>
   </div>
-</div> 
+</div>

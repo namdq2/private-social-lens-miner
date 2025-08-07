@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { GelatoTaskRelay } from '../../models/gelato';
 import { GelatoApiService } from '../../services/gelato-api.service';
 import { SubmissionProcessingService } from '../../services/submission-processing.service';
+import { AppConfigService } from '../../services/app-config.service';
 
 @Component({
   selector: 'app-submission-processing',
@@ -11,6 +12,8 @@ import { SubmissionProcessingService } from '../../services/submission-processin
 })
 export class SubmissionProcessingComponent {
   private readonly submissionProcessingService: SubmissionProcessingService = inject(SubmissionProcessingService);
+  private readonly appConfigService: AppConfigService = inject(AppConfigService);
+  public readonly suiScanUrl = this.appConfigService.suiPoc?.suiScanUrl;
   // private readonly cloudFlareService: CloudFlareService = inject(CloudFlareService);
   private readonly gelatoApiService: GelatoApiService = inject(GelatoApiService);
 
@@ -25,11 +28,12 @@ export class SubmissionProcessingComponent {
   public showErrorMessage = this.submissionProcessingService.showErrorMessage;
   public showSuccessMessage = this.submissionProcessingService.showSuccessMessage;
   public showFailureMessage = this.submissionProcessingService.showFailureMessage;
+  public processedData = this.submissionProcessingService.processedData;
 
   public get gelatoTaskType() {
     return this.gelatoApiService.currentTaskType;
   }
-  
+
   public readonly gelatoTaskTypeRequestReward = GelatoTaskRelay.REQUEST_REWARD;
   public readonly gelatoTaskTypeNone = GelatoTaskRelay.NONE;
 

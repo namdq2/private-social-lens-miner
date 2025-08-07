@@ -10,6 +10,8 @@ declare const window: any;
 export class ElectronIpcService {
   public walletAddress = signal<string>('');
   public encryptionKey = signal<string>('');
+  public aiAgentAccessToken = signal<string>('');
+  public aiAgentRefreshToken = signal<string>('');
   public walletType = signal<WalletType | null>(null);
 
   public isUploadAllChats = signal<boolean>(true);
@@ -32,6 +34,16 @@ export class ElectronIpcService {
   }
 
   public async doInitialisation() {
+    console.log('🚀 ~ ElectronIpcService ~ doInitialisation ~ Starting initialization');
+
+    const aiAgentAccessToken = await window.electron.getAiAgentAccessToken();
+    console.log('🚀 ~ ElectronIpcService ~ doInitialisation ~ aiAgentAccessToken:', aiAgentAccessToken);
+    this.aiAgentAccessToken.set(aiAgentAccessToken);
+
+    const aiAgentRefreshToken = await window.electron.getAiAgentRefreshToken();
+    console.log('🚀 ~ ElectronIpcService ~ doInitialisation ~ aiAgentRefreshToken:', aiAgentRefreshToken);
+    this.aiAgentRefreshToken.set(aiAgentRefreshToken);
+
     const walletAddress = await window.electron.getWalletAddress();
     console.log('init walletAddress', walletAddress);
     this.walletAddress.set(walletAddress);
@@ -91,7 +103,16 @@ export class ElectronIpcService {
     const checkForUpdate = await window.electron.getCheckForUpdate();
     console.log('init checkForUpdates', checkForUpdate);
     this.checkForUpdate.set(checkForUpdate);
+  }
 
+  public setAiAgentAccessToken(value: string) {
+    this.aiAgentAccessToken.set(value);
+    window.electron.setAiAgentAccessToken(this.aiAgentAccessToken());
+  }
+
+  public setAiAgentRefreshToken(value: string) {
+    this.aiAgentRefreshToken.set(value);
+    window.electron.setAiAgentRefreshToken(this.aiAgentRefreshToken());
   }
 
   public setWalletAddress(value: string) {

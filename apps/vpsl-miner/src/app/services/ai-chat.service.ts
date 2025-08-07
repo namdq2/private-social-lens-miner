@@ -1,195 +1,265 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
-import { AiMessage, AiConversation, AiChatRequest, AiChatResponse } from '../models/ai-chat';
-import { ElectronIpcService } from './electron-ipc.service';
+import { IChatStreamParams, IConversation, IConversationsData, IMessage, IMessagesDataRes, IStreamConversationResponse, ITokenGatingConfig } from '../models/ai-chat';
+import { HttpService } from './http.service';
+import { DEFAULT_CONVERSATION_NAME } from '../shared/constants';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AiChatService {
-  private readonly conversations = signal<AiConversation[]>([]);
+  private readonly conversations = signal<IConversation[]>([]);
+  private readonly messages = signal<IMessage[]>([]);
   private readonly activeConversationId = signal<string | null>(null);
+  private readonly httpService: HttpService = inject(HttpService);
+
+  // Streaming properties
+  public readonly isStreaming = signal<boolean>(false);
+  public readonly streamingMessage = signal<string>('');
+  public readonly streamingError = signal<any>(null);
+  public readonly isConversationLoading = signal<boolean>(false);
+  public readonly isMessagesLoading = signal<boolean>(false);
+  public readonly isCreateNewLoading = signal<boolean>(false);
+  public readonly deletedConversation = signal<string>('');
 
   public readonly conversationsList = computed(() => this.conversations());
-  public readonly activeConversation = computed(() => {
-    const activeId = this.activeConversationId();
-    return activeId ? this.conversations().find(c => c.id === activeId) || null : null;
-  });
+  public readonly messagesList = computed(() => this.messages());
+  public readonly shownStreaming = computed(() => this.streamingMessage());
+  public readonly activeConversation = computed(() => this.activeConversationId());
+  public readonly streamingFailed = computed(() => !!this.streamingError());
+  public readonly isChatLoading = computed(() => this.isConversationLoading() || this.isMessagesLoading());
+  public readonly isCreateConversationLoading = computed(() => this.isCreateNewLoading());
+  public readonly deletedConversationId = computed(() => this.deletedConversation());
 
-  private readonly storageKey = 'ai-chat-conversations';
+  public async loadConversationsFromApi(): Promise<void> {
+    try {
+      this.isConversationLoading.set(true);
+      const response = await firstValueFrom(this.httpService.get<IConversationsData>('conversations'));
+      const conversations = response?.data || [];
+      this.conversations.set(conversations);
 
-  constructor(private electronIpcService: ElectronIpcService) {
-    this.loadConversations();
+      if (conversations.length === 0) {
+        this.messages.set([]);
+        this.activeConversationId.set(null);
+        return;
+      }
+
+      if (!this.isStreaming()) {
+        this.selectConversation(conversations[0].id);
+      }
+    } catch (error) {
+      console.error('Failed to load conversations from API:', error);
+    } finally {
+      this.isConversationLoading.set(false);
+    }
   }
 
-  public createNewConversation(): AiConversation {
-    const conversation: AiConversation = {
-      id: uuidv4(),
-      title: 'New Chat',
-      messages: [],
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
+  public resetAllChatInfo() {
+    this.conversations.set([]);
+    this.messages.set([]);
+    this.activeConversationId.set(null);
+    this.isStreaming.set(false);
+    this.streamingMessage.set('');
+    this.streamingError.set(null);
+    this.isConversationLoading.set(false);
+    this.isMessagesLoading.set(false);
+    this.isCreateNewLoading.set(false);
+  }
 
-    this.conversations.update(convs => [conversation, ...convs]);
-    this.activeConversationId.set(conversation.id);
-    this.saveConversations();
-    
-    return conversation;
+  public async createNewConversation(): Promise<void> {
+    try {
+      this.isCreateNewLoading.set(true);
+      await firstValueFrom(this.httpService.post<IConversation>('conversations', { title: DEFAULT_CONVERSATION_NAME }));
+      await this.loadConversationsFromApi();
+    } catch (error) {
+      console.error('Failed to create new conversation:', error);
+    } finally {
+      this.isCreateNewLoading.set(false);
+    }
   }
 
   public selectConversation(conversationId: string): void {
+    if (conversationId === this.activeConversationId()) return;
+    this.getMessages(conversationId);
     this.activeConversationId.set(conversationId);
   }
 
-  public deleteConversation(conversationId: string): void {
-    this.conversations.update(convs => convs.filter(c => c.id !== conversationId));
-    
-    if (this.activeConversationId() === conversationId) {
-      const remaining = this.conversations();
-      this.activeConversationId.set(remaining.length > 0 ? remaining[0].id : null);
-    }
-    
-    this.saveConversations();
-  }
-
-  public async sendMessage(content: string): Promise<void> {
-    let conversation = this.activeConversation();
-    
-    if (!conversation) {
-      conversation = this.createNewConversation();
-    }
-
-    // Add user message
-    const userMessage: AiMessage = {
-      id: uuidv4(),
-      content,
-      role: 'user',
-      timestamp: new Date()
-    };
-
-    this.addMessageToConversation(conversation.id, userMessage);
-
-    // Update conversation title if it's the first message
-    if (conversation.messages.length === 1) {
-      const title = content.length > 30 ? content.substring(0, 30) + '...' : content;
-      this.updateConversationTitle(conversation.id, title);
-    }
-
-    // Add assistant message placeholder
-    const assistantMessage: AiMessage = {
-      id: uuidv4(),
-      content: '',
-      role: 'assistant',
-      timestamp: new Date(),
-      isStreaming: true
-    };
-
-    this.addMessageToConversation(conversation.id, assistantMessage);
-
+  public async deleteConversation(conversationId: string): Promise<void> {
     try {
-      // Call AI API
-      const response = await this.callAiApi(conversation.messages.filter(m => !m.isStreaming));
-      
-      // Update assistant message with response
-      this.updateMessage(conversation.id, assistantMessage.id, {
-        content: response.content,
-        isStreaming: false
-      });
-      
+      this.deletedConversation.set(conversationId);
+      await firstValueFrom(this.httpService.delete(`conversations/${conversationId}`));
+      await this.loadConversationsFromApi();
     } catch (error) {
-      // Update with error message
-      this.updateMessage(conversation.id, assistantMessage.id, {
-        content: 'Sorry, I encountered an error while processing your request. Please try again.',
-        isStreaming: false
-      });
-      console.error('AI API Error:', error);
+      console.error('Failed to delete conversation:', error);
+    } finally {
+      this.deletedConversation.set('');
     }
   }
 
-  private addMessageToConversation(conversationId: string, message: AiMessage): void {
-    this.conversations.update(convs => 
-      convs.map(conv => 
-        conv.id === conversationId 
-          ? { ...conv, messages: [...conv.messages, message], updatedAt: new Date() }
-          : conv
-      )
-    );
-    this.saveConversations();
+  public async getMessages(conversationId: string): Promise<void> {
+    try {
+      this.isMessagesLoading.set(true);
+      this.streamingError.set(null);
+      const response = await firstValueFrom(this.httpService.get<IMessagesDataRes>(`conversations/${conversationId}/messages`));
+      const messages = response?.data || [];
+      this.messages.set(messages.reverse());
+    } catch (error) {
+      console.error('Failed to load messages:', error);
+    } finally {
+      this.isMessagesLoading.set(false);
+    }
   }
 
-  private updateMessage(conversationId: string, messageId: string, updates: Partial<AiMessage>): void {
-    this.conversations.update(convs => 
-      convs.map(conv => 
-        conv.id === conversationId 
-          ? {
-              ...conv,
-              messages: conv.messages.map(msg => 
-                msg.id === messageId ? { ...msg, ...updates } : msg
-              ),
-              updatedAt: new Date()
-            }
-          : conv
-      )
-    );
-    this.saveConversations();
+  public sendMessage(content: string): void {
+    if (!content?.trim()) {
+      console.error('Message content cannot be empty');
+      return;
+    }
+
+    const aiMessageId = this.prepareMessageSending(content);
+    const params = this.buildChatParams(content);
+    this.streamChatResponse(params, aiMessageId);
   }
 
-  private updateConversationTitle(conversationId: string, title: string): void {
-    this.conversations.update(convs => 
-      convs.map(conv => 
-        conv.id === conversationId 
-          ? { ...conv, title, updatedAt: new Date() }
-          : conv
-      )
-    );
-    this.saveConversations();
-  }
+  private createMessage(content: string, role: string, id?: string): IMessage {
+    const messageId = id || uuidv4();
+    const now = new Date().toISOString();
 
-  private async callAiApi(messages: AiMessage[]): Promise<AiChatResponse> {
-    // For demo purposes, return a mock response
-    // In production, you would call an actual AI service like OpenAI, Anthropic, etc.
-    await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
-    
-    const responses = [
-      "I'm an AI assistant created by dFusion to help you with your questions about the DLP miner and blockchain technology.",
-      "That's an interesting question! Let me help you understand this better.",
-      "Based on what you're asking, here's what I can tell you...",
-      "I'd be happy to help you with that. Here's my response:",
-      "Great question! From my understanding of the dFusion ecosystem..."
-    ];
-    
     return {
-      content: responses[Math.floor(Math.random() * responses.length)] + " This is a demo response. In production, this would connect to a real AI service.",
-      role: 'assistant'
+      id: messageId,
+      content,
+      role,
+      createdAt: now,
+      updatedAt: now,
     };
   }
 
-  private saveConversations(): void {
-    if (typeof localStorage !== 'undefined') {
-      localStorage.setItem(this.storageKey, JSON.stringify(this.conversations()));
-    }
+  private buildChatParams(content: string): IChatStreamParams {
+    return {
+      content,
+      conversationId: this.activeConversationId() || '',
+    };
   }
 
-  private loadConversations(): void {
-    if (typeof localStorage !== 'undefined') {
-      const stored = localStorage.getItem(this.storageKey);
-      if (stored) {
-        try {
-          const conversations = JSON.parse(stored);
-          this.conversations.set(conversations.map((conv: any) => ({
-            ...conv,
-            createdAt: new Date(conv.createdAt),
-            updatedAt: new Date(conv.updatedAt),
-            messages: conv.messages.map((msg: any) => ({
-              ...msg,
-              timestamp: new Date(msg.timestamp)
-            }))
-          })));
-        } catch (error) {
-          console.error('Error loading conversations:', error);
-        }
-      }
-    }
+  private streamChatResponse(params: IChatStreamParams, aiMessageId: string): void {
+    this.streamingError.set(null);
+    this.httpService
+      .stream<any>(
+        'conversations/chat/stream',
+        params,
+        (conversation) => this.handleConversation(conversation),
+        (chunk) => this.handleStreamingChunk(chunk),
+        (finalMessage) => this.handleStreamingComplete(finalMessage, aiMessageId),
+        (error) => this.handleStreamingError(error, aiMessageId),
+      )
+      .subscribe({
+        error: (error) => {
+          this.handleStreamingError(error, aiMessageId);
+        },
+      });
   }
-} 
+
+  private handleStreamingChunk(chunk: string): void {
+    if (!chunk?.trim()) return;
+    this.streamingMessage.update((current) => {
+      const newContent = current + chunk;
+      return newContent;
+    });
+  }
+
+  private handleConversation(conversation: IStreamConversationResponse): void {
+    const currentConversationTitle = conversation?.userMessage?.conversation?.title;
+
+    if (currentConversationTitle !== DEFAULT_CONVERSATION_NAME) {
+      return;
+    }
+
+    const currentConversations = this.conversations().map((item) => {
+      if (item.id === conversation?.conversation?.id) {
+        item.title = conversation?.conversation?.title;
+      }
+
+      return item;
+    });
+
+    this.conversations.set(currentConversations);
+  }
+
+  private handleStreamingComplete(finalMessage: any, aiMessageId: string): void {
+    // Update the actual messages array with the complete content
+    this.messages.update((messages) => [...messages, finalMessage]);
+
+    // Update message metadata if available
+    if (finalMessage.id || finalMessage.createdAt || finalMessage.updatedAt) {
+      this.updateAIMessageMetadata(aiMessageId, finalMessage);
+    }
+
+    // Clear streaming state after updating messages
+    this.clearStreamingState();
+  }
+
+  private prepareMessageSending(content: string): string {
+    // Add user message
+    const userMessage = this.createMessage(content, 'user');
+    this.messages.update((messages) => [...messages, userMessage]);
+
+    // Add AI message placeholder
+    const aiMessageId = uuidv4();
+
+    // Initialize streaming state
+    this.isStreaming.set(true);
+    this.streamingMessage.set('');
+
+    return aiMessageId;
+  }
+
+  private handleStreamingError(error: any, aiMessageId: string): void {
+    console.error('🚀 ~ AiChatService ~ handleStreamingError ~ error:', error);
+    this.streamingError.set(error);
+    this.removeAIMessage(aiMessageId);
+    this.clearStreamingState();
+  }
+
+  private updateAIMessageMetadata(aiMessageId: string, finalMessage: any): void {
+    this.messages.update((messages) => {
+      const updatedMessages = [...messages];
+      const aiMessageIndex = updatedMessages.findIndex((msg) => msg.id === aiMessageId);
+
+      if (aiMessageIndex !== -1) {
+        updatedMessages[aiMessageIndex] = {
+          ...updatedMessages[aiMessageIndex],
+          id: finalMessage.id || aiMessageId,
+          createdAt: finalMessage.createdAt || new Date().toISOString(),
+          updatedAt: finalMessage.updatedAt || new Date().toISOString(),
+        };
+      }
+
+      return updatedMessages;
+    });
+  }
+
+  private removeAIMessage(aiMessageId: string): void {
+    this.messages.update((messages) => messages.filter((msg) => msg.id !== aiMessageId));
+  }
+
+  private clearStreamingState(): void {
+    this.isStreaming.set(false);
+    this.streamingMessage.set('');
+  }
+
+  public async getTokenGatingConfig() {
+    const response = await firstValueFrom(this.httpService.get<ITokenGatingConfig>('token-gating-configs/latest'));
+
+    return {
+      stakeThreshold: Number(response.stakeThreshold || 0),
+      balanceThreshold: Number(response.balanceThreshold || 0),
+    };
+  }
+
+  public async getLatestCompletedJob() {
+    const response = await firstValueFrom(this.httpService.get<{ latestCompletedAt: string }>('jobs/latest-completed-at'));
+
+    return response.latestCompletedAt;
+  }
+}
