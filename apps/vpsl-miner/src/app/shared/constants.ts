@@ -5,3 +5,5 @@ export const ENCRYPTION_SEED = 'dFusion Private Social Lens DLP miner encryption
 export const TIMEOUT_MS = {
   THREE_MINUTES: 180000,
 }
+
+export const DEFAULT_CONVERSATION_NAME = 'New Chat';

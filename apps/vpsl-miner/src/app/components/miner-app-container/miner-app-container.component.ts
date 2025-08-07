@@ -100,7 +100,7 @@ export class MinerAppContainerComponent implements OnInit {
       .open(ConfirmDialogComponent, {
         data: {
           title: 'Permission Alert',
-          message: `You need to own at least ${this.requiredBalanceAmount} VFSN and stake at least ${this.requiredStakeAmount} VFSN to use the AI Assistant.`,
+          message: `You need to own at least ${this.requiredBalanceAmount} VFSN and stake at least ${this.requiredStakeAmount} VFSN to use the Private Lens AI.`,
           confirmText: 'Understand',
           confirmButtonClass: 'dfus-blue-btn',
         },
@@ -117,8 +117,8 @@ export class MinerAppContainerComponent implements OnInit {
     this.matDialog
       .open(ConfirmDialogComponent, {
         data: {
-          title: 'Login to AI Assistant',
-          message: 'Please login to the AI Assistant with Telegram to continue.',
+          title: 'Login to Private Lens AI',
+          message: 'Please login to the Private Lens AI with Telegram to continue.',
           confirmText: 'Login',
           confirmButtonClass: 'dfus-blue-btn',
           icon: 'login',

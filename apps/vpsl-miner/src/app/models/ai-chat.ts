@@ -144,3 +144,44 @@ export interface ITokenGatingConfig {
   stakeThreshold: string;
   balanceThreshold: string;
 }
+
+
+export interface IStreamConversation {
+  title: string;
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface IUserMessage {
+  content: string;
+  role: string;
+  conversation: IStreamUserConversation;
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface IStreamUserConversation {
+  title: string;
+  user: IStreamUser;
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface IStreamUser {
+  id: number;
+  email: any;
+  password: any;
+  provider: string;
+  socialId: string;
+  firstName: string;
+  lastName: string;
+}
+
+export interface IStreamConversationResponse {
+  type: string;
+  conversation: IStreamConversation;
+  userMessage: IUserMessage;
+}

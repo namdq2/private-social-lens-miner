@@ -5,6 +5,7 @@ import { catchError, filter, take, timeout } from 'rxjs/operators';
 import { AppConfigService } from './app-config.service';
 import { ElectronIpcService } from './electron-ipc.service';
 import { TIMEOUT_MS } from '../shared/constants';
+import { IStreamConversationResponse } from '../models/ai-chat';
 
 @Injectable({
   providedIn: 'root',
@@ -52,6 +53,7 @@ export class HttpService {
   stream<T>(
     endpoint: string,
     body: any,
+    onConversation: (conversation: IStreamConversationResponse) => void,
     onChunk: (content: string) => void,
     onComplete: (finalMessage: any) => void,
     onError: (error: any) => void,
@@ -80,7 +82,7 @@ export class HttpService {
           if (!response.ok) {
             if (response.status === 401) {
               // Handle 401 by attempting token refresh
-              this.handleStreaming401Error(endpoint, body, onChunk, onComplete, onError, observer);
+              this.handleStreaming401Error(endpoint, body, onConversation, onChunk, onComplete, onError, observer);
             } else {
               throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
@@ -111,7 +113,7 @@ export class HttpService {
                     if (data) {
                       try {
                         const parsed = JSON.parse(data);
-                        this.handleStreamingEvent(parsed, onChunk, onComplete, onError);
+                        this.handleStreamingEvent(parsed, onConversation, onChunk, onComplete, onError);
                       } catch (e) {
                         console.warn('Failed to parse SSE data:', data);
                       }
@@ -141,6 +143,7 @@ export class HttpService {
   private handleStreaming401Error(
     endpoint: string,
     body: any,
+    onConversation: (conversation: IStreamConversationResponse) => void,
     onChunk: (content: string) => void,
     onComplete: (finalMessage: any) => void,
     onError: (error: any) => void,
@@ -154,7 +157,7 @@ export class HttpService {
           take(1),
         )
         .subscribe(() => {
-          this.stream(endpoint, body, onChunk, onComplete, onError).subscribe({
+          this.stream(endpoint, body, onConversation, onChunk, onComplete, onError).subscribe({
             next: () => observer.next(),
             error: (err) => {
               onError(err);
@@ -176,7 +179,7 @@ export class HttpService {
         // Retry all queued requests
         this.retryQueuedRequests();
 
-        this.stream(endpoint, body, onChunk, onComplete, onError).subscribe({
+        this.stream(endpoint, body, onConversation, onChunk, onComplete, onError).subscribe({
           next: () => observer.next(),
           error: (err) => {
             onError(err);
@@ -198,7 +201,13 @@ export class HttpService {
   }
 
   // Handle streaming events
-  private handleStreamingEvent(event: any, onChunk: (content: string) => void, onComplete: (finalMessage: any) => void, onError: (error: any) => void): void {
+  private handleStreamingEvent(
+    event: any,
+    onConversation: (conversation: IStreamConversationResponse) => void,
+    onChunk: (content: string) => void,
+    onComplete: (finalMessage: any) => void,
+    onError: (error: any) => void,
+  ): void {
     switch (event.type) {
       case 'chunk':
         if (event.content && typeof event.content === 'string') {
@@ -212,7 +221,7 @@ export class HttpService {
         onError(event.aiMessage || event);
         break;
       case 'conversation':
-        console.log('Conversation created:', event.conversation);
+        onConversation(event);
         break;
       case 'userMessage':
         console.log('User message processed:', event.userMessage);

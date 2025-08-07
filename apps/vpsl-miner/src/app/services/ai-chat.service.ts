@@ -1,8 +1,9 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
-import { IChatStreamParams, IConversation, IConversationsData, IMessage, IMessagesDataRes, ITokenGatingConfig } from '../models/ai-chat';
+import { IChatStreamParams, IConversation, IConversationsData, IMessage, IMessagesDataRes, IStreamConversationResponse, ITokenGatingConfig } from '../models/ai-chat';
 import { HttpService } from './http.service';
+import { DEFAULT_CONVERSATION_NAME } from '../shared/constants';
 
 @Injectable({
   providedIn: 'root',
@@ -69,7 +70,7 @@ export class AiChatService {
   public async createNewConversation(): Promise<void> {
     try {
       this.isCreateNewLoading.set(true);
-      await firstValueFrom(this.httpService.post<IConversation>('conversations', { title: 'New Chat' }));
+      await firstValueFrom(this.httpService.post<IConversation>('conversations', { title: DEFAULT_CONVERSATION_NAME }));
       await this.loadConversationsFromApi();
     } catch (error) {
       console.error('Failed to create new conversation:', error);
@@ -147,6 +148,7 @@ export class AiChatService {
       .stream<any>(
         'conversations/chat/stream',
         params,
+        (conversation) => this.handleConversation(conversation),
         (chunk) => this.handleStreamingChunk(chunk),
         (finalMessage) => this.handleStreamingComplete(finalMessage, aiMessageId),
         (error) => this.handleStreamingError(error, aiMessageId),
@@ -164,6 +166,24 @@ export class AiChatService {
       const newContent = current + chunk;
       return newContent;
     });
+  }
+
+  private handleConversation(conversation: IStreamConversationResponse): void {
+    const currentConversationTitle = conversation?.userMessage?.conversation?.title;
+
+    if (currentConversationTitle !== DEFAULT_CONVERSATION_NAME) {
+      return;
+    }
+
+    const currentConversations = this.conversations().map((item) => {
+      if (item.id === conversation?.conversation?.id) {
+        item.title = conversation?.conversation?.title;
+      }
+
+      return item;
+    });
+
+    this.conversations.set(currentConversations);
   }
 
   private handleStreamingComplete(finalMessage: any, aiMessageId: string): void {
@@ -230,10 +250,16 @@ export class AiChatService {
 
   public async getTokenGatingConfig() {
     const response = await firstValueFrom(this.httpService.get<ITokenGatingConfig>('token-gating-configs/latest'));
-    
+
     return {
       stakeThreshold: Number(response.stakeThreshold || 0),
-      balanceThreshold: Number(response.balanceThreshold || 0)
+      balanceThreshold: Number(response.balanceThreshold || 0),
     };
+  }
+
+  public async getLatestCompletedJob() {
+    const response = await firstValueFrom(this.httpService.get<{ latestCompletedAt: string }>('jobs/latest-completed-at'));
+
+    return response.latestCompletedAt;
   }
 }
