@@ -46,8 +46,7 @@ export class TelegramComponent {
     if (result) {
       this.showAuthCodeInput = true;
       this.showPhoneNumberError = false;
-    }
-    else {
+    } else {
       console.log('getAuthCode failed:', result);
       this.showPhoneNumberError = true;
     }
@@ -58,9 +57,11 @@ export class TelegramComponent {
     const loginSuccess: boolean = await this.telegramApiService.clientStartHandler(this.phoneNumber, this.authCode);
     if (loginSuccess) {
       console.log('Login success');
+
+      this.telegramApiService.sendValidateSubmissionUserMessage();
+
       this.showCodeError = false;
-    }
-    else {
+    } else {
       this.showCodeError = true;
     }
   }

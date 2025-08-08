@@ -53,4 +53,8 @@ contextBridge.exposeInMainWorld('electron', {
   setCheckForUpdate: (value) => ipcRenderer.send('set-check-for-update', value),
   getCheckForUpdate: () => ipcRenderer.invoke('get-check-for-update'),
   onSendUpdateMessage: (callback) => ipcRenderer.on('send-update-message', callback),
+
+  getSubmissionUser: (value) => ipcRenderer.invoke('api:get-submission-user', value),
+  getTopNReferrals: () => ipcRenderer.invoke('api:get-top-n-referrals'),
+
 });

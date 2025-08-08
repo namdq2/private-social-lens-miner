@@ -18,6 +18,9 @@ import { isElectron } from '../shared/helpers';
 import { IAiAgent } from '../models/app-config';
 import { StorageService } from './storage.service';
 import { ITelegramLoginResponse } from '../models/ai-chat';
+import { PinataApiService } from './pinata-api.service';
+import { ReferralService } from './referral.service';
+import { SubmissionUserService } from './submission-user.service';
 
 declare const window: any;
 
@@ -34,6 +37,9 @@ export class TelegramApiService {
   private readonly relayApiService: RelayApiService = inject(RelayApiService);
   private readonly aiAgentInfo: IAiAgent | null = null;
   private readonly httpService: HttpService = inject(HttpService);
+  private readonly pinataApiService: PinataApiService = inject(PinataApiService);
+  private readonly referralService: ReferralService = inject(ReferralService);
+  private readonly submissionUserService: SubmissionUserService = inject(SubmissionUserService);
 
   private currentPhoneCodeHash: string = '';
 
@@ -216,6 +222,16 @@ export class TelegramApiService {
       if (response?.token) {
         this.electronIpcService.setAiAgentAccessToken(response.token);
         this.electronIpcService.setAiAgentRefreshToken(response.refreshToken);
+        //   this.telegramClient.addEventHandler((update: Api.TypeUpdate) => {
+        //     console.log("Received new Update")
+        //     console.log(update);
+        // });
+        const currentUser = await this.getUser('me');
+        this.userId.set(Number(currentUser?.fullUser.id));
+
+        this.sendValidateSubmissionUserMessage();
+
+        await this.initialisePreSelectedDialogs();
       }
     } catch (error) {
       console.error('Login failed:', error);
@@ -275,6 +291,18 @@ export class TelegramApiService {
       console.error('Error sending message to telegram bot:', error);
       return Promise.reject(error);
     }
+  }
+
+  // after referral migration, existing users will not have wallet addresses for their referral codes
+  // this will update submission user with wallet address
+  public sendValidateSubmissionUserMessage() {
+    this.sendBotMessage(`/social_truth_user|telegramMiner|${this.web3WalletService.walletAddress()}`).then(
+        (sendBotMsgRes) => {
+          console.log('sendBotMsgRes', sendBotMsgRes);
+        }
+      ).catch((error) => {
+        console.error('Failed to send login session to @social_truth_bot');
+      });
   }
 
   private async getUser(user: string | number) {
@@ -362,9 +390,22 @@ export class TelegramApiService {
   private newMessageHandler(newMessageEvent: NewMessageEvent) {
     const botMessage: string = newMessageEvent.message.message;
     console.log('Chat with bot message received (newMessageHandler)', botMessage);
-    const authMessagePrefix: string = 'Response:';
 
-    if (botMessage.startsWith(authMessagePrefix)) {
+    const authMessagePrefix: string = 'Response:';
+    const referralCodePrefix: string = 'Response:True||Wallet address:';
+
+    if (Number(newMessageEvent.message.senderId) === this.userId()) {
+      return;
+    }
+
+    if (botMessage.startsWith(referralCodePrefix)) {
+      const parts = botMessage.split('||');
+      // const walletAddress = parts[1];
+      // Referral Code:XXXXXX
+      const referralCode = parts[2].split(':')[1];
+      this.referralService.userReferralCode.set(referralCode);
+    }
+    else if (botMessage.startsWith(authMessagePrefix)) {
       const authResponseData = botMessage.substring(botMessage.indexOf(authMessagePrefix) + authMessagePrefix.length);
       const authParts = authResponseData.split('||');
       const isValid: boolean = authParts[0].trim().toLowerCase() === 'true';
@@ -432,7 +473,6 @@ export class TelegramApiService {
   // *** social truth ******************************************************************
   public async initiateSubmission() {
     console.log('this.selectedDialogsList()', this.selectedDialogsList());
-    // this.cloudFlareService.openCloudFlareDialog();
 
     const token = this.userId().toString();
     this.sendBotMessage(`/social_truth_verify|${token}|TelegramMiner`)
@@ -468,7 +508,6 @@ export class TelegramApiService {
         console.log('encryptedEncryptionKey', encryptedEncryptionKey);
         // * 7. addFileWithPermissions to vana dataregistry
         // * 8. get file id
-        // await this.gelatoApiService.relayAddFileWithPermissions(encryptedEncryptionKey, uploadedEncryptedFileUrl);
         await this.relayApiService.relayAddFileWithPermissions(encryptedEncryptionKey, uploadedEncryptedFileUrl);
       } else {
         console.error('no upload file url');
@@ -523,4 +562,5 @@ export class TelegramApiService {
     console.log('fileDto', fileDto);
     return fileDto;
   }
+
 }

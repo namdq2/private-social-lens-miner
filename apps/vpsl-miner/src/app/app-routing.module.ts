@@ -8,6 +8,7 @@ import { WalletConnectionComponent } from './components/wallet-connection/wallet
 import { authGuard } from './guards/auth.guard';
 import { SignMessageWalletComponent } from './components/sign-message-wallet/sign-message-wallet.component';
 import { AiChatMainComponent } from './components/ai-chat-main/ai-chat-main.component';
+import { ReferralLeaderboardComponent } from './components/referral-leaderboard/referral-leaderboard.component';
 
 const routes: Routes = [
   {
@@ -38,10 +39,13 @@ const routes: Routes = [
       {
         path: 'ai-chat',
         component: AiChatMainComponent,
+      },
+      {
+        path: 'referral-leaderboard',
+        component: ReferralLeaderboardComponent,
       }
     ]
   },
-
 ];
 
 @NgModule({

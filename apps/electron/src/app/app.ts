@@ -2,11 +2,12 @@ import { app, BrowserWindow, ipcMain, Menu, MenuItem, nativeImage, screen, shell
 import * as Store from 'electron-store';
 import { extname, join } from 'path';
 import { environment } from '../environments/environment';
-import { rendererAppName, rendererAppPort } from './constants';
+import { rendererAppName, rendererAppPort, dFusionValidatorBackendUrl, devBackendUrl } from './constants';
 import * as http from 'http';
 import * as fs from 'fs';
 import UpdateEvents from './events/update.events';
 // import log from 'electron-log';
+import axios from 'axios';
 
 // log.transports.file.level = 'debug';
 
@@ -514,6 +515,37 @@ export default class App {
 
     ipcMain.handle('get-ai-agent-refresh-token', () => {
       return App.aiAgentRefreshToken;
+    });
+
+    const url = dFusionValidatorBackendUrl;
+    // const url = devBackendUrl;
+
+    ipcMain.handle('api:get-submission-user', async (event, sourceId) => {
+      try {
+        const response = await axios.get(`${url}/api/submission-users?dataSource=telegramMiner&sourceId=${sourceId}`, {
+          headers: {
+            'Accept': 'application/json',
+          },
+        });
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching API:', error);
+        return { error: true, message: error.message };
+      }
+    });
+
+    ipcMain.handle('api:get-top-n-referrals', async (event, value) => {
+      try {
+        const response = await axios.get(`${url}/api/submission-referrals/leaderboard?topNRecords=10`, {
+          headers: {
+            'Accept': 'application/json',
+          },
+        });
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching API:', error);
+        return { error: true, message: error.message };
+      }
     });
   }
 }
