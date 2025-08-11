@@ -22,10 +22,6 @@
 
     <div>|</div>
 
-    <button mat-icon-button (click)="openSuiKeyImport()">
-      <mat-icon [matTooltip]="suiAddress() ? suiAddress() : 'Configure Sui wallet'">wallet</mat-icon>
-    </button>
-
     @if (!isBackgroundTaskEnabled()) {
     <!-- [disabled]="selectedDialogsList().length === 0" -->
     <button

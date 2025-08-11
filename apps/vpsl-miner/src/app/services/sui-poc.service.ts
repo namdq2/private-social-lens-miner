@@ -1,9 +1,6 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { TelegramApiService } from './telegram-api.service';
 import { fileDto, IFileMetadata, IProcessDataRes } from '../models/social-truth';
-import * as bech32 from 'bech32';
-import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
-import { Transaction } from '@mysten/sui/transactions';
 import { getFullnodeUrl, SuiClient } from '@mysten/sui/client';
 import { fromHex, toHex } from '@mysten/sui/utils';
 import { EncryptedObject, SealClient } from '@mysten/seal';
@@ -23,8 +20,6 @@ import { TIMEOUT_MS } from '../shared/constants';
 export class SuiPocService {
   private readonly httpClient: HttpClient = inject(HttpClient);
   private readonly httpService: HttpService = inject(HttpService);
-  private keypair: Ed25519Keypair | null = null;
-  private suiPrivateKey = signal<string>('');
   private suiClient: SuiClient;
   private sealClient: SealClient;
   private pocConfig: ISuiPoc | null;
@@ -41,7 +36,6 @@ export class SuiPocService {
   ) {
     this.pocConfig = this.appConfigService.suiPoc;
     this.walrusConfig = this.appConfigService.walrus;
-    // Initialize keypair from secret key
     // set up SUI client
     this.suiClient = new SuiClient({ url: getFullnodeUrl('testnet') });
     // set up Seal client
@@ -51,60 +45,6 @@ export class SuiPocService {
       serverObjectIds: keyServers.map((id) => [id, 1]),
       verifyKeyServers: false,
     });
-  }
-
-  public generateKeyPair() {
-    const privateKey = this.suiPrivateKey();
-
-    if (!privateKey) return;
-
-    const decoded = bech32.bech32.decode(privateKey);
-    if (!decoded) {
-      throw new Error('Invalid bech32 private key format');
-    }
-    const privateKeyBytes = bech32.bech32.fromWords(decoded.words);
-    // Remove the first byte (flag), use only the last 32 bytes
-    const rawSecretKey = Buffer.from(privateKeyBytes).slice(1);
-    this.keypair = Ed25519Keypair.fromSecretKey(rawSecretKey);
-    this.suiAddress.set(this.keypair.getPublicKey().toSuiAddress());
-  }
-
-  public async createPolicy(): Promise<string> {
-    if (!this.keypair) {
-      return '';
-    }
-
-    try {
-      this.submissionProcessingService.displayInfo('Creating policy');
-      const tx = new Transaction();
-      tx.setGasBudget(10000000);
-
-      tx.moveCall({
-        target: `${this.pocConfig?.packageId}::seal_manager::create_access_policy`,
-        arguments: [tx.pure.vector('address', [this.suiAddress() || '', this.pocConfig?.dlpWalletAddress || ''])],
-      });
-
-      const result = await this.suiClient.signAndExecuteTransaction({
-        transaction: tx,
-        signer: this.keypair,
-        requestType: 'WaitForLocalExecution',
-        options: {
-          showEffects: true,
-        },
-      });
-
-      const policyObjId = result?.effects?.created?.[0]?.reference?.objectId || '';
-
-      if (!policyObjId) {
-        throw new Error('Failed to create policy. Please try again.');
-      }
-
-      return policyObjId;
-    } catch (err) {
-      console.error('Failed to create policy', err);
-      this.submissionProcessingService.displayError('Failed to create policy');
-      throw new Error('Failed to create policy. Please try again.');
-    }
   }
 
   public async createPolicyViaRelay(): Promise<string> {
@@ -159,46 +99,6 @@ export class SuiPocService {
       console.error('Failed to get telechat', err);
       this.submissionProcessingService.displayError('Failed to get chat info');
       throw new Error('Failed to get telechat. Please try again.');
-    }
-  }
-
-  public async saveEncryptedFileOnchain(fileId: string, policyObjId: string, metadata: IFileMetadata): Promise<string> {
-    if (!this.keypair) {
-      return '';
-    }
-
-    try {
-      this.submissionProcessingService.displayInfo('Saving encrypted file');
-      const tx = new Transaction();
-      tx.setGasBudget(10000000);
-
-      const metadataBytes = new Uint8Array(new TextEncoder().encode(JSON.stringify(metadata)));
-
-      tx.moveCall({
-        target: `${this.pocConfig?.packageId}::seal_manager::save_encrypted_file`,
-        arguments: [tx.pure.vector('u8', fromHex(fileId)), tx.object(policyObjId), tx.pure.vector('u8', metadataBytes)],
-      });
-
-      const result = await this.suiClient.signAndExecuteTransaction({
-        transaction: tx,
-        signer: this.keypair,
-        requestType: 'WaitForLocalExecution',
-        options: {
-          showEffects: true,
-        },
-      });
-
-      const onChainFileObjId = result?.effects?.created?.[0]?.reference?.objectId || '';
-
-      if (!onChainFileObjId) {
-        throw new Error('Failed to save encrypted file onchain. Please try again.');
-      }
-
-      return onChainFileObjId;
-    } catch (err) {
-      this.submissionProcessingService.displayError('Failed to save encrypted file');
-      console.error('Failed to save encrypted file onchain', err);
-      throw new Error('Failed to save encrypted file onchain. Please try again.');
     }
   }
 
@@ -386,13 +286,5 @@ export class SuiPocService {
 
     const processDataRes = await this.processDataWithWorker(blobId, onChainFileObjId, policyObjId, this.pocConfig?.threshold || 2);
     console.log('🚀 ~ Nautilus Processed data:', processDataRes?.data);
-  }
-
-  public setSuiPrivateKey(suiPrivateKey: string) {
-    this.suiPrivateKey.set(suiPrivateKey);
-  }
-
-  public getSuiPrivateKey(): string {
-    return this.suiPrivateKey();  
   }
 }
