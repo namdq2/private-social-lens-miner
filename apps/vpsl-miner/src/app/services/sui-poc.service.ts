@@ -107,6 +107,49 @@ export class SuiPocService {
     }
   }
 
+  public async createPolicyViaRelay(): Promise<string> {
+    try {
+      this.submissionProcessingService.displayInfo('Creating policy via relay service');
+      
+      const requestBody = {
+        packageObjectId: this.pocConfig?.packageId || '',
+        dlpWalletAddress: this.pocConfig?.dlpWalletAddress || ''
+      };
+
+      const response = await this.httpClient
+        .post<{ digest: string; policyObjectId: string }>(`${this.appConfigService.relayApi?.baseUrl}/api/relay/sui/create-policy`, requestBody, {
+          headers: {
+            'accept': 'application/json',
+            'x-custom-lang': 'en',
+            'Content-Type': 'application/json',
+            'x-api-key': this.appConfigService.relayApi?.apiKey || ''
+          }
+        })
+        .pipe(
+          timeout(TIMEOUT_MS.THREE_MINUTES),
+          catchError((error) => {
+            if (error.name === 'TimeoutError') {
+              console.error('Request timed out');
+              this.submissionProcessingService.displayError('Request timed out. Please try again.');
+              return throwError(() => new Error('Request timed out. Please try again.'));
+            }
+            return throwError(() => error);
+          }),
+        )
+        .toPromise();
+
+      if (!response || !response.policyObjectId) {
+        throw new Error('Failed to create policy via relay service. Please try again.');
+      }
+
+      return response.policyObjectId;
+    } catch (err) {
+      console.error('Failed to create policy via relay service', err);
+      this.submissionProcessingService.displayError('Failed to create policy via relay service');
+      throw new Error('Failed to create policy via relay service. Please try again.');
+    }
+  }
+
   public async getTelechat(): Promise<string> {
     try {
       this.submissionProcessingService.displayInfo('Getting chat info');
@@ -156,6 +199,50 @@ export class SuiPocService {
       this.submissionProcessingService.displayError('Failed to save encrypted file');
       console.error('Failed to save encrypted file onchain', err);
       throw new Error('Failed to save encrypted file onchain. Please try again.');
+    }
+  }
+
+  public async saveEncryptedFileViaRelay(fileId: string, policyObjId: string, metadata: IFileMetadata): Promise<string> {
+    try {
+      this.submissionProcessingService.displayInfo('Saving encrypted file via relay service');
+      
+      const requestBody = {
+        fileId: fileId,
+        policyObjId: policyObjId,
+        metadata: metadata
+      };
+
+      const response = await this.httpClient
+        .post<{ digest: string; onChainFileObjId: string }>(`${this.appConfigService.relayApi?.baseUrl}/api/relay/sui/save-encrypted-file`, requestBody, {
+          headers: {
+            'accept': 'application/json',
+            'x-custom-lang': 'en',
+            'Content-Type': 'application/json',
+            'x-api-key': this.appConfigService.relayApi?.apiKey || ''
+          }
+        })
+        .pipe(
+          timeout(TIMEOUT_MS.THREE_MINUTES),
+          catchError((error) => {
+            if (error.name === 'TimeoutError') {
+              console.error('Request timed out');
+              this.submissionProcessingService.displayError('Request timed out. Please try again.');
+              return throwError(() => new Error('Request timed out. Please try again.'));
+            }
+            return throwError(() => error);
+          }),
+        )
+        .toPromise();
+
+      if (!response || !response.onChainFileObjId) {
+        throw new Error('Failed to save encrypted file via relay service. Please try again.');
+      }
+
+      return response.onChainFileObjId;
+    } catch (err) {
+      console.error('Failed to save encrypted file via relay service', err);
+      this.submissionProcessingService.displayError('Failed to save encrypted file via relay service');
+      throw new Error('Failed to save encrypted file via relay service. Please try again.');
     }
   }
 
@@ -281,7 +368,7 @@ export class SuiPocService {
   }
 
   public async doSuiPoc() {
-    const policyObjId = await this.createPolicy();
+    const policyObjId = await this.createPolicyViaRelay();
     const teleChat = await this.getTelechat();
     const encryptedBytes = await this.encryptData(policyObjId, teleChat);
 
@@ -295,7 +382,7 @@ export class SuiPocService {
 
     const encryptedData = new Uint8Array(encryptedBytes);
     const encryptedObject = EncryptedObject.parse(encryptedData);
-    const onChainFileObjId = await this.saveEncryptedFileOnchain(encryptedObject.id, policyObjId, metadata);
+    const onChainFileObjId = await this.saveEncryptedFileViaRelay(encryptedObject.id, policyObjId, metadata);
 
     const processDataRes = await this.processDataWithWorker(blobId, onChainFileObjId, policyObjId, this.pocConfig?.threshold || 2);
     console.log('🚀 ~ Nautilus Processed data:', processDataRes?.data);
