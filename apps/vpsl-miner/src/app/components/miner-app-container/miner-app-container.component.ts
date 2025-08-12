@@ -6,7 +6,7 @@ import { SubmissionProcessingService } from '../../services/submission-processin
 import { Web3WalletService } from '../../services/web3-wallet.service';
 import { StakingApiService } from '../../services/staking-api.service';
 import { Router } from '@angular/router';
-import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
+import { ConfirmDialogV2Component } from '../confirm-dialog-v2/confirm-dialog-v2.component';
 import { TelegramApiService } from '../../services/telegram-api.service';
 import { AiChatService } from '../../services/ai-chat.service';
 
@@ -97,7 +97,7 @@ export class MinerAppContainerComponent implements OnInit {
 
   public openTokenGatingDialog() {
     this.matDialog
-      .open(ConfirmDialogComponent, {
+      .open(ConfirmDialogV2Component, {
         data: {
           title: 'Permission Alert',
           message: `You need to own at least ${this.requiredBalanceAmount} VFSN and stake at least ${this.requiredStakeAmount} VFSN to use the Private Lens AI.`,
@@ -115,7 +115,7 @@ export class MinerAppContainerComponent implements OnInit {
 
   public openLoginNotification() {
     this.matDialog
-      .open(ConfirmDialogComponent, {
+      .open(ConfirmDialogV2Component, {
         data: {
           title: 'Login to Private Lens AI',
           message: 'Please login to the Private Lens AI with Telegram to continue.',

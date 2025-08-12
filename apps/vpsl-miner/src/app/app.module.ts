@@ -22,7 +22,7 @@ import { MinerAppContainerComponent } from './components/miner-app-container/min
 import { MinerMainComponent } from './components/miner-main/miner-main.component';
 import { StakingRewardsInfoComponent } from './components/staking-rewards-info/staking-rewards-info.component';
 // import { MatStepperModule } from '@angular/material/stepper';
-import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
+import { ConfirmDialogV2Component } from './components/confirm-dialog-v2/confirm-dialog-v2.component';
 import { MinerSettingsComponent } from './components/miner-settings/miner-settings.component';
 import { SignMessageWalletComponent } from './components/sign-message-wallet/sign-message-wallet.component';
 import { SubmissionProcessingComponent } from './components/submission-processing/submission-processing.component';
@@ -39,6 +39,7 @@ import { AiMessageComponent } from './components/ai-message/ai-message.component
 import { PhoneInputDirective } from './directives/phone-input.directive';
 import { AppConfigService } from './services/app-config.service';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
 
 @NgModule({
   schemas: [
@@ -74,8 +75,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     FormsModule,
     NgOptimizedImage,
     HttpClientModule,
+    ConfirmDialogV2Component,
     ConfirmDialogComponent,
-
     MatDialogModule,
     MatButtonModule,
     MatMenuModule,

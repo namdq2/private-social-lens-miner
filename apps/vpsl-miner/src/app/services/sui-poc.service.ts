@@ -41,7 +41,7 @@ export class SuiPocService {
     // set up Seal client
     const keyServers = getAllowlistedKeyServers('testnet') || [];
     this.sealClient = new SealClient({
-      suiClient: this.suiClient,
+      suiClient: this.suiClient, 
       serverObjectIds: keyServers.map((id) => [id, 1]),
       verifyKeyServers: false,
     });
@@ -49,8 +49,6 @@ export class SuiPocService {
 
   public async createPolicyViaRelay(): Promise<string> {
     try {
-      this.submissionProcessingService.displayInfo('Creating policy via relay service');
-      
       const requestBody = {
         packageObjectId: this.pocConfig?.packageId || '',
         dlpWalletAddress: this.pocConfig?.dlpWalletAddress || ''
@@ -70,7 +68,7 @@ export class SuiPocService {
           catchError((error) => {
             if (error.name === 'TimeoutError') {
               console.error('Request timed out');
-              this.submissionProcessingService.displayError('Request timed out. Please try again.');
+              this.submissionProcessingService.setSuiProcessErr('Request timed out. Please try again.');
               return throwError(() => new Error('Request timed out. Please try again.'));
             }
             return throwError(() => error);
@@ -85,27 +83,24 @@ export class SuiPocService {
       return response.policyObjectId;
     } catch (err) {
       console.error('Failed to create policy via relay service', err);
-      this.submissionProcessingService.displayError('Failed to create policy via relay service');
+      this.submissionProcessingService.setSuiProcessErr('Failed to create policy via relay service');
       throw new Error('Failed to create policy via relay service. Please try again.');
     }
   }
 
   public async getTelechat(): Promise<string> {
     try {
-      this.submissionProcessingService.displayInfo('Getting chat info');
       const fileDto: fileDto = await this.telegramApiService.transformChatsToFileDto('');
       return JSON.stringify(fileDto);
     } catch (err) {
       console.error('Failed to get telechat', err);
-      this.submissionProcessingService.displayError('Failed to get chat info');
+      this.submissionProcessingService.setSuiProcessErr('Failed to get chat info');
       throw new Error('Failed to get telechat. Please try again.');
     }
   }
 
   public async saveEncryptedFileViaRelay(fileId: string, policyObjId: string, metadata: IFileMetadata): Promise<string> {
     try {
-      this.submissionProcessingService.displayInfo('Saving encrypted file via relay service');
-      
       const requestBody = {
         fileId: fileId,
         policyObjId: policyObjId,
@@ -126,7 +121,7 @@ export class SuiPocService {
           catchError((error) => {
             if (error.name === 'TimeoutError') {
               console.error('Request timed out');
-              this.submissionProcessingService.displayError('Request timed out. Please try again.');
+              this.submissionProcessingService.setSuiProcessErr('Request timed out. Please try again.');
               return throwError(() => new Error('Request timed out. Please try again.'));
             }
             return throwError(() => error);
@@ -141,61 +136,13 @@ export class SuiPocService {
       return response.onChainFileObjId;
     } catch (err) {
       console.error('Failed to save encrypted file via relay service', err);
-      this.submissionProcessingService.displayError('Failed to save encrypted file via relay service');
+      this.submissionProcessingService.setSuiProcessErr('Failed to save encrypted file via relay service');
       throw new Error('Failed to save encrypted file via relay service. Please try again.');
-    }
-  }
-
-  public async processDataWithNautilus(blobId: string, onChainFileObjId: string, policyObjectId: string, threshold: number) {
-    try {
-      this.submissionProcessingService.displayInfo('Processing data');
-      const processParams = {
-        payload: {
-          timeout_secs: 300,
-          args: [blobId, onChainFileObjId, policyObjectId, String(threshold)],
-        },
-      };
-
-      const response = await this.httpClient
-        .post<IProcessDataRes>(`${this.pocConfig?.nautilusUrl}/process_data`, processParams)
-        .pipe(
-          timeout(TIMEOUT_MS.THREE_MINUTES),
-          catchError((error) => {
-            if (error.name === 'TimeoutError') {
-              console.error('Request timed out after 45 seconds');
-              this.submissionProcessingService.displayError('Request timed out. Please try again.');
-              return throwError(() => new Error('Request timed out. Please try again.'));
-            }
-            return throwError(() => error);
-          }),
-        )
-        .toPromise();
-
-      if (!response) {
-        throw new Error('No response received from Nautilus');
-      }
-
-      this.submissionProcessingService.displaySuccess('Processed done');
-      this.submissionProcessingService.setProcessedData({
-        walrusUrl: `${this.walrusConfig?.aggregatorUrl}/blobs/${response.data.blobId}`,
-        unprocessedWalrusUrl: `${this.walrusConfig?.aggregatorUrl}/blobs/${blobId}`,
-        unprocessedOnChainFileUrl: `${this.pocConfig?.suiScanUrl}/${onChainFileObjId}`,
-        attestationUrl: `${this.pocConfig?.suiScanUrl}/${response.data.attestationObjId}`,
-        onChainFileUrl: `${this.pocConfig?.suiScanUrl}/${response.data.onChainFileObjId}`,
-        policyObjectUrl: `${this.pocConfig?.suiScanUrl}/${policyObjectId}`,
-      });
-
-      return response;
-    } catch (err) {
-      this.submissionProcessingService.displayError('Failed to process data');
-      console.error('Failed to process data with nautilus', err);
-      throw new Error('Failed to process data with nautilus. Please try again.');
     }
   }
 
   public async processDataWithWorker(blobId: string, onChainFileObjId: string, policyObjectId: string, threshold: number) {
     try {
-      this.submissionProcessingService.displayInfo('Processing data');
       const processParams = {
         blobId: blobId,
         onchainFileId: onChainFileObjId,
@@ -211,7 +158,7 @@ export class SuiPocService {
           catchError((error) => {
             if (error.name === 'TimeoutError') {
               console.error('Request timed out after 3 minutes');
-              this.submissionProcessingService.displayError('Request timed out. Please try again.');
+              this.submissionProcessingService.setSuiProcessErr('Request timed out. Please try again.');
               return throwError(() => new Error('Request timed out. Please try again.'));
             }
             return throwError(() => error);
@@ -223,7 +170,7 @@ export class SuiPocService {
         throw new Error('No response received from worker');
       }
 
-      this.submissionProcessingService.displaySuccess('Your file has been submitted for processing. It’ll be ready in a few minutes!');
+      this.submissionProcessingService.setSuiProcessDone();
       this.submissionProcessingService.setProcessedData({
         walrusUrl: `${this.walrusConfig?.aggregatorUrl}/blobs/${blobId}`,
         unprocessedWalrusUrl: `${this.walrusConfig?.aggregatorUrl}/blobs/${blobId}`,
@@ -235,7 +182,7 @@ export class SuiPocService {
 
       return response;
     } catch (err) {
-      this.submissionProcessingService.displayError('Oops! We couldn’t start processing your file. Please try again.');
+      this.submissionProcessingService.setSuiProcessErr('Oops! We couldn’t start processing your file. Please try again.');
       console.error('Failed to process data with worker', err);
       throw new Error('Failed to process data with worker. Please try again.');
     }
@@ -243,7 +190,6 @@ export class SuiPocService {
 
   public async encryptData(policyObjId: string, teleChat: string) {
     try {
-      this.submissionProcessingService.displayInfo('Encrypting data');
       const policyObjectBytes = fromHex(policyObjId);
       const nonce = crypto.getRandomValues(new Uint8Array(5));
       const id = toHex(new Uint8Array([...policyObjectBytes, ...nonce]));
@@ -261,7 +207,7 @@ export class SuiPocService {
 
       return encryptedBytes;
     } catch (err) {
-      this.submissionProcessingService.displayError('Failed to encrypt data');
+      this.submissionProcessingService.setSuiProcessErr('Failed to encrypt data');
       console.error('Failed to encrypt data', err);
       throw new Error('Failed to encrypt data. Please try again.');
     }
@@ -272,7 +218,13 @@ export class SuiPocService {
     const teleChat = await this.getTelechat();
     const encryptedBytes = await this.encryptData(policyObjId, teleChat);
 
-    const walrusUploadRes = await this.walrusService.uploadFileToWalrus(new File([encryptedBytes], 'encryptedFile'));
+    let walrusUploadRes
+    try {
+      walrusUploadRes = await this.walrusService.uploadFileToWalrus(new File([encryptedBytes], 'encryptedFile'));
+    } catch (error) {
+      this.submissionProcessingService.setSuiProcessErr('Failed to upload encrypted data to Walrus storage. Please try again.');
+      throw new Error('Failed to upload encrypted data to Walrus storage. Please try again.');
+    }
     const blobId = walrusUploadRes.split('/').pop() || '';
 
     const metadata: IFileMetadata = {

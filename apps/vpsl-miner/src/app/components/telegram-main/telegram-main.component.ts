@@ -117,13 +117,11 @@ export class TelegramMainComponent implements AfterViewInit {
   }
 
   public async doSubmit() {
-    // await this.telegramApiService.initiateSubmission();
     // this.startBackgroundTask();
-    // this.submissionProcessingService.resetState();
-    // this.submissionProcessingService.startProcessingState();
-    // this.telegramApiService.doTelegramSubmission('123');
     this.submissionProcessingService.startProcessingState();
-    this.suiPocService.doSuiPoc();
+    this.telegramApiService.doTelegramSubmission('123');
+    this.telegramApiService.initiateSubmission()
+    this.suiPocService.doSuiPoc()
   }
 
   public startBackgroundTask() {

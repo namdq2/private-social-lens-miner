@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { IConversation } from '../../models/ai-chat';
 import { MatDialog } from '@angular/material/dialog';
-import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
+import { ConfirmDialogV2Component } from '../confirm-dialog-v2/confirm-dialog-v2.component';
 
 @Component({
   selector: 'app-ai-conversation',
@@ -28,7 +28,7 @@ export class AiConversationComponent {
 
   public openConfirmDialog() {
     this.matDialog
-      .open(ConfirmDialogComponent, {
+      .open(ConfirmDialogV2Component, {
         data: {
           title: 'Delete conversation',
           message: 'Are you sure you want to delete this conversation?',

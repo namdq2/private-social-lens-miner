@@ -53,10 +53,10 @@ export class RelayApiService {
       console.log('Claim requested successfully');
 
       await this.web3WalletService.calculateBalance();
-      this.submissionProcessingService.displaySuccess(`Your submission scored ${this.submissionProcessingService.successRewardsAmount()} VFSN`);
+      this.submissionProcessingService.setVanaProcessDone(`Your submission scored ${this.submissionProcessingService.successRewardsAmount()} VFSN`);
     } catch (err: any) {
       console.error('Error relayAddFileWithPermissions:', err);
-      this.submissionProcessingService.displayError(ERROR_MSG_GENERAL);
+      this.submissionProcessingService.setVanaProcessErr(ERROR_MSG_GENERAL);
     }
   }
 
@@ -135,10 +135,10 @@ export class RelayApiService {
         this.submissionProcessingService.successRewardsAmount.set(rewards);
         await this.requestReward(fileId, proofIndex);
       } else {
-        this.submissionProcessingService.displayFailure('The score for your data submission was below the acceptable limit. No rewards were awarded.');
+        this.submissionProcessingService.setVanaProcessErr('The score for your data submission was below the acceptable limit. No rewards were awarded.');
       }
     } catch (err: any) {
-      this.submissionProcessingService.displayError(err);
+      this.submissionProcessingService.setVanaProcessErr(err);
       throw new Error(err);
     }
   }
