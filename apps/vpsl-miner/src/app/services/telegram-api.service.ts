@@ -91,11 +91,13 @@ export class TelegramApiService {
     if (isElectron()) {
       window.electron.onExecuteBackgroundTaskCode((event: any, message: any) => {
         console.warn('Received message from main process:', message);
+        this.submissionProcessingService.startProcessingState();
+
         if (this.isAuthorized) {
           this.runAutoSubmission(message);
         } else {
           this.submissionProcessingService.setVanaProcessErr('Not signed in to Telegram. Sign in to continue.');
-        }
+        } 
       });
 
       // window.electron.onBackgroundTaskFailed((event: any, message: any) => {
@@ -422,6 +424,7 @@ export class TelegramApiService {
 
     if (this.selectedDialogsList().length > 0) {
       await this.initiateSubmission();
+      // await this.doTelegramSubmission('')
     } else {
       this.submissionProcessingService.setVanaProcessErr('No chats selected for submission.');
     }

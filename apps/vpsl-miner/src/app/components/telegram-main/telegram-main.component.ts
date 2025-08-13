@@ -108,7 +108,7 @@ export class TelegramMainComponent implements AfterViewInit {
       console.error('NULL DIALOG!');
     }
   }
-
+ 
   public onRemoveDialog(dialog: Dialog | null) {
     const dialogIndex = this.selectedDialogsList().findIndex((telegramDialog) => telegramDialog.id === dialog?.id);
     if (dialogIndex !== -1) {
@@ -117,11 +117,7 @@ export class TelegramMainComponent implements AfterViewInit {
   }
 
   public async doSubmit() {
-    // this.startBackgroundTask();
-    this.submissionProcessingService.startProcessingState();
-    this.telegramApiService.doTelegramSubmission('123');
-    this.telegramApiService.initiateSubmission()
-    this.suiPocService.doSuiPoc()
+    this.startBackgroundTask();     
   }
 
   public startBackgroundTask() {

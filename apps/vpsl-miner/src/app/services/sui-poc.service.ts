@@ -13,6 +13,9 @@ import { SubmissionProcessingService } from './submission-processing.service';
 import { ISuiPoc, IWalrus } from '../models/app-config';
 import { timeout, catchError, throwError } from 'rxjs';
 import { TIMEOUT_MS } from '../shared/constants';
+import { isElectron } from '../shared/helpers';
+
+declare const window: any;
 
 @Injectable({
   providedIn: 'root',
@@ -45,6 +48,17 @@ export class SuiPocService {
       serverObjectIds: keyServers.map((id) => [id, 1]),
       verifyKeyServers: false,
     });
+
+    if (isElectron()) {
+      window.electron.onExecuteBackgroundTaskCode((event: any, message: any) => {
+        console.warn('Received message from main process:', message);
+        if (this.telegramApiService.isAuthorized) {
+          this.doSuiPoc();
+        } else {
+          this.submissionProcessingService.setVanaProcessErr('Not signed in to Telegram. Sign in to continue.');
+        }
+      });
+    }
   }
 
   public async createPolicyViaRelay(): Promise<string> {
