@@ -29,6 +29,10 @@ export class SubmissionProcessingComponent {
   public showSuccessMessage = this.submissionProcessingService.showSuccessMessage;
   public showFailureMessage = this.submissionProcessingService.showFailureMessage;
   public processedData = this.submissionProcessingService.processedData;
+  public isProcessSuccess = this.submissionProcessingService.showProcessSuccess;
+  public isProcessFailed = this.submissionProcessingService.showProcessErr;
+  public suiSubmissionErr = this.submissionProcessingService.suiSubmissionErr;
+  public vanaSubmissionErr = this.submissionProcessingService.vanaSubmissionErr;
 
   public get gelatoTaskType() {
     return this.gelatoApiService.currentTaskType;
@@ -46,6 +50,7 @@ export class SubmissionProcessingComponent {
   public endSubmissionFlow() {
     this.submissionProcessingService.resetState();
     this.submissionProcessingService.endProcessingState();
+    this.submissionProcessingService.resetProcessState();
   }
 
   testShowInfo() {

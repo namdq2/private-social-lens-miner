@@ -19,13 +19,23 @@ export function isElectron() {
   return false;
 }
 
+// Get user's timezone
+export const getUserTimezone = (): string => {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+  } catch (error) {
+    // Fallback to local timezone if detection fails
+    return 'UTC';
+  }
+};
+
 export const formatTime = (date: Date | string): string => {
     const dateObj = new Date(date);
     return dateObj.toLocaleTimeString('en-US', {
       hour: '2-digit',
       minute: '2-digit',
       hour12: false,
-      timeZone: 'Asia/Bangkok',
+      timeZone: getUserTimezone(),
     });
   }
 
@@ -36,6 +46,6 @@ export const formatTime = (date: Date | string): string => {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
-      timeZone: 'Asia/Bangkok',
+      timeZone: getUserTimezone(),
     });
   }

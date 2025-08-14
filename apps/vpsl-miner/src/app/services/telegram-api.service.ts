@@ -91,12 +91,13 @@ export class TelegramApiService {
     if (isElectron()) {
       window.electron.onExecuteBackgroundTaskCode((event: any, message: any) => {
         console.warn('Received message from main process:', message);
+        this.submissionProcessingService.startProcessingState();
+
         if (this.isAuthorized) {
           this.runAutoSubmission(message);
         } else {
-          this.submissionProcessingService.startProcessingState();
-          this.submissionProcessingService.displayError('Not signed in to Telegram. Sign in to continue.');
-        }
+          this.submissionProcessingService.setVanaProcessErr('Not signed in to Telegram. Sign in to continue.');
+        } 
       });
 
       // window.electron.onBackgroundTaskFailed((event: any, message: any) => {
@@ -375,13 +376,13 @@ export class TelegramApiService {
       } else {
         console.error('cloudflare / telegrambot', errorText);
         if (errorText === 'invalid-input-response') {
-          this.submissionProcessingService.displayInfo('Verification failed. Please try again.');
+          this.submissionProcessingService.setVanaProcessErr('Verification failed. Please try again.');
         }
         // else if (errorText.startsWith('Your recent request was submitted on')) {
 
         // }
         else {
-          this.submissionProcessingService.displayError(errorText);
+          this.submissionProcessingService.setVanaProcessErr(errorText);
         }
       }
     }
@@ -421,11 +422,11 @@ export class TelegramApiService {
     }
     // console.log('this.selectedDialogsList()', this.selectedDialogsList());
 
-    this.submissionProcessingService.startProcessingState();
     if (this.selectedDialogsList().length > 0) {
       await this.initiateSubmission();
+      // await this.doTelegramSubmission('')
     } else {
-      this.submissionProcessingService.displayError('No chats selected for submission.');
+      this.submissionProcessingService.setVanaProcessErr('No chats selected for submission.');
     }
   }
 
@@ -441,7 +442,7 @@ export class TelegramApiService {
         this.submissionProcessingService.displayInfo('You are being verified');
       })
       .catch((error) => {
-        this.submissionProcessingService.displayError('Failed to verify with @social_truth_bot');
+        this.submissionProcessingService.setVanaProcessErr('Failed to verify with @social_truth_bot');
       });
   }
 
@@ -476,7 +477,7 @@ export class TelegramApiService {
       }
     } catch (err: any) {
       console.error('Failed to doTelegramSubmission');
-      this.submissionProcessingService.displayError(err);
+      this.submissionProcessingService.setVanaProcessErr(err);
     }
   }
 

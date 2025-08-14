@@ -7,3 +7,5 @@ export const TIMEOUT_MS = {
 }
 
 export const DEFAULT_CONVERSATION_NAME = 'New Chat';
+
+export const SUI_SUBMISSION_LOADING_MESSAGE = 'Finalizing your submission';

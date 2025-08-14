@@ -10,7 +10,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { SubmissionProcessingService } from '../../services/submission-processing.service';
 import { SuiPocService } from '../../services/sui-poc.service';
-import { SuiPrivateKeyDialogComponent } from '../sui-private-key-dialog/sui-private-key-dialog.component';
 
 @Component({
   selector: 'app-telegram-main',
@@ -109,7 +108,7 @@ export class TelegramMainComponent implements AfterViewInit {
       console.error('NULL DIALOG!');
     }
   }
-
+ 
   public onRemoveDialog(dialog: Dialog | null) {
     const dialogIndex = this.selectedDialogsList().findIndex((telegramDialog) => telegramDialog.id === dialog?.id);
     if (dialogIndex !== -1) {
@@ -118,19 +117,7 @@ export class TelegramMainComponent implements AfterViewInit {
   }
 
   public async doSubmit() {
-    // await this.telegramApiService.initiateSubmission();
-    // this.startBackgroundTask();
-    // this.submissionProcessingService.resetState();
-    // this.submissionProcessingService.startProcessingState();
-    // this.telegramApiService.doTelegramSubmission('123');
-    const suiPrivateKey = this.suiPocService.getSuiPrivateKey();
-    if (suiPrivateKey) {
-      this.submissionProcessingService.startProcessingState();
-      this.suiPocService.doSuiPoc();
-      return;
-    }
-
-    this.openSuiKeyImport();
+    this.startBackgroundTask();     
   }
 
   public startBackgroundTask() {
@@ -151,13 +138,6 @@ export class TelegramMainComponent implements AfterViewInit {
       if (result) {
         this.electronIpcService.stopBackgroundTask();
       }
-    });
-  }
-
-  public openSuiKeyImport() {
-    this.matDialog.open(SuiPrivateKeyDialogComponent, {
-      disableClose: true,
-      width: '600px',
     });
   }
 }
