@@ -82,7 +82,7 @@
         @if(!suiSubmissionErr()) {
         <div class="mt-[-20px]">
           <div>
-            <a href="{{ processedData()?.unprocessedWalrusUrl }}" target="_blank" class="text-blue-500">Download submission from Walrus</a>
+            <a href="{{ processedData()?.unprocessedWalrusUrl }}" target="_blank" class="text-blue-500">Download encrypted submission from Walrus</a>
           </div>
           <div>
             <a href="{{ processedData()?.unprocessedOnChainFileUrl }}" target="_blank" class="text-blue-500">View submission on Sui block explorer</a>
@@ -103,7 +103,7 @@
       </div>
     </div>
     } @else {
-    <div class="h-full w-full flex flex-col justify-center items-center">
+    <div class="h-[400px] w-full flex flex-col justify-center items-center">
       <span>
         Please wait
         <span class="ellipsis-anim">
