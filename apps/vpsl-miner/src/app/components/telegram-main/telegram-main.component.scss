@@ -11,3 +11,14 @@
 .dialog-msgs-container {
   height: calc(100vh - 40px - 72px - 74px - 32px - 2px - 32px - 60px - 16px - 40px);
 }
+
+.referral-btn {
+  text-align: center;
+  background-image: radial-gradient(circle, #0c2453, #1c4aaa);
+  border-radius: 0.75rem;
+  border: 1px solid #1a56cb;
+  padding: .5rem 1rem;
+  font-weight: 400;
+  transition: opacity .2s;
+  font-size: 1rem;
+}

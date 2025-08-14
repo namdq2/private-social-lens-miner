@@ -41,12 +41,6 @@ export class SubmissionProcessingComponent {
   public readonly gelatoTaskTypeRequestReward = GelatoTaskRelay.REQUEST_REWARD;
   public readonly gelatoTaskTypeNone = GelatoTaskRelay.NONE;
 
-  // public ngAfterViewInit(): void {
-  //   if (this.submissionProcessingService.showCloudFlare()) {
-  //     this.cloudFlareService.renderTurnstile();
-  //   }
-  // }
-
   public endSubmissionFlow() {
     this.submissionProcessingService.resetState();
     this.submissionProcessingService.endProcessingState();

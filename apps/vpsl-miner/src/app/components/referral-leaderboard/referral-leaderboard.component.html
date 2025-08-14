@@ -1,0 +1,25 @@
+<div class="text-3xl lg:text-4xl mb-8">
+  <h6>Referral Leaderboard</h6>
+</div>
+
+<div
+  class="section-container flex flex-col w-full shadow-md rounded-xl bg-clip-border">
+<table class="table-auto">
+  <thead>
+    <tr>
+      <th class="font-bold p-4 border-b border-white">Rank</th>
+      <th class="font-bold p-4 border-b border-white">Wallet Address</th>
+      <th class="font-bold p-4 border-b border-white">No. of Referrals</th>
+    </tr>
+  </thead>
+  <tbody>
+    @for(refItem of referralLeaderboardList(); track refItem.walletAddress; let idx = $index) {
+      <tr>
+        <td class="text-center p-4 border-b border-[#E1F6FF3B]">{{idx + 1}}</td>
+        <td class="text-center p-4 border-b border-[#E1F6FF3B]">{{refItem.walletAddress}}</td>
+        <td class="text-center p-4 border-b border-[#E1F6FF3B]">{{refItem.referralCount}}</td>
+      </tr>
+    }
+  </tbody>
+</table>
+</div>

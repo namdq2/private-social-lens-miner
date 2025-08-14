@@ -32,7 +32,7 @@ export class AiChatMainComponent implements AfterViewChecked {
     this.aiChatService.loadConversationsFromApi();
     this.aiChatService.getLatestCompletedJob().then((latestCompletedAt) => {
       if (!latestCompletedAt) {
-        this.latestCompletedAt.set('Nothing is completed yet')
+        this.latestCompletedAt.set('No chat data is processed yet')
         return;
       }
       this.latestCompletedAt.set(this.formatDayTime(latestCompletedAt));

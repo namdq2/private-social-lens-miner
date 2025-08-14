@@ -12,10 +12,12 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
 import { ConfirmWalletDialogComponent } from './components/confirm-wallet-dialog/confirm-wallet-dialog.component';
 import { HotWalletComponent } from './components/hot-wallet/hot-wallet.component';
 import { MinerAppContainerComponent } from './components/miner-app-container/miner-app-container.component';
@@ -24,6 +26,8 @@ import { StakingRewardsInfoComponent } from './components/staking-rewards-info/s
 // import { MatStepperModule } from '@angular/material/stepper';
 import { ConfirmDialogV2Component } from './components/confirm-dialog-v2/confirm-dialog-v2.component';
 import { MinerSettingsComponent } from './components/miner-settings/miner-settings.component';
+import { ReferralLeaderboardComponent } from './components/referral-leaderboard/referral-leaderboard.component';
+import { ReferralRewardsDialogComponent } from './components/referral-rewards-dialog/referral-rewards-dialog.component';
 import { SignMessageWalletComponent } from './components/sign-message-wallet/sign-message-wallet.component';
 import { SubmissionProcessingComponent } from './components/submission-processing/submission-processing.component';
 import { TelegramDialogComponent } from './components/telegram-dialog/telegram-dialog.component';
@@ -38,13 +42,9 @@ import { AiConversationComponent } from './components/ai-conversation/ai-convers
 import { AiMessageComponent } from './components/ai-message/ai-message.component';
 import { PhoneInputDirective } from './directives/phone-input.directive';
 import { AppConfigService } from './services/app-config.service';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
 
 @NgModule({
-  schemas: [
-    CUSTOM_ELEMENTS_SCHEMA,
-  ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   declarations: [
     AppComponent,
     HotWalletComponent,
@@ -67,6 +67,8 @@ import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dial
     AiChatMainComponent,
     AiConversationComponent,
     AiMessageComponent,
+    ReferralRewardsDialogComponent,
+    ReferralLeaderboardComponent,
   ],
   imports: [
     BrowserModule,
@@ -88,7 +90,6 @@ import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dial
     MatSidenavModule,
     MatTooltipModule,
     ClipboardModule,
-    // MatStepperModule
   ],
   providers: [
     {
