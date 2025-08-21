@@ -26,9 +26,18 @@
             "input": "apps/vpsl-miner/src/app/assets/fonts"
           }
         ],
-        "styles": ["apps/vpsl-miner/src/styles.scss"],
+        "styles": [
+          "apps/vpsl-miner/src/styles.scss"
+        ],
         "scripts": [],
-        "allowedCommonJsDependencies": ["buffer", "iso-url", "telegram", "@gelatonetwork/relay-sdk", "elliptic", "form-data"]
+        "allowedCommonJsDependencies": [
+          "buffer",
+          "iso-url",
+          "telegram",
+          "@gelatonetwork/relay-sdk",
+          "elliptic",
+          "form-data"
+        ]
       },
       "configurations": {
         "production": {
@@ -64,8 +73,7 @@
           "buildTarget": "vpsl-miner:build:development"
         }
       },
-      "defaultConfiguration": "development",
-      "continuous": true
+      "defaultConfiguration": "development"
     },
     "extract-i18n": {
       "executor": "@angular-devkit/build-angular:extract-i18n",

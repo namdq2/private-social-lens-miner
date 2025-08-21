@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { GelatoTaskRelay } from '../../models/gelato';
-// import { GelatoApiService } from '../../services/gelato-api.service';
+import { GelatoApiService } from '../../services/gelato-api.service';
 import { SubmissionProcessingService } from '../../services/submission-processing.service';
 
 @Component({
@@ -11,7 +11,7 @@ import { SubmissionProcessingService } from '../../services/submission-processin
 })
 export class SubmissionProcessingComponent {
   private readonly submissionProcessingService: SubmissionProcessingService = inject(SubmissionProcessingService);
-  // private readonly gelatoApiService: GelatoApiService = inject(GelatoApiService);
+  private readonly gelatoApiService: GelatoApiService = inject(GelatoApiService);
 
   public showCloudFlare = this.submissionProcessingService.showCloudFlare;
 
@@ -25,12 +25,12 @@ export class SubmissionProcessingComponent {
   public showSuccessMessage = this.submissionProcessingService.showSuccessMessage;
   public showFailureMessage = this.submissionProcessingService.showFailureMessage;
 
-  // public get gelatoTaskType() {
-  //   return this.gelatoApiService.currentTaskType;
-  // }
+  public get gelatoTaskType() {
+    return this.gelatoApiService.currentTaskType;
+  }
 
-  // public readonly gelatoTaskTypeRequestReward = GelatoTaskRelay.REQUEST_REWARD;
-  // public readonly gelatoTaskTypeNone = GelatoTaskRelay.NONE;
+  public readonly gelatoTaskTypeRequestReward = GelatoTaskRelay.REQUEST_REWARD;
+  public readonly gelatoTaskTypeNone = GelatoTaskRelay.NONE;
 
   public endSubmissionFlow() {
     this.submissionProcessingService.resetState();

@@ -5,12 +5,7 @@
   "projectType": "application",
   "targets": {
     "build": {
-      "dependsOn": [
-        {
-          "projects": ["vpsl-miner"],
-          "target": "build"
-        }
-      ],
+      "dependsOn": [{"projects": ["vpsl-miner"], "target": "build"}],
       "executor": "nx-electron:build",
       "outputs": ["{options.outputPath}"],
       "options": {
