@@ -44,3 +44,5 @@ Thumbs.db
 .angular
 
 apps/vpsl-miner/src/app/assets/data
+.cursor/rules/nx-rules.mdc
+.github/instructions/nx.instructions.md
