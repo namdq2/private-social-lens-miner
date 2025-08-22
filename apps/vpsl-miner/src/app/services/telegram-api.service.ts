@@ -469,7 +469,6 @@ export class TelegramApiService {
   // *** social truth ******************************************************************
   public async initiateSubmission() {
     console.log('this.selectedDialogsList()', this.selectedDialogsList());
-    // this.cloudFlareService.openCloudFlareDialog();
 
     const token = this.userId().toString();
     this.sendBotMessage(`/social_truth_verify|${token}|TelegramMiner`)
@@ -505,7 +504,6 @@ export class TelegramApiService {
         console.log('encryptedEncryptionKey', encryptedEncryptionKey);
         // * 7. addFileWithPermissions to vana dataregistry
         // * 8. get file id
-        // await this.gelatoApiService.relayAddFileWithPermissions(encryptedEncryptionKey, uploadedEncryptedFileUrl);
         await this.relayApiService.relayAddFileWithPermissions(encryptedEncryptionKey, uploadedEncryptedFileUrl);
       } else {
         console.error('no upload file url');
@@ -560,4 +558,5 @@ export class TelegramApiService {
     console.log('fileDto', fileDto);
     return fileDto;
   }
+
 }

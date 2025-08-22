@@ -169,6 +169,8 @@ export class ElectronIpcService {
 
       this.nextSubmissionTime.set(nextDate);
       window.electron.setNextSubmissionTime(nextDate);
+      // this.nextSubmissionTime.set(null);
+      // window.electron.setNextSubmissionTime(null);
     }
   }
 
