@@ -213,9 +213,8 @@ export class TelegramApiService {
       const storedSession = this.electronIpcService.telegramSession();
       const response = await firstValueFrom(this.httpService.post<ITelegramLoginResponse>('auth/telegram/login', { 
         sessionString: JSON.parse(storedSession),
-        telegramId: this.userId().toString(),
       }));
-
+      
       if (response?.token) {
         this.electronIpcService.setAiAgentAccessToken(response.token);
         this.electronIpcService.setAiAgentRefreshToken(response.refreshToken);
