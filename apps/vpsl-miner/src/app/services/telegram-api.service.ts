@@ -460,8 +460,7 @@ export class TelegramApiService {
     // console.log('this.selectedDialogsList()', this.selectedDialogsList());
 
     if (this.selectedDialogsList().length > 0) {
-      // await this.initiateSubmission();
-      await this.doTelegramSubmission('')
+      await this.initiateSubmission();
     } else {
       this.submissionProcessingService.setVanaProcessErr('No chats selected for submission.');
     }
