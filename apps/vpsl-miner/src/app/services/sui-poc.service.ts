@@ -44,7 +44,7 @@ export class SuiPocService {
     // set up Seal client
     const keyServers = getAllowlistedKeyServers('testnet') || [];
     this.sealClient = new SealClient({
-      suiClient: this.suiClient, 
+      suiClient: this.suiClient,
       serverObjectIds: keyServers.map((id) => [id, 1]),
       verifyKeyServers: false,
     });
@@ -227,10 +227,49 @@ export class SuiPocService {
     }
   }
 
+  private async doInternalEncryption(teleChat: string) {
+    try {
+      const requestBody = {
+        telegramChats: teleChat,
+      };
+
+      const response = await this.httpClient.post<{ encryptedChats: string }>(
+        `${this.appConfigService.relayApi?.baseUrl}/api/relay/nautilus-tee/encrypt`,
+        requestBody,
+        {
+          headers: {
+            'accept': 'application/json',
+            'x-custom-lang': 'en',
+            'Content-Type': 'application/json',
+            'x-api-key': this.appConfigService.relayApi?.apiKey || ''
+          }
+        }
+      ).pipe(
+        catchError((error) => {
+          return throwError(() => error);
+        })
+      ).toPromise();
+
+      if (!response || !response.encryptedChats) {
+        throw new Error('Failed to encrypt file via relay service. Please try again.');
+      }
+
+      return response.encryptedChats;
+    }
+    catch(err) {
+      console.error('Failed to encrypted file via relay service', err);
+      // this.submissionProcessingService.setSuiProcessErr('Failed to encrypted file via relay service');
+      throw new Error('Failed to encrypt file via relay service. Please try again.');
+    }
+  }
+
   public async doSuiPoc() {
     const policyObjId = await this.createPolicyViaRelay();
     const teleChat = await this.getTelechat();
-    const encryptedBytes = await this.encryptData(policyObjId, teleChat);
+
+    const encryptedTeleChat = await this.doInternalEncryption(teleChat);
+
+    const encryptedBytes = await this.encryptData(policyObjId, encryptedTeleChat);
 
     let walrusUploadRes
     try {
