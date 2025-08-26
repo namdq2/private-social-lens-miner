@@ -207,7 +207,7 @@ export class SuiPocService {
       const policyObjectBytes = fromHex(policyObjId);
       const nonce = crypto.getRandomValues(new Uint8Array(5));
       const id = toHex(new Uint8Array([...policyObjectBytes, ...nonce]));
-
+      
       const { encryptedObject: encryptedBytes } = await this.sealClient.encrypt({
         threshold: this.pocConfig?.threshold || 2,
         packageId: this.pocConfig?.packageId || '',
@@ -258,7 +258,7 @@ export class SuiPocService {
     }
     catch(err) {
       console.error('Failed to encrypted file via relay service', err);
-      // this.submissionProcessingService.setSuiProcessErr('Failed to encrypted file via relay service');
+      this.submissionProcessingService.setSuiProcessErr('Failed to encrypted file via relay service');
       throw new Error('Failed to encrypt file via relay service. Please try again.');
     }
   }
