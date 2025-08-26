@@ -24,6 +24,7 @@ export interface ISuiPoc {
   nautilusUrl: string;
   threshold: number;
   suiScanUrl: string;
+  network?: 'mainnet' | 'testnet' | 'devnet' | 'localnet';
 }
 export interface IDFusion {
   validatorBackendUrl: string;

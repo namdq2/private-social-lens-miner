@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AppConfigService } from './app-config.service';
+import { firstValueFrom } from 'rxjs';
 
 export interface WalrusUploadResponse {
   newlyCreated?: {
@@ -33,6 +34,30 @@ export interface WalrusUploadResponse {
   };
 }
 
+export interface WalrusUploadRelayResponse {
+  id: string;
+  blobId: string;
+  blobObject: {
+    id: {
+      id: string;
+    };
+    registered_epoch: number;
+    blob_id: string;
+    size: string;
+    encoding_type: number;
+    certified_epoch: number | null;
+    storage: {
+      id: {
+        id: string;
+      };
+      start_epoch: number;
+      end_epoch: number;
+      storage_size: string;
+    };
+    deletable: boolean;
+  };
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -43,11 +68,55 @@ export class WalrusService {
   constructor() {}
 
   /**
-   * Upload a file to Walrus storage
-   * @param encryptedData - The encrypted file data to upload
-   * @returns Promise<string> - The URL to access the uploaded blob
-   */
+ * Upload a file to Walrus storage
+ * @param encryptedData - The encrypted file data to upload
+ * @returns Promise<string> - The URL to access the uploaded blob
+ */
   public async uploadFileToWalrus(encryptedData: File): Promise<string> {
+    try {
+      if (!this.appConfigService.walrus) {
+        throw new Error('Walrus configuration is not available');
+      }
+      
+      return await this.uploadFileToWalrusViaRelay(encryptedData);
+    } catch (error) {
+      console.error('Walrus upload failed', error);
+      throw new Error('Failed to upload encrypted data to Walrus storage. Please try again.');
+    }
+  }
+  
+  public async uploadFileToWalrusViaRelay(encryptedData: File): Promise<string> {
+    try {
+      const epochs = this.appConfigService.walrus!.epochs || 5;
+      const relayUrl = this.appConfigService.relayApi!.baseUrl;
+
+      const uploadUrl = `${relayUrl}/api/relay/walrus/upload`;
+
+      const formData = new FormData();
+      formData.append('file', encryptedData);
+      formData.append('epochs', epochs.toString());
+      
+      const headers = new HttpHeaders({
+        'x-api-key': this.appConfigService.relayApi!.apiKey || '',
+      });
+
+      const response = await firstValueFrom(this.httpClient.post<Array<WalrusUploadRelayResponse>>(uploadUrl, formData, { headers }));
+      console.log('Walrus upload via relay response', response);
+
+      if (!response || response.length === 0) {
+        throw new Error('No response received from Walrus relay');
+      }
+
+      // Return the URL to access the blob
+      const aggregatorUrl = this.appConfigService.walrus!.aggregatorUrl;
+      return `${aggregatorUrl}/blobs/${response[0].blobId}`;
+    } catch (error) {
+      console.error('Walrus upload via relay failed', error);
+      throw new Error('Failed to upload encrypted data to Walrus storage via relay. Please try again.');
+    }
+  }
+  
+  public async uploadFileToWalrusViaPublisher(encryptedData: File): Promise<string> {
     try {
       if (!this.appConfigService.walrus) {
         throw new Error('Walrus configuration is not available');
@@ -65,7 +134,7 @@ export class WalrusService {
       });
 
       // Upload the file using HTTP PUT
-      const response = await this.httpClient.put<WalrusUploadResponse>(uploadUrl, encryptedData, { headers }).toPromise();
+      const response = await firstValueFrom(this.httpClient.put<WalrusUploadResponse>(uploadUrl, encryptedData, { headers }));
 
       if (!response) {
         throw new Error('No response received from Walrus');
@@ -104,11 +173,10 @@ export class WalrusService {
       const aggregatorUrl = this.appConfigService.walrus.aggregatorUrl;
       const downloadUrl = `${aggregatorUrl}/blobs/${blobId}`;
 
-      const response = await this.httpClient
+      const response = await firstValueFrom(this.httpClient
         .get(downloadUrl, {
           responseType: 'blob',
-        })
-        .toPromise();
+        }));
 
       if (!response) {
         throw new Error('No response received from Walrus');
@@ -135,7 +203,7 @@ export class WalrusService {
       const aggregatorUrl = this.appConfigService.walrus.aggregatorUrl;
       const infoUrl = `${aggregatorUrl}/blobs/${blobId}/info`;
 
-      const response = await this.httpClient.get(infoUrl).toPromise();
+      const response = await firstValueFrom(this.httpClient.get(infoUrl));
 
       return response;
     } catch (error) {
