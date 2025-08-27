@@ -11,7 +11,7 @@ import { HttpService } from './http.service';
 import { AppConfigService } from './app-config.service';
 import { SubmissionProcessingService } from './submission-processing.service';
 import { ISuiPoc, IWalrus } from '../models/app-config';
-import { timeout, catchError, throwError } from 'rxjs';
+import { timeout, catchError, throwError, firstValueFrom } from 'rxjs';
 import { TIMEOUT_MS } from '../shared/constants';
 import { isElectron } from '../shared/helpers';
 
@@ -68,7 +68,7 @@ export class SuiPocService {
         dlpWalletAddress: this.pocConfig?.dlpWalletAddress || ''
       };
 
-      const response = await this.httpClient
+      const response = await await firstValueFrom(this.httpClient
         .post<{ digest: string; policyObjectId: string }>(`${this.appConfigService.relayApi?.baseUrl}/api/relay/sui/create-policy`, requestBody, {
           headers: {
             'accept': 'application/json',
@@ -87,8 +87,7 @@ export class SuiPocService {
             }
             return throwError(() => error);
           }),
-        )
-        .toPromise();
+        ));
 
       if (!response || !response.policyObjectId) {
         throw new Error('Failed to create policy via relay service. Please try again.');
@@ -121,7 +120,7 @@ export class SuiPocService {
         metadata: metadata
       };
 
-      const response = await this.httpClient
+      const response = await firstValueFrom(this.httpClient
         .post<{ digest: string; onChainFileObjId: string }>(`${this.appConfigService.relayApi?.baseUrl}/api/relay/sui/save-encrypted-file`, requestBody, {
           headers: {
             'accept': 'application/json',
@@ -140,8 +139,7 @@ export class SuiPocService {
             }
             return throwError(() => error);
           }),
-        )
-        .toPromise();
+        ));
 
       if (!response || !response.onChainFileObjId) {
         throw new Error('Failed to save encrypted file via relay service. Please try again.');
@@ -165,7 +163,7 @@ export class SuiPocService {
         priority: 5
       };
 
-      const response = await this.httpService
+      const response = await firstValueFrom(this.httpService
         .post<IProcessDataRes>('jobs/data-processing', processParams)
         .pipe(
           timeout(TIMEOUT_MS.THREE_MINUTES),
@@ -177,8 +175,7 @@ export class SuiPocService {
             }
             return throwError(() => error);
           }),
-        )
-        .toPromise();
+        ));
 
       if (!response) {
         throw new Error('No response received from worker');

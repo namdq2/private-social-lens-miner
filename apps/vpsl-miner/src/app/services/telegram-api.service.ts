@@ -16,9 +16,9 @@ import { NewMessage, NewMessageEvent } from 'telegram/events';
 import { chatDto, fileDto } from '../models/social-truth';
 import { isElectron } from '../shared/helpers';
 import { IAiAgent } from '../models/app-config';
-import { StorageService } from './storage.service';
 import { ITelegramLoginResponse } from '../models/ai-chat';
 import { ReferralService } from './referral.service';
+import { PinataApiService } from './pinata-api.service';
 
 declare const window: any;
 
@@ -29,7 +29,8 @@ export class TelegramApiService {
   private readonly appConfigService: AppConfigService = inject(AppConfigService);
   private readonly submissionProcessingService: SubmissionProcessingService = inject(SubmissionProcessingService);
   private readonly cryptographyService: CryptographyService = inject(CryptographyService);
-  private readonly storageService: StorageService = inject(StorageService);
+  // private readonly storageService: StorageService = inject(StorageService);
+  private readonly pinataApiService: PinataApiService = inject(PinataApiService);
   private readonly electronIpcService: ElectronIpcService = inject(ElectronIpcService);
   private readonly web3WalletService: Web3WalletService = inject(Web3WalletService);
   private readonly relayApiService: RelayApiService = inject(RelayApiService);
@@ -99,7 +100,7 @@ export class TelegramApiService {
           this.runAutoSubmission(message);
         } else {
           this.submissionProcessingService.setVanaProcessErr('Not signed in to Telegram. Sign in to continue.');
-        } 
+        }
       });
 
       // window.electron.onBackgroundTaskFailed((event: any, message: any) => {
@@ -211,8 +212,9 @@ export class TelegramApiService {
   public async loginAiAgent(): Promise<void> {
     try {
       const storedSession = this.electronIpcService.telegramSession();
-      const response = await firstValueFrom(this.httpService.post<ITelegramLoginResponse>('auth/telegram/login', { 
+      const response = await firstValueFrom(this.httpService.post<ITelegramLoginResponse>('auth/telegram/login', {
         sessionString: JSON.parse(storedSession),
+        telegramId: this.userId().toString(),
       }));
       
       if (response?.token) {
@@ -460,6 +462,8 @@ export class TelegramApiService {
 
     if (this.selectedDialogsList().length > 0) {
       await this.initiateSubmission();
+      // for dev - uncomment to bypass
+      // this.doTelegramSubmission('');
     } else {
       this.submissionProcessingService.setVanaProcessErr('No chats selected for submission.');
     }
@@ -524,7 +528,8 @@ export class TelegramApiService {
       const encryptedData = await this.cryptographyService.clientSideEncrypt(file, signature); // user symmetric encryption key - can encrypt and decrypt using the same key, itself
       // * 3. upload file to pinata ipfs
       // * 4. get pinata file url
-      return await this.storageService.uploadFile(encryptedData);
+      return await this.pinataApiService.uploadFileToPinata(encryptedData)
+      // return await this.storageService.uploadFile(encryptedData);
     } catch (err) {
       console.error('encryptAndUploadFile failed', err);
       throw new Error('Failed to submit encrypted data. Please try again.');
