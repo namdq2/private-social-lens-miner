@@ -14,6 +14,7 @@ import { ISuiPoc, IWalrus } from '../models/app-config';
 import { timeout, catchError, throwError } from 'rxjs';
 import { TIMEOUT_MS } from '../shared/constants';
 import { isElectron } from '../shared/helpers';
+import { IInternalEncryptedData, IInternalEncryptRes } from '../models/sui-poc';
 
 declare const window: any;
 
@@ -202,7 +203,7 @@ export class SuiPocService {
     }
   }
 
-  public async encryptData(policyObjId: string, teleChat: string) {
+  public async encryptData(policyObjId: string, encryptedTeleChat: IInternalEncryptedData) {
     try {
       const policyObjectBytes = fromHex(policyObjId);
       const nonce = crypto.getRandomValues(new Uint8Array(5));
@@ -212,7 +213,7 @@ export class SuiPocService {
         threshold: this.pocConfig?.threshold || 2,
         packageId: this.pocConfig?.packageId || '',
         id,
-        data: new Uint8Array(new TextEncoder().encode(teleChat)),
+        data: new Uint8Array(new TextEncoder().encode(JSON.stringify(encryptedTeleChat))),
       });
 
       if (!encryptedBytes) {
@@ -233,7 +234,7 @@ export class SuiPocService {
         telegramChats: teleChat,
       };
 
-      const response = await this.httpClient.post<{ encryptedChats: string }>(
+      const response = await this.httpClient.post<IInternalEncryptRes>(
         `${this.appConfigService.relayApi?.baseUrl}/api/relay/nautilus-tee/encrypt`,
         requestBody,
         {
@@ -250,11 +251,11 @@ export class SuiPocService {
         })
       ).toPromise();
 
-      if (!response || !response.encryptedChats) {
+      if (!response || !response.encryptedData) {
         throw new Error('Failed to encrypt file via relay service. Please try again.');
       }
 
-      return response.encryptedChats;
+      return response.encryptedData;
     }
     catch(err) {
       console.error('Failed to encrypted file via relay service', err);

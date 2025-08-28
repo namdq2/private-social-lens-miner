@@ -6,3 +6,15 @@ export interface IProcessedData {
   onChainFileUrl: string;
   policyObjectUrl: string;
 }
+
+export interface IInternalEncryptRes {
+  success: boolean
+  encryptedData: IInternalEncryptedData
+  message: string
+}
+
+export interface IInternalEncryptedData {
+  nonce: string
+  ciphertext: string
+  tag: string
+}

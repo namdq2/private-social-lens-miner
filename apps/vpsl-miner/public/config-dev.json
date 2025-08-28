@@ -62,8 +62,8 @@
     }
   },
   "relayApi": {
-    "baseUrl": "http://localhost:3000",
-    "apiKey": "8mK_rHJJsaOSwQPfOvM6Qc5FdNkSs5PR_9HjlK8zKbw_"
+    "baseUrl": "https://dfusion-relay.var-meta.com",
+    "apiKey": "a7bf801f_lIRzBR5BrR9DRJaAVtyUldbYfIcoETA7FCbpNgyn"
   },
   "walrus": {
     "publisherUrl": "https://publisher.walrus-testnet.walrus.space/v1",
