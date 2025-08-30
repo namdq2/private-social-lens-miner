@@ -11,7 +11,7 @@ import { HttpService } from './http.service';
 import { AppConfigService } from './app-config.service';
 import { SubmissionProcessingService } from './submission-processing.service';
 import { ISuiPoc, IWalrus } from '../models/app-config';
-import { timeout, catchError, throwError } from 'rxjs';
+import { timeout, catchError, throwError, firstValueFrom } from 'rxjs';
 import { TIMEOUT_MS } from '../shared/constants';
 import { isElectron } from '../shared/helpers';
 import { IInternalEncryptedData, IInternalEncryptRes } from '../models/sui-poc';
@@ -166,9 +166,8 @@ export class SuiPocService {
         priority: 5
       };
 
-      const response = await this.httpService
-        .post<IProcessDataRes>('jobs/data-processing', processParams)
-        .pipe(
+      const response = await firstValueFrom(
+        this.httpService.post<IProcessDataRes>('jobs/data-processing', processParams).pipe(
           timeout(TIMEOUT_MS.THREE_MINUTES),
           catchError((error) => {
             if (error.name === 'TimeoutError') {
@@ -178,8 +177,8 @@ export class SuiPocService {
             }
             return throwError(() => error);
           }),
-        )
-        .toPromise();
+        ),
+      );
 
       if (!response) {
         throw new Error('No response received from worker');
@@ -208,7 +207,7 @@ export class SuiPocService {
       const policyObjectBytes = fromHex(policyObjId);
       const nonce = crypto.getRandomValues(new Uint8Array(5));
       const id = toHex(new Uint8Array([...policyObjectBytes, ...nonce]));
-      
+
       const { encryptedObject: encryptedBytes } = await this.sealClient.encrypt({
         threshold: this.pocConfig?.threshold || 2,
         packageId: this.pocConfig?.packageId || '',
@@ -246,8 +245,8 @@ export class SuiPocService {
           }
         }
       ).pipe(
-        catchError((error) => {
-          return throwError(() => error);
+          catchError((error) => {
+            return throwError(() => error);
         })
       ).toPromise();
 
