@@ -32,24 +32,18 @@ export class RefinementApiService {
    * @param encryptionKey Original encryption key
    * @returns Promise with transaction hash of addRefinementWithPermission
    */
-  public async callRefinementService(
-    fileId: number,
-    encryptionKey: string
-  ): Promise<{add_refinement_tx_hash: string}> {
+  public async callRefinementService(fileId: number, encryptionKey: string): Promise<{ add_refinement_tx_hash: string }> {
     const requestBody = {
       file_id: fileId,
       encryption_key: encryptionKey,
       refiner_id: this.refinerId,
       env_vars: {
         PINATA_API_JWT: this.appConfigService.pinata?.jwt,
-      }
+      },
     };
 
     try {
-      return await firstValueFrom(this.http.post<{add_refinement_tx_hash: string}>(
-        this.refinementServiceUrl,
-        requestBody
-      ));
+      return await firstValueFrom(this.http.post<{ add_refinement_tx_hash: string }>(this.refinementServiceUrl, requestBody));
     } catch (error) {
       console.error('Error calling refinement service:', error);
       throw new Error('Failed to process data refinement. Please try again.');

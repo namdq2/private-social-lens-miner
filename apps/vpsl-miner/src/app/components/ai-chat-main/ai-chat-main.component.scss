@@ -1,0 +1,189 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.conversations-container {
+  max-height: 100%;
+  scrollbar-width: thin;
+  scrollbar-color: #8691a7 #2b3445;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  scroll-behavior: smooth;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #2b3445;
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #8691a7;
+    border-radius: 3px;
+    transition: background-color 0.2s ease;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0;
+  }
+}
+
+// Messages container smooth scrolling
+.messages-container {
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: #8691a7 #2b3445;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #2b3445;
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #8691a7;
+    border-radius: 3px;
+    transition: background-color 0.2s ease;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0;
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Smooth transitions for buttons and interactive elements
+button {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+}
+
+textarea {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:focus {
+    box-shadow: 0 0 0 2px rgba(68, 136, 246, 0.2);
+    transform: scale(1.005);
+  }
+}
+
+button:disabled {
+  @apply opacity-50 cursor-not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.conversations-container.collapsed {
+  width: 48px !important;
+  min-width: 48px !important;
+  max-width: 48px !important;
+  padding-right: 0 !important;
+  overflow-x: hidden;
+}
+
+.collapse-btn {
+  background: none;
+  border: none;
+  color: #8691a7;
+  cursor: pointer;
+  padding: 4px;
+  margin-bottom: 8px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 4px;
+
+  &:hover {
+    color: #4488f6;
+    background-color: rgba(68, 136, 246, 0.1);
+    transform: scale(1.05);
+  }
+}
+
+// Smooth transitions for conversation items
+app-ai-conversation {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    transform: translateX(2px);
+  }
+}
+
+// Smooth transitions for message bubbles
+.message-bubble {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+}
+
+// Smooth transitions for the main container
+.main-content {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// Smooth transitions for the chat area
+.chat-area {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// Loading states with smooth transitions
+.loading-state {
+  transition: opacity 0.3s ease-in-out;
+}
+
+// Smooth fade in for new messages
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message-enter {
+  animation: fadeInUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// Smooth transitions for disabled states
+.disabled {
+  transition: all 0.2s ease;
+}
+
+// Smooth transitions for the welcome message
+.welcome-message {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    transform: scale(1.02);
+  }
+}

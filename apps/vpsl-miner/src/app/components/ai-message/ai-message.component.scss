@@ -1,0 +1,99 @@
+:host {
+  display: block;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.animate-pulse {
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.message {
+  font-family: 'Courier New', monospace;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.6;
+  padding: 1rem;
+  background: #1e1e1e;
+  color: #d4d4d4;
+  border-radius: 8px;
+  max-width: 600px;
+  margin: 1rem auto;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+}
+
+/* Optional: fake typing cursor */
+.cursor {
+  animation: blink 1s step-end infinite;
+  color: #0f0;
+  transition: all 0.2s ease;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+// Message container with smooth transitions
+.message-container {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    transform: scale(1.01);
+  }
+}
+
+// Avatar with smooth transitions
+.message-avatar {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    transform: scale(1.1);
+  }
+}
+
+// Message bubble with enhanced transitions
+.message-bubble {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+}
+
+// Content text with smooth transitions
+.content-text {
+  transition: all 0.2s ease;
+}
+
+// Streaming animation
+.streaming {
+  animation: streaming 2s ease-in-out infinite;
+}
+
+@keyframes streaming {
+  0%,
+  100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+}

@@ -10,6 +10,8 @@ import { ElectronIpcService } from '../../services/electron-ipc.service';
 import { ReferralService } from '../../services/referral.service';
 import { TelegramApiService } from '../../services/telegram-api.service';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
+import { SubmissionProcessingService } from '../../services/submission-processing.service';
+import { SuiPocService } from '../../services/sui-poc.service';
 import { ReferralRewardsDialogComponent } from '../referral-rewards-dialog/referral-rewards-dialog.component';
 
 @Component({
@@ -21,8 +23,11 @@ import { ReferralRewardsDialogComponent } from '../referral-rewards-dialog/refer
 export class TelegramMainComponent implements AfterViewInit {
   private readonly telegramApiService: TelegramApiService = inject(TelegramApiService);
   private readonly electronIpcService: ElectronIpcService = inject(ElectronIpcService);
+  private readonly submissionProcessingService: SubmissionProcessingService = inject(SubmissionProcessingService);
   private readonly snackBar: MatSnackBar = inject(MatSnackBar);
   private readonly matDialog: MatDialog = inject(MatDialog);
+  private readonly suiPocService: SuiPocService = inject(SuiPocService);
+  public suiAddress = this.suiPocService.suiPublicKey;
   private readonly clipboard: Clipboard = inject(Clipboard);
   private readonly referralService: ReferralService = inject(ReferralService);
 
@@ -118,7 +123,7 @@ export class TelegramMainComponent implements AfterViewInit {
       console.error('NULL DIALOG!');
     }
   }
-
+ 
   public onRemoveDialog(dialog: Dialog | null) {
     const dialogIndex = this.selectedDialogsList().findIndex((telegramDialog) => telegramDialog.id === dialog?.id);
     if (dialogIndex !== -1) {
@@ -127,8 +132,7 @@ export class TelegramMainComponent implements AfterViewInit {
   }
 
   public async doSubmit() {
-    // await this.telegramApiService.initiateSubmission();
-    this.startBackgroundTask();
+    this.startBackgroundTask();     
   }
 
   public startBackgroundTask() {

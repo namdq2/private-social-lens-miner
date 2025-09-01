@@ -1,7 +1,9 @@
-import { inject, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { SubmissionProcessingComponent } from '../components/submission-processing/submission-processing.component';
-import { ERROR_MSG_GENERAL } from '../shared/constants';
+import { ERROR_MSG_GENERAL, SUI_SUBMISSION_LOADING_MESSAGE } from '../shared/constants';
+import { IProcessedData } from '../models/sui-poc';
+import { SubmissionStatus } from '../shared/enum';
 
 @Injectable({
   providedIn: 'root',
@@ -20,8 +22,71 @@ export class SubmissionProcessingService {
   public showErrorMessage = signal<string>('');
   public showSuccessMessage = signal<string>('');
   public showFailureMessage = signal<string>('');
-
+  public processedData = signal<IProcessedData | null>(null);
   public successRewardsAmount = signal<string>('');
+  public vanaSubmissionStatus = signal<SubmissionStatus>(SubmissionStatus.NOT_DONE);
+  public suiSubmissionStatus = signal<SubmissionStatus>(SubmissionStatus.NOT_DONE);
+  public suiSubmissionErr = signal<string>('');
+  public vanaSubmissionErr = signal<string>('');
+  
+  public isVanaSubmissionDone = computed(() => this.vanaSubmissionStatus() === SubmissionStatus.DONE);
+  public isSuiSubmissionDone = computed(() => this.suiSubmissionStatus() === SubmissionStatus.DONE);
+  public showProcessSuccess = computed(() => {
+    const isDone = this.isSuiSubmissionDone() && this.isVanaSubmissionDone()
+    const isSuccess = !this.suiSubmissionErr() || !this.vanaSubmissionErr()
+    return isDone && isSuccess
+  })
+  public showProcessErr = computed(() => {
+    const isDone = this.isSuiSubmissionDone() && this.isVanaSubmissionDone()
+    const isFailed = this.suiSubmissionErr() && this.vanaSubmissionErr()
+    return isDone && isFailed
+  })
+
+  public setVanaProcessErr(errMessage: string) {
+    this.vanaSubmissionErr.set(errMessage)
+    this.vanaSubmissionStatus.set(SubmissionStatus.DONE)
+    if(this.suiSubmissionStatus() === SubmissionStatus.DONE) {
+      this.showInfo.set(false);
+    } else {
+      this.displayInfo(SUI_SUBMISSION_LOADING_MESSAGE)
+    }
+  }
+
+  public setSuiProcessErr(errMessage: string) {
+    this.suiSubmissionErr.set(errMessage)
+    this.suiSubmissionStatus.set(SubmissionStatus.DONE)
+    if(this.vanaSubmissionStatus() === SubmissionStatus.DONE) {
+      this.showInfo.set(false);
+    }
+  }
+
+  public resetProcessState() {
+    this.vanaSubmissionStatus.set(SubmissionStatus.NOT_DONE)
+    this.suiSubmissionStatus.set(SubmissionStatus.NOT_DONE)
+    this.suiSubmissionErr.set('')
+    this.vanaSubmissionErr.set('')
+    this.successRewardsAmount.set('')
+  }
+
+  public setSuiProcessDone() {
+    this.suiSubmissionStatus.set(SubmissionStatus.DONE)
+    if(this.vanaSubmissionStatus() === SubmissionStatus.DONE) {
+      this.showInfo.set(false);
+    }
+  }
+
+  public setVanaProcessDone(successMessage: string ) {
+    this.vanaSubmissionStatus.set(SubmissionStatus.DONE)
+    this.showSuccessMessage.set(successMessage);
+
+    if(this.suiSubmissionStatus() === SubmissionStatus.DONE) {
+      this.showInfo.set(false);
+      this.showError.set(false);
+      this.showFailure.set(false);
+    } else {
+      this.displayInfo(SUI_SUBMISSION_LOADING_MESSAGE)
+    }
+  }
 
   public displayInfo(infoMessage: string) {
     this.showInfo.set(true);
@@ -40,11 +105,11 @@ export class SubmissionProcessingService {
   }
 
   public displaySuccess(successMessage: string = '') {
-    this.showInfo.set(false);
-    this.showError.set(false);
-    this.showSuccess.set(true);
-    this.showSuccessMessage.set(successMessage);
-    this.showFailure.set(false);
+      this.showInfo.set(false);
+      this.showError.set(false);
+      this.showSuccess.set(true);
+      this.showSuccessMessage.set(successMessage);
+      this.showFailure.set(false);
   }
 
   public displayFailure(failureMessage: string = '') {
@@ -67,16 +132,18 @@ export class SubmissionProcessingService {
     this.showFailureMessage.set('');
   }
 
+  public setProcessedData(data: IProcessedData) {
+    this.processedData.set(data);
+  }
+
   public startProcessingState() {
     const matDialogConfig: MatDialogConfig = {
       disableClose: true,
-      height: '600px',
-      width: '700px'
-    }
-    this.dialog.open(
-      SubmissionProcessingComponent,
-      matDialogConfig
-    );
+      minHeight: '400px',
+      height: 'auto',
+      width: '700px',
+    };
+    this.dialog.open(SubmissionProcessingComponent, matDialogConfig);
   }
 
   public endProcessingState() {

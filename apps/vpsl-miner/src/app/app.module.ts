@@ -22,11 +22,13 @@ import { ConfirmWalletDialogComponent } from './components/confirm-wallet-dialog
 import { HotWalletComponent } from './components/hot-wallet/hot-wallet.component';
 import { MinerAppContainerComponent } from './components/miner-app-container/miner-app-container.component';
 import { MinerMainComponent } from './components/miner-main/miner-main.component';
+import { StakingRewardsInfoComponent } from './components/staking-rewards-info/staking-rewards-info.component';
+// import { MatStepperModule } from '@angular/material/stepper';
+import { ConfirmDialogV2Component } from './components/confirm-dialog-v2/confirm-dialog-v2.component';
 import { MinerSettingsComponent } from './components/miner-settings/miner-settings.component';
 import { ReferralLeaderboardComponent } from './components/referral-leaderboard/referral-leaderboard.component';
 import { ReferralRewardsDialogComponent } from './components/referral-rewards-dialog/referral-rewards-dialog.component';
 import { SignMessageWalletComponent } from './components/sign-message-wallet/sign-message-wallet.component';
-import { StakingRewardsInfoComponent } from './components/staking-rewards-info/staking-rewards-info.component';
 import { SubmissionProcessingComponent } from './components/submission-processing/submission-processing.component';
 import { TelegramDialogComponent } from './components/telegram-dialog/telegram-dialog.component';
 import { TelegramMainComponent } from './components/telegram-main/telegram-main.component';
@@ -35,6 +37,9 @@ import { TelegramSigninComponent } from './components/telegram-signin/telegram-s
 import { TelegramComponent } from './components/telegram/telegram.component';
 import { WalletConnectionComponent } from './components/wallet-connection/wallet-connection.component';
 import { WalletComponent } from './components/wallet/wallet.component';
+import { AiChatMainComponent } from './components/ai-chat-main/ai-chat-main.component';
+import { AiConversationComponent } from './components/ai-conversation/ai-conversation.component';
+import { AiMessageComponent } from './components/ai-message/ai-message.component';
 import { PhoneInputDirective } from './directives/phone-input.directive';
 import { AppConfigService } from './services/app-config.service';
 
@@ -52,15 +57,16 @@ import { AppConfigService } from './services/app-config.service';
     TelegramDialogComponent,
     TelegramSigninComponent,
     TelegramMessageComponent,
-
     PhoneInputDirective,
     // StakingComponent,
     SubmissionProcessingComponent,
     MinerSettingsComponent,
-    ConfirmDialogComponent,
     ConfirmWalletDialogComponent,
     SignMessageWalletComponent,
     WalletConnectionComponent,
+    AiChatMainComponent,
+    AiConversationComponent,
+    AiMessageComponent,
     ReferralRewardsDialogComponent,
     ReferralLeaderboardComponent,
   ],
@@ -71,7 +77,8 @@ import { AppConfigService } from './services/app-config.service';
     FormsModule,
     NgOptimizedImage,
     HttpClientModule,
-
+    ConfirmDialogV2Component,
+    ConfirmDialogComponent,
     MatDialogModule,
     MatButtonModule,
     MatMenuModule,

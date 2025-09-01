@@ -22,3 +22,23 @@ export interface proofResponseDto {
   revision: string;
   submitted_on: string;
 };
+
+export interface IProcessData {
+  walrusUrl: string;
+  attestationObjId: string;
+  onChainFileObjId: string;
+  blobId: string;
+}
+
+export interface IProcessDataRes {
+  status: string;
+  data: IProcessData;
+  stderr: string;
+  exit_code: number;
+  execution_time_ms: number;
+}
+
+export interface IFileMetadata {
+  walrusUrl: string;
+  size: number;
+}

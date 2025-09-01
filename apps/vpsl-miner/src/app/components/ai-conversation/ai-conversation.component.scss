@@ -1,0 +1,86 @@
+:host {
+  display: block;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.conversation-item {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 8px;
+
+  &:hover {
+    transform: translateX(4px);
+    background-color: rgba(68, 136, 246, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    .delete-btn {
+      opacity: 1;
+      transform: scale(1.05);
+    }
+  }
+
+  &.selected {
+    background-color: rgba(68, 136, 246, 0.15);
+    border-left: 3px solid #4488f6;
+    transform: translateX(2px);
+  }
+
+  &.disabled {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+}
+
+.delete-btn {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0;
+
+  &:hover {
+    transform: scale(1.1);
+    color: #ef4444;
+    background-color: rgba(239, 68, 68, 0.1);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+// Conversation title with smooth transitions
+.conversation-title {
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: #4488f6;
+  }
+}
+
+// Conversation content with smooth transitions
+.conversation-content {
+  transition: all 0.2s ease;
+}
+
+// Loading state with smooth transitions
+.loading-state {
+  transition: opacity 0.3s ease-in-out;
+}
+
+// Deletion animation
+.deleting {
+  animation: slideOut 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes slideOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+}
+
+// Selection indicator
+.selection-indicator {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
