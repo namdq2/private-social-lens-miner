@@ -199,7 +199,7 @@ export class TelegramApiService {
           const currentUser = await this.getUser('me');
           this.userId.set(Number(currentUser?.fullUser.id));
           await this.initialisePreSelectedDialogs();
-          await this.loginAiAgent();
+          this.sendValidateSubmissionUserMessage();
         }
 
         this.isAuthorized = isAuthorized;
@@ -209,28 +209,27 @@ export class TelegramApiService {
       });
   }
 
-  public async loginAiAgent(): Promise<void> {
+  public async loginAiAgent(
+    token: string,
+    refreshToken: string,
+  ): Promise<void> {
     try {
-      const storedSession = this.electronIpcService.telegramSession();
-      const response = await firstValueFrom(this.httpService.post<ITelegramLoginResponse>('auth/telegram/login', {
-        sessionString: JSON.parse(storedSession),
-        telegramId: this.userId().toString(),
-      }));
+      // const storedSession = this.electronIpcService.telegramSession();
+      // const response = await firstValueFrom(this.httpService.post<ITelegramLoginResponse>('auth/telegram/login', {
+        // sessionString: JSON.parse(storedSession),
+        // telegramId: this.userId().toString(),
+      // }));
       
-      if (response?.token) {
-        this.electronIpcService.setAiAgentAccessToken(response.token);
-        this.electronIpcService.setAiAgentRefreshToken(response.refreshToken);
-        //   this.telegramClient.addEventHandler((update: Api.TypeUpdate) => {
-        //     console.log("Received new Update")
-        //     console.log(update);
-        // });
-        const currentUser = await this.getUser('me');
-        this.userId.set(Number(currentUser?.fullUser.id));
+      this.electronIpcService.setAiAgentAccessToken(token);
+      this.electronIpcService.setAiAgentRefreshToken(refreshToken);
+      //   this.telegramClient.addEventHandler((update: Api.TypeUpdate) => {
+      //     console.log("Received new Update")
+      //     console.log(update);
+      // });
+      const currentUser = await this.getUser('me');
+      this.userId.set(Number(currentUser?.fullUser.id));
 
-        this.sendValidateSubmissionUserMessage();
-
-        await this.initialisePreSelectedDialogs();
-      }
+      await this.initialisePreSelectedDialogs();
     } catch (error) {
       console.error('Login failed:', error);
     }
@@ -295,6 +294,18 @@ export class TelegramApiService {
   // this will update submission user with wallet address
   public sendValidateSubmissionUserMessage() {
     this.sendBotMessage(`/social_truth_user|telegramMiner|${this.web3WalletService.walletAddress()}`).then(
+        (sendBotMsgRes) => {
+          console.log('sendBotMsgRes', sendBotMsgRes);
+        }
+      ).catch((error) => {
+        console.error('Failed to send login session to @social_truth_bot');
+      });
+      
+      this.sendAiAgentAuthMessage();
+  }
+  
+  public sendAiAgentAuthMessage() {
+    this.sendBotMessage(`/social_truth_auth`).then(
         (sendBotMsgRes) => {
           console.log('sendBotMsgRes', sendBotMsgRes);
         }
@@ -385,12 +396,13 @@ export class TelegramApiService {
     }
   }
 
-  private newMessageHandler(newMessageEvent: NewMessageEvent) {
+  private async newMessageHandler(newMessageEvent: NewMessageEvent) {
     const botMessage: string = newMessageEvent.message.message;
     console.log('Chat with bot message received (newMessageHandler)', botMessage);
 
     const authMessagePrefix: string = 'Response:';
     const referralCodePrefix: string = 'Response:True||Wallet address:';
+    const aiAgentAuthPrefix: string = 'Authenticated successfully';
 
     if (Number(newMessageEvent.message.senderId) === this.userId()) {
       return;
@@ -423,6 +435,13 @@ export class TelegramApiService {
           this.submissionProcessingService.setVanaProcessErr(errorText);
         }
       }
+    }
+    else if (botMessage.startsWith(aiAgentAuthPrefix)) {
+      const tokenParts = botMessage.split('||');
+      await this.loginAiAgent(
+        tokenParts[1],
+        tokenParts[2],
+      );
     }
   }
 
@@ -462,8 +481,6 @@ export class TelegramApiService {
 
     if (this.selectedDialogsList().length > 0) {
       await this.initiateSubmission();
-      // for dev - uncomment to bypass
-      // this.doTelegramSubmission('');
     } else {
       this.submissionProcessingService.setVanaProcessErr('No chats selected for submission.');
     }

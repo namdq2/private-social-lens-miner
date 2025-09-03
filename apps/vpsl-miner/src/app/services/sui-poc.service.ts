@@ -4,7 +4,6 @@ import { fileDto, IFileMetadata, IProcessDataRes } from '../models/social-truth'
 import { getFullnodeUrl, SuiClient } from '@mysten/sui/client';
 import { fromHex, toHex } from '@mysten/sui/utils';
 import { EncryptedObject, SealClient } from '@mysten/seal';
-import { getAllowlistedKeyServers } from '@mysten/seal';
 import { WalrusService } from './walrus.service';
 import { HttpClient } from '@angular/common/http';
 import { HttpService } from './http.service';
@@ -28,7 +27,8 @@ export class SuiPocService {
   private pocConfig: ISuiPoc | null;
   private walrusConfig: IWalrus | null;
   private suiAddress = signal<string>('');
-
+  private keyServers = signal<string[]>([]);
+  
   public suiPublicKey = computed(() => this.suiAddress());
 
   constructor(
@@ -40,12 +40,22 @@ export class SuiPocService {
     this.pocConfig = this.appConfigService.suiPoc;
     this.walrusConfig = this.appConfigService.walrus;
     // set up SUI client
-    this.suiClient = new SuiClient({ url: getFullnodeUrl('testnet') });
-    // set up Seal client
-    const keyServers = getAllowlistedKeyServers('testnet') || [];
+    const network = this.pocConfig?.network || 'testnet';
+    this.suiClient = new SuiClient({ url: getFullnodeUrl(network) });
+    // LATEST SEAL SDK does not work with key server object ids
+    // [https://seal-key-server-testnet-1.mystenlabs.com, https://seal-key-server-testnet-2.mystenlabs.com]
+    // this.keyServers.set(["0x73d05d62c18d9374e3ea529e8e0ed6161da1a141a94d3f76ae3fe4e99356db75", "0xf5d14a81a982144ae441cd7d64b09027f116a468bd36e7eca494f750591623c8"]);
+    // this.keyServers.set(["0x73d05d62c18d9374e3ea529e8e0ed6161da1a141a94d3f76ae3fe4e99356db75"]);
+    
+    // [https://seal-testnet.api.rubynodes.io/]
+    this.keyServers.set(this.pocConfig?.keyServers ?? ['0xda2f2fe7b82a6b734aedfe2d278f83a1db21d21a907dd8e6e19ce5e906b42afe']);
+    
     this.sealClient = new SealClient({
       suiClient: this.suiClient, 
-      serverObjectIds: keyServers.map((id) => [id, 1]),
+      serverConfigs: this.keyServers().map((id) => ({
+        objectId: id,
+        weight: 1,
+      })),
       verifyKeyServers: false,
     });
 
@@ -206,7 +216,7 @@ export class SuiPocService {
       const id = toHex(new Uint8Array([...policyObjectBytes, ...nonce]));
 
       const { encryptedObject: encryptedBytes } = await this.sealClient.encrypt({
-        threshold: this.pocConfig?.threshold || 2,
+        threshold: this.pocConfig?.threshold || 1,
         packageId: this.pocConfig?.packageId || '',
         id,
         data: new Uint8Array(new TextEncoder().encode(teleChat)),
@@ -247,7 +257,7 @@ export class SuiPocService {
     const encryptedObject = EncryptedObject.parse(encryptedData);
     const onChainFileObjId = await this.saveEncryptedFileViaRelay(encryptedObject.id, policyObjId, metadata);
 
-    const processDataRes = await this.processDataWithWorker(blobId, onChainFileObjId, policyObjId, this.pocConfig?.threshold || 2);
+    const processDataRes = await this.processDataWithWorker(blobId, onChainFileObjId, policyObjId, this.pocConfig?.threshold || 1);
     console.log('🚀 ~ Nautilus Processed data:', processDataRes?.data);
   }
 }

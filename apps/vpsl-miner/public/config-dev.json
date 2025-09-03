@@ -26,7 +26,7 @@
     "vanaScanUrl": "https://moksha.vanascan.io",
     "rpcUrl": "https://rpc.moksha.vana.org",
     "refinementServiceUrl": "https://a7df0ae43df690b889c1201546d7058ceb04d21b-8000.dstack-prod5.phala.network/refine",
-    "refinerId": 90
+    "refinerId": 116
   },
   "cloudFlare": {
     "siteKey": "1x00000000000000000000AA"
@@ -62,22 +62,28 @@
     }
   },
   "relayApi": {
-    "baseUrl": "http://localhost:3000",
-    "apiKey": "8mK_rHJJsaOSwQPfOvM6Qc5FdNkSs5PR_9HjlK8zKbw_"
+    "baseUrl": "http://localhost:3001",
+    "apiKey": "d124a8ce_SaEHf6y5X1bX8CtgKfQcj0kTx20zMJunl91RC49T"
   },
   "walrus": {
     "publisherUrl": "https://publisher.walrus-testnet.walrus.space/v1",
     "aggregatorUrl": "https://aggregator.walrus-testnet.walrus.space/v1",
-    "epochs": 5
+    "epochs": 1
   },
   "suiPoc": {
-    "dlpWalletAddress": "0x4cc4a51dfefcb859872c7fa45d3a6598dea97668d1c69d7b9cfa6206892f3669",
-    "packageId": "0xf2433262bd55b30c1cddbae940a2355086cfe2850bd62583bdfcad7c57b17956",
-    "nautilusUrl": "https://dfusion-tee.var-meta.com",
+    "dlpWalletAddress": "0xcf1d64559d26142d9d60b5a74ec1ab65e6469647d252c8a457c4ffb3110c0a31",
+    "packageId": "0x1fddedda68d8c1c58a445e56740fdad6e8f6b0cc27acb2b9dc369985d6abb605",
+    "nautilusUrl": "http://localhost:3000",
     "suiScanUrl": "https://suiscan.xyz/testnet/object",
-    "threshold": 2
+    "threshold": 1,
+    "network": "testnet",
+    "keyServers": ["0x6068c0acb197dddbacd4746a9de7f025b2ed5a5b6c1b1ab44dade4426d141da2"],
+    "stageDlpWalletAddress": "0x4cc4a51dfefcb859872c7fa45d3a6598dea97668d1c69d7b9cfa6206892f3669",
+    "stagePackageId": "0xf2433262bd55b30c1cddbae940a2355086cfe2850bd62583bdfcad7c57b17956",
+    "stageNautilusUrl": "https://dfusion-tee.var-meta.com"
   },
   "aiAgent": {
-    "aiAgentUrl": "https://dfusion-agent.var-meta.com/api/v1"
+    "aiAgentUrl": "localhost:3002/api/v1",
+    "stageAiAgentUrl": "https://dfusion-agent.var-meta.com/api/v1"
   }
 }

@@ -66,17 +66,18 @@
   },
   "walrus": {
     "publisherUrl": "https://publisher.walrus-testnet.walrus.space/v1",
-    "aggregatorUrl": "https://aggregator.walrus-testnet.walrus.space/v1",
-    "epochs": 5
+    "aggregatorUrl": "https://aggregator.walrus-mainnet.walrus.space/v1",
+    "epochs": 53
   },
   "suiPoc": {
-    "dlpWalletAddress": "0x4cc4a51dfefcb859872c7fa45d3a6598dea97668d1c69d7b9cfa6206892f3669",
-    "packageId": "0xf2433262bd55b30c1cddbae940a2355086cfe2850bd62583bdfcad7c57b17956",
-    "nautilusUrl": "https://dfusion-tee.var-meta.com",
-    "suiScanUrl": "https://suiscan.xyz/testnet/object",
-    "threshold": 2
+    "dlpWalletAddress": "0x61dc067b264b423cc4ca3bcc57f4867c08c01619aa0b6d156ac24d0fabff044a",
+    "packageId": "0x5e537069e74ea010fb472df17011ffeba1f63d1bae387f42751e81f020ee0d1f",
+    "suiScanUrl": "https://suiscan.xyz/mainnet/object",
+    "threshold": 1,
+    "network": "mainnet",
+    "keyServers": ["0xda2f2fe7b82a6b734aedfe2d278f83a1db21d21a907dd8e6e19ce5e906b42afe"]
   },
   "aiAgent": {
-    "aiAgentUrl": "https://dfusion-agent.var-meta.com/api/v1"
+    "aiAgentUrl": "https://sui-private-social-lens-ai-agent.happyfield-d4613d37.eastus.azurecontainerapps.io/api/v1"
   }
 }

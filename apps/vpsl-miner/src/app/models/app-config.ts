@@ -21,10 +21,10 @@ export interface IAiAgent {
 export interface ISuiPoc {
   dlpWalletAddress: string;
   packageId: string;
-  nautilusUrl: string;
   threshold: number;
+  keyServers: string[];
   suiScanUrl: string;
-  network?: 'mainnet' | 'testnet' | 'devnet' | 'localnet';
+  network: 'mainnet' | 'testnet' | 'devnet' | 'localnet';
 }
 export interface IDFusion {
   validatorBackendUrl: string;

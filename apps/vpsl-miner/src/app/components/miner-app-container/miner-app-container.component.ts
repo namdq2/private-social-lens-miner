@@ -78,7 +78,13 @@ export class MinerAppContainerComponent implements OnInit {
       const vfsnBalance = Number(this.web3WalletService.dlpTokenAmount());
       this.submissionProcessingService.endProcessingState();
 
-      const isNotAllowed = (totalVFSNStake || 0) < stakeThreshold || (vfsnBalance || 0) < balanceThreshold;
+      console.log('>>>>> stakeThreshold', stakeThreshold);
+      console.log('totalVFSNStake', totalVFSNStake);
+      console.log('>>>>> balanceThreshold', balanceThreshold);
+      console.log('vfsnBalance', vfsnBalance);
+      
+      // either 500 $VFSN staked OR 2500 $VFSN in your wallet
+      const isNotAllowed = (totalVFSNStake || 0) < stakeThreshold && (vfsnBalance || 0) < balanceThreshold;
 
       if (isNotAllowed) {
         this.openTokenGatingDialog();
@@ -100,8 +106,8 @@ export class MinerAppContainerComponent implements OnInit {
       .open(ConfirmDialogV2Component, {
         data: {
           title: 'Permission Alert',
-          message: `You need to own at least ${this.requiredBalanceAmount} VFSN and stake at least ${this.requiredStakeAmount} VFSN to use the Private Lens AI.`,
-          confirmText: 'Understand',
+          message: `You need to have at least ${this.requiredBalanceAmount} $VFSN in your wallet or have at least ${this.requiredStakeAmount} $VFSN staked to use the Private Lens AI Agent.`,
+          confirmText: 'OK',
           confirmButtonClass: 'dfus-blue-btn',
         },
       })
