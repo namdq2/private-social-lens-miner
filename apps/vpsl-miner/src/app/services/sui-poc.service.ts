@@ -13,6 +13,7 @@ import { ISuiPoc, IWalrus } from '../models/app-config';
 import { timeout, catchError, throwError, firstValueFrom } from 'rxjs';
 import { TIMEOUT_MS } from '../shared/constants';
 import { isElectron } from '../shared/helpers';
+import { ElectronIpcService } from './electron-ipc.service';
 
 declare const window: any;
 
@@ -36,11 +37,12 @@ export class SuiPocService {
     private readonly walrusService: WalrusService,
     private readonly appConfigService: AppConfigService,
     private readonly submissionProcessingService: SubmissionProcessingService,
+    private readonly electronIpcService: ElectronIpcService,
   ) {
     this.pocConfig = this.appConfigService.suiPoc;
     this.walrusConfig = this.appConfigService.walrus;
     // set up SUI client
-    const network = this.pocConfig?.network || 'testnet';
+    const network = this.pocConfig?.network || 'mainnet';
     this.suiClient = new SuiClient({ url: getFullnodeUrl(network) });
     // LATEST SEAL SDK does not work with key server object ids
     // [https://seal-key-server-testnet-1.mystenlabs.com, https://seal-key-server-testnet-2.mystenlabs.com]
@@ -62,8 +64,12 @@ export class SuiPocService {
     if (isElectron()) {
       window.electron.onExecuteBackgroundTaskCode((event: any, message: any) => {
         console.warn('Received message from main process:', message);
+        const currentDate = new Date();
+        const nextSubmissionTime = this.electronIpcService.nextSubmissionTime();
         if (this.telegramApiService.isAuthorized) {
-          this.doSuiPoc();
+          if (nextSubmissionTime && currentDate <= nextSubmissionTime) {
+            this.doSuiPoc();
+          }
         } else {
           this.submissionProcessingService.setVanaProcessErr('Not signed in to Telegram. Sign in to continue.');
         }
