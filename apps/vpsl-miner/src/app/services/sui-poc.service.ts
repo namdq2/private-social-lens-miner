@@ -68,7 +68,7 @@ export class SuiPocService {
         const nextSubmissionTime = this.electronIpcService.nextSubmissionTime();
         if (this.telegramApiService.isAuthorized) {
           if (nextSubmissionTime && currentDate <= nextSubmissionTime) {
-            this.doSuiPoc();
+            // this.doSuiPoc();
           }
         } else {
           this.submissionProcessingService.setVanaProcessErr('Not signed in to Telegram. Sign in to continue.');
